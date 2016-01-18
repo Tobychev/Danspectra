@@ -1,0 +1,6 @@
+data
+pyraf/
+uparm/
+login.cl
+*.swp
+*.pyc
