@@ -34,4 +34,12 @@ def parse_dan_filename(name):
     else:
         typ   = last
         runnr = ""
-    return (manad,dag,typ,serie,angstrom,rnnr)
+    return (manad,dag,typ,serie,angstrom,runnr)
+
+def parse_filenames():
+    with open("allfiles.list","r") as infile:
+        for line in infile:
+            filename = line.split(",")[-1][:43].strip()
+            (manad,dag,typ,serie,angstrom,runnr) = parse_dan_filename(filename)
+            print """Datum 1999-{}-{}, typ: {:>10}, serie {}, Ångström = {}, nr: {}""".format(
+                manad,dag,typ,serie,angstrom,runnr)
