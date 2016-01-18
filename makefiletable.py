@@ -24,13 +24,13 @@ def parse_dan_filename(name):
            r"(?P<manad>Sep|Jul)99_"
            r"(?P<angstrom>\d{4})"
            r"(?P<serie>[a-z])"
-           r"(?:_|m16b_im.*99\.)"
+           r"(?:_|m16b_im(?P=dag)(?P=manad)99\.)"
            r"(?P<last>\w+)")
     pat = re.compile(reg)
     dag,manad,angstrom,serie,last = pat.match(name).groups()
     if last.isdigit():
         runnr = int(last)
-        typ   = "spec"
+        typ   = "cor"
     else:
         typ   = last
         runnr = ""
@@ -43,3 +43,13 @@ def parse_filenames():
             (manad,dag,typ,serie,angstrom,runnr) = parse_dan_filename(filename)
             print """Datum 1999-{}-{}, typ: {:>10}, serie {}, Ångström = {}, nr: {}""".format(
                 manad,dag,typ,serie,angstrom,runnr)
+
+def parse_filenames_to_file(outfile):
+    with open("allfiles.list","r") as infile, open(outfile,"w") as out:
+        out.write("datum,typ,serie,ångström,nr,filnamn\n")
+        for line in infile:
+            filename = line.split(",")[-1][:43].strip()
+            (manad,dag,typ,serie,angstrom,runnr) = parse_dan_filename(filename)
+            out.write(
+                "1999-{}-{},{},{},{},{},{}\n".format(
+                 manad,dag,typ,serie,angstrom,runnr,filename))
