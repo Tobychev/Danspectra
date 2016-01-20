@@ -40,10 +40,13 @@ class danspectra(object):
         print "Defining new background windows"
         if self.haswindows:
             print "WARNING: background windows already defined"
+            print "WARNING: all old values will be erased"
+            if not raw_input("Continue Y/N? ").lower() == "y":
+                return None
         self.bgwindows = []
         fig = pl.figure()
         ax  = fig.add_subplot(111)
-        ax.plot(self.lmbd,self.mean)
+        ax.plot(self.mean)
         axis = AxesWidget(ax)
         axis.connect_event("key_press_event",self.__manageux)
         cursor = Cursor(ax,useblit=True, color='red', 
@@ -57,15 +60,16 @@ class danspectra(object):
 a - add point to background window, after two points have been indicated a new window is defined
 """            
         elif event.key == "a":
-            print event.xdata, self.__window
+            pos = int(round(event.xdata))
+            print "adding ", pos
             if len(self.__window) == 0:
-                self.__window.append(event.xdata)
+                self.__window.append(pos)
             elif len(self.__window) == 1:
                 if self.__window[0] < event.xdata:
-                    self.__window.append(event.xdata)
+                    self.__window.append(pos)
                 else:
                     self.__window.append(self.__window[0])
-                    self.__window[0] = event.xdata
+                    self.__window[0] = pos
                 self.bgwindows.append(self.__window)
                 self.__window=[]
 
@@ -74,17 +78,13 @@ a - add point to background window, after two points have been indicated a new w
         LOW = 0; HIGH = 1 # Lower and upper window edge
     
         head = self.fits[0].header
+        del head[keyword("?*")]
         head.set(keyword("N"),len(self.bgwindows))
 
-        # Wavlength increases in the negative x-direction
-        # So switching things around here makes it look right
+        self.bgwindows.sort() # For nicer order in header
         for i in range(0,len(self.bgwindows)):
-            idxLow  = self.__find_nearest(self.bgwindows[i][LOW])
-            idxHigh = self.__find_nearest(self.bgwindows[i][HIGH])
-            print i,idxLow,idxHigh, self.bgwindows[i]
-            
-            head.set(keyword(str(i+1)+"L"), idxLow)   #Want index 1,..,N
-            head.set(keyword(str(i+1)+"H"), idxHigh)
+            head.set(keyword(str(i+1)+"L"), self.bgwindows[i][LOW])   #Want index 1,..,N
+            head.set(keyword(str(i+1)+"H"), self.bgwindows[i][HIGH])
     
         self.fits.flush() 
         self.__load_bgwindows()
@@ -95,7 +95,6 @@ a - add point to background window, after two points have been indicated a new w
         head = self.fits[0].header
         wins = head.get("BGWINN") 
         self.bgwindows = []
-        print "load" 
         for i in range(1,wins+1):   #Want index 1,..,N
             self.__window = []
             self.__window.append(head.get(keyword(str(i)+"L")))
