@@ -1,2 +1,2 @@
 # Danspectra
-Code to analyse solar spectra taken by Dan Kiselman
+Code to analyse solar spectra from the SST.
