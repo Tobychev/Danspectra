@@ -31,5 +31,6 @@ def rename_data():
         new_series = serie+manad[0]+dag[-1]
         new_name   = "{}_{}_{}_{}.fits".format(angstrom,new_series,runnr,typ)
         print "Filnamn: {:<50} Nytt filnamn {:<50}".format(Dir+name,Dir+new_name)
-        os.rename(Dir+name,Dir+new_name)
+        print "Renaming disabled for safety"
+        #os.rename(Dir+name,Dir+new_name)
 
