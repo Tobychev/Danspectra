@@ -4,24 +4,30 @@ import numpy as np
 import pyfits as f
 import os
 
+# Consider refactoring this to only handle the reading
+# and  writing of data from the fits file, with other 
+# modules doing actual calculations. Specifically,
+# moving select_background and its collection of supporint
+# properties somwhere else
+
 class danspectra(object):
     Dir = "data/"
-    __meanname = "{}_{}__meanspec.fits"
+    __meanname = "{}_{}__adjustspec.fits"
     __lmbdname = "{}_{}__lambda.fits"
     bgwindows = []
     __window  = []
     def __init__(self,filename):
-        self.fits    = f.open(self.Dir+filename,mode="update")
-        self.data    = self.fits[0].data
-        self.series  = filename.split("_")[1]
-        self.wave    = filename.split("_")[0]
-        self.lmbd    = f.open(self.Dir+self.__lmbdname.format(
-                                        self.wave,self.series))
-        self.lmbd    = self.lmbd[0].data
-        self.mean     = f.open(self.Dir+self.__meanname.format(
-                                        self.wave,self.series))
-        self.mean    = self.mean[0].data
-        self.isnorm  = False
+        self.fits   = f.open(self.Dir+filename,mode="update")
+        self.data   = self.fits[0].data
+        self.series = filename.split("_")[1]
+        self.wave   = filename.split("_")[0]
+        self.lmbd   = f.open(self.Dir+self.__lmbdname.format(
+                                       self.wave,self.series))
+        self.lmbd   = self.lmbd[0].data
+        self.mean   = f.open(self.Dir+self.__meanname.format(
+                                       self.wave,self.series))
+        self.mean   = self.mean[0].data
+        self.isnorm = False
         if self.fits[0].header.get("BGWINN"):
             self.__load_bgwindows()
             self.haswindows = True
