@@ -1,2 +1,2 @@
 # Danspectra
-Code to analyse solar spectra from the SST.
+Code to analyse solar spectra from the SVST.
