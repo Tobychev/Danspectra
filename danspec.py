@@ -23,7 +23,7 @@ class danspectra(object):
         self.lmbd   = self.__load_from_fits(self.__lmbdname)
         self.mean   = self.__load_from_fits(self.__meanname)
         self.ref    = self.__load_from_fits(self.__refname)
-        if self.header.get("BGWINN") and self.header.get("BGWIN") > 0:
+        if self.header.get("BGWINN") > 0 and self.header.get("BGWIN"):
             self.__load_bgwindows()
         else:
             self.bgwindows  = []
