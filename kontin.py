@@ -2,6 +2,24 @@ from matplotlib.widgets import Cursor,AxesWidget
 import matplotlib.pyplot as pl
 import numpy as np
 
+def show_fit(spec,idx,fit,line="mean"):
+    if line == "mean":
+        data = spec.mean
+    else:
+        data = spec.spec(line)
+    pl.plot(spec.lmbd,spec.mean)
+    pl.plot(spec.lmbd[idx],spec.mean[idx],'ro')
+    pl.plot(spec.lmbd[idx], fit[1]+ fit[0]*spec.lmbd[idx])
+    pl.show()
+
+def simple_fit_continium(bg,spec,idx):
+    fit = np.polyfit(spec.lmbd[idx],bg,1)
+    return fit
+
+def fit_continium(spec,bg,idx):
+    fit, cov = np.polyfit(spec.lmbd[idx],bg,1,cov=True)
+    return fit,cov
+
 def make_idx_from_windows(windows):
     idbg = []
     for win in windows:
@@ -33,27 +51,32 @@ def select_bgwin_auto(danspec,metod,line="mean"):
     else:
         data = danspec.spec(line)
 
-    if   metod == "over1":
+    if   metod == "over 1":
         return np.flatnonzero(data > 1)
-    elif metod == "tophundred":
+    elif metod == "top 100":
         return top_number(data,100)
     elif metod == "top 5%":
         return top_number(data,round(len(data)*0.05))
-    elif metod == "top 10%":
+    elif metod == "top 20":
         return top_number(data,round(len(data)*0.1))
     elif metod == "90-95 decile":
         t5  = top_number(data,round(len(data)*0.05))[-1]
         t10 = top_number(data,round(len(data)*0.1))
         return t10[ t10 >= t5 ]
-
+    
 def top_number(data,number):
     idx = np.argpartition(data,-number)[-number:]
     idx.sort()
     return idx
-    
+
+def save_bgwin_from_idx(danspec,idx):
+    wins = make_windows_from_idx(idx)
+    danspec.set_bgwindows(wins)
+
 window  = []
 windows = []
 def select_bgwin_manual(danspec):
+        global windows
         print "Selecting background windows"
 
         windows = []
@@ -66,9 +89,7 @@ def select_bgwin_manual(danspec):
         cursor = Cursor(ax,useblit=True, color='red', 
                         linewidth=1,horizOn=False)
         pl.show()
-
         return make_idx_from_windows(windows)
-
 
 def __manageux(event):
     global window, windows
