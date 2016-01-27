@@ -9,17 +9,19 @@ import os
 # properties somwhere else
 
 class danspectra(object):
-    Dir = "data/"
     __meanname = "{}_{}__adjustspec.fits"
     __lmbdname = "{}_{}__lambda.fits"
     __refname  = "{}_{}__adjustfts.fits"
 
     def __init__(self,filename):
-        self.fits   = f.open(self.Dir+filename,mode="update")
+        self.filename = filename.split("/")[-1]
+        self.Dir      = "/".join(filename.split("/")[:-1])+"/"  # everything before the last '/'
+
+        self.fits   = f.open(self.Dir+self.filename,mode="update")
         self.data   = self.fits[0].data
         self.header = self.fits[0].header
-        self.series = filename.split("_")[1]
-        self.wave   = filename.split("_")[0]
+        self.series = self.filename.split("_")[1]
+        self.wave   = self.filename.split("_")[0]
         self.lmbd   = self.__load_from_fits(self.__lmbdname)
         self.mean   = self.__load_from_fits(self.__meanname)
         self.ref    = self.__load_from_fits(self.__refname)
