@@ -24,19 +24,20 @@ def fit_all_windows(spec,wins):
     return fits
 
 def perturb_window_fit(spec,window,itr=103):
-    nfrac = 10
+    nfrac     = 10
+    msg       = "{:.3f} %: mean {:.5e}, std {:.5e}, rel var {:.5e}".format
     fractions = (np.linspace(0.3,1.0,nfrac)*len(window)).round()
-    fits  = np.zeros((itr,2))
-    perbs = np.zeros((nfrac,4))
+    fits      = np.zeros((itr,2))
+    perbs     = np.zeros((nfrac,4))
     for i,fraction in enumerate(fractions):
         for j in range(0,itr):
             win = np.random.choice(window,fraction)
             fits[j,0],fits[j,1] = con.simple_fit_continium(spec.mean[win],spec,win)
         
-        centre_continium = fits[:,1] + fits[:,0]*spec.lmbd.mean() -1 # Minus one only for meanspec 
+        c_cont = fits[:,1] + fits[:,0]*spec.lmbd.mean() -1 # Minus one only for meanspec 
         key = round(fraction/len(window),3)
-        perbs[i,:] = [key, centre_continium.mean(), centre_continium.std() , centre_continium.std()/centre_continium.mean()]
-        print "{:.3f} %: mean {:.5e}, std {:.5e}, rel var {:.5e}".format(key,perbs[i,0],perbs[i,1],perbs[i,2])
+        perbs[i,:] = [key, c_cont.mean(), c_cont.std() , c_cont.std()/c_cont.mean()]
+        print msg(key,perbs[i,0],perbs[i,1],perbs[i,2])
 
     return perbs
 
