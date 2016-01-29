@@ -56,6 +56,8 @@ def select_bgwin_auto(danspec,metod,line="mean"):
         t5  = top_number(data,round(len(data)*0.05))[-1]
         t10 = top_number(data,round(len(data)*0.1))
         return t10[ t10 >= t5 ]
+    elif metod == "ref top":
+        return range( danspec.ref.argmax()- 5, danspec.ref.argmax()+ 5 )
     
 def top_number(data,number):
     idx = np.argpartition(data,-number)[-number:]
