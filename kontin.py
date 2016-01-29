@@ -2,15 +2,8 @@ from matplotlib.widgets import Cursor,AxesWidget
 import matplotlib.pyplot as pl
 import numpy as np
 
-def show_fit(spec,idx,fit,line="mean"):
-    if line == "mean":
-        data = spec.mean
-    else:
-        data = spec.spec(line)
-    pl.plot(spec.lmbd,spec.mean)
-    pl.plot(spec.lmbd[idx],spec.mean[idx],'ro')
-    pl.plot(spec.lmbd[idx], fit[1]+ fit[0]*spec.lmbd[idx])
-    pl.show()
+def fit_frame(spec,idx):
+   return np.polyfit(spec.lmbd[idx],spec.data.transpose()[idx,:],1)
 
 def simple_fit_continium(bg,spec,idx):
     fit = np.polyfit(spec.lmbd[idx],bg,1)
@@ -110,3 +103,13 @@ a - add point to background window, after two points have been indicated a new w
                 window[0] = pos
             windows.append(window)
             window=[]
+
+def show_fit(spec,idx,fit,line="mean"):
+    if line == "mean":
+        data = spec.mean
+    else:
+        data = spec.spec(line)
+    pl.plot(spec.lmbd,spec.mean)
+    pl.plot(spec.lmbd[idx],spec.mean[idx],'ro')
+    pl.plot(spec.lmbd[idx], fit[1]+ fit[0]*spec.lmbd[idx])
+    pl.show()
