@@ -1,6 +1,7 @@
 data
 pyraf/
 uparm/
+.ipynb_checkpoints/
 login.cl
 *.swp
 *.pyc
