@@ -15,7 +15,10 @@ class danspectra(object):
 
     def __init__(self,filename):
         self.filename = filename.split("/")[-1]
-        self.Dir      = "/".join(filename.split("/")[:-1])+"/"  # everything before the last '/'
+        if filename.find("/") > 0:
+            self.Dir  = "/".join(filename.split("/")[:-1])+"/"  # everything before the last '/'
+        else:
+            self.Dir  = ""
 
         self.fits   = f.open(self.Dir+self.filename,mode="update")
         self.data   = self.fits[0].data
