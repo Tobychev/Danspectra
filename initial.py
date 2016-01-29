@@ -13,48 +13,15 @@ def find_nearest(array,value):
 
 
 
-# lines - spectra
-# rows  - dispersion/space axis
-fil = "6405_aS1_388_cor.fits"
-spec = d.danspectra(fil)
-
-
-fil2 = "6405_aS1_397_cor.fits"
+# rows     - spectra
+# columns  - dispersion/space axis
+fil2 = "data/6405_aS1_397_cor.fits"
 spec2 = d.danspectra(fil2)
 
-try:
-    wn
-except NameError:
-    wn = tw.gen_all_auto_wins(spec2)
-    wn = tw.gen_man_win(spec2,wn)
+wn = tw.gen_all_auto_wins(spec2)
+wn = tw.gen_man_win(spec2,wn)
 
-fits = tw.fit_all_windows(spec2,wn)
-pt = tw.perturb_all_windows(spec2,wn,5000)
-
-# Continium fit stability, meanspectra
-if True:   
-    pl.plot(pt["top 5%"][:,0], pt["top 5%"][:,3],label="top 5%")
-    pl.plot(pt["top 20"][:,0], pt["top 20"][:,3],label="top 20")
-    pl.plot(pt["top 100"][:,0], pt["top 100"][:,3],label="top 100")
-    pl.plot(pt["90-95 decile"][:,0], pt["90-95 decile"][:,3],label="90-95 decile")
-    pl.plot(pt["manual"][:,0], pt["manual"][:,3],label="manual")
-    pl.plot(pt["over 1"][:,0], pt["over 1"][:,3],label="over 1")
-    pl.title("Continium fit stability on mean spectra, 5k iterations")
-    pl.ylabel("std/mean")
-    pl.xlabel("Fraction of points included")
-    pl.legend()
-    pl.show()
-
-if True:
-    pl.plot(pt["top 5%"][:,0], pt["top 5%"][:,1],label="top 5%")
-    pl.plot(pt["top 20"][:,0], pt["top 20"][:,1],label="top 20")
-    pl.plot(pt["top 100"][:,0], pt["top 100"][:,1],label="top 100")
-    pl.plot(pt["90-95 decile"][:,0], pt["90-95 decile"][:,1],label="90-95 decile")
-    pl.plot(pt["manual"][:,0], pt["manual"][:,1],label="manual")
-    pl.plot(pt["over 1"][:,0], pt["over 1"][:,1],label="over 1")
-    pl.title("Continium fit stability on mean spectra, 5k iterations")
-    pl.ylabel("mean")
-    pl.xlabel("Fraction of points included")
-    pl.legend()
-    pl.show()
+refmean,refstd = tw.compare_win_continua(spec2,wn,centre="median",plot=False,bins=44)
+refmean,refstd = tw.compare_win_continua(spec2,wn,centre="smoothmax",plot=False)
+menmean,menstd = tw.compare_win_continua(spec2,wn,centre="mean",plot=False)
 
