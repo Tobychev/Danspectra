@@ -1,9 +1,10 @@
 import numpy as np
 import kontin as con
 import danspec as dan
+import matplotlib.pyplot as pl
 
 def gen_all_auto_wins(spec,wins={},line="mean"):
-    metod = ["over 1","top 100","top 5%","top 20", "90-95 decile"]
+    metod = ["over 1","top 100","top 5%","top 20", "90-95 decile","ref top"]
     for m in metod:
         wins[m] = con.select_bgwin_auto(spec,m,line)
 
@@ -47,4 +48,55 @@ def perturb_all_windows(spec,windows,itr=103):
         res[key] = perturb_window_fit(spec,windows[key],itr)
 
     return res
-#def narrow_window
+
+def gen_frame_continuum(spec,win):
+    fits = con.fit_frame(spec,win)
+    return fits[1,:] + fits[0,:]*spec.lmbd.mean()
+
+def all_wins_frame_continuum(spec,wins):
+    lines = 800
+    names = {}
+    cont  = np.zeros((lines,
+                      len(wins.keys()) ))
+    for i,key in enumerate(wins.keys()):
+        cont[:,i]  = gen_frame_continuum(spec,wins[key])
+        names[key] = i
+    return cont,names
+
+def compare_win_continua(spec,wins,centre="mean",cols=2,bins=39,plot=True):
+    conts,winame = all_wins_frame_continuum(spec,wins)
+
+    if centre == "mean":
+        conts = (conts.T - conts.mean(axis=1)).T #transpose to allow broadcasting
+        title = "deviation from ensamble mean"
+    elif centre == "refmax":
+        centre = spec.data[:,spec.ref.argmax()]
+        conts  = (conts.T - centre).T
+        title = "deviation from highest pixel"
+    elif centre == "smoothmax":
+        centre = spec.data[:,(spec.ref.argmax()- 5):(spec.ref.argmax()+ 5)].mean(axis=1)
+        print centre
+        conts  = (conts.T - centre).T
+        title = "deviation from smoothed highest pixel"
+
+    if plot:
+        fig = pl.figure()
+        pl.suptitle(title,fontsize=14)
+        rows = len(winame)/cols
+        if len(winame)%cols > 0:
+            rows+=1
+        for i,key in enumerate(winame):
+            ax = fig.add_subplot(rows,cols,i+1)
+            ax.hist(conts[:,i],bins=bins)
+            ax.axvline(0.0,linestyle="dashed",color="r")
+            ax.set_title(key)
+        pl.tight_layout()
+        pl.show()
+
+    std  = conts.std(axis=0)
+    mean = conts.mean(axis=0)
+    print "\n"+ title
+    for i,name in enumerate(winame):
+        print "{:>12}: {:+.4e} {:6.4e}".format(name,mean[i],std[i])
+
+    return mean,std 
