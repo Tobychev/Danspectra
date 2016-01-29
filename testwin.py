@@ -69,13 +69,16 @@ def compare_win_continua(spec,wins,centre="mean",cols=2,bins=39,plot=True):
     if centre == "mean":
         conts = (conts.T - conts.mean(axis=1)).T #transpose to allow broadcasting
         title = "deviation from ensamble mean"
+    elif centre == "median":
+        centre = np.median(conts,axis=1)
+        conts  = (conts.T - centre).T
+        title = "deviation from ensamble median"
     elif centre == "refmax":
         centre = spec.data[:,spec.ref.argmax()]
         conts  = (conts.T - centre).T
         title = "deviation from highest pixel"
     elif centre == "smoothmax":
         centre = spec.data[:,(spec.ref.argmax()- 5):(spec.ref.argmax()+ 5)].mean(axis=1)
-        print centre
         conts  = (conts.T - centre).T
         title = "deviation from smoothed highest pixel"
 
@@ -96,6 +99,7 @@ def compare_win_continua(spec,wins,centre="mean",cols=2,bins=39,plot=True):
     std  = conts.std(axis=0)
     mean = conts.mean(axis=0)
     print "\n"+ title
+    print "\n{:>12}   {:<10} {}".format("","mean","std")
     for i,name in enumerate(winame):
         print "{:>12}: {:+.4e} {:6.4e}".format(name,mean[i],std[i])
 
