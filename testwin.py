@@ -33,7 +33,7 @@ def perturb_window_fit(spec,window,itr=103):
     for i,fraction in enumerate(fractions):
         for j in range(0,itr):
             win = np.random.choice(window,fraction)
-            fits[j,0],fits[j,1] = con.simple_fit_continium(spec.mean[win],spec,win)
+            fits[j,0],fits[j,1] = np.polyfit(spec.lmbd[win],spec.mean[win],1)
         
         c_cont = fits[:,1] + fits[:,0]*spec.lmbd.mean() -1 # Minus one only for meanspec 
         key = round(fraction/len(window),3)
@@ -49,8 +49,9 @@ def perturb_all_windows(spec,windows,itr=103):
 
     return res
 
+
 def gen_frame_continuum(spec,win):
-    fits = con.fit_frame(spec,win)
+    fits = con.frame_fit(spec,win)
     return fits[1,:] + fits[0,:]*spec.lmbd.mean()
 
 def all_wins_frame_continuum(spec,wins):
@@ -104,3 +105,45 @@ def compare_win_continua(spec,wins,centre="mean",cols=2,bins=39,plot=True):
         print "{:>12}: {:+.4e} {:6.4e}".format(name,mean[i],std[i])
 
     return mean,std 
+
+def rolling_mean(data,size=10):
+    return np.convolve(data, np.ones((size,))/size, mode='valid')
+
+def smooth_test(spec,win,size):
+    rows = 800
+    data = con.frame_subtract_cont(spec,win)
+    lmd = rolling_mean(spec.lmbd,size)
+    spe = np.zeros((rows,lmd.size))
+    res = np.zeros((rows,2))
+
+    for i in range(0,rows):
+        spe[i,:] = rolling_mean(data[i,:],size)
+        res[i,0] = spe[i,spe[i,:] > 0].sum()
+        res[i,1] = spe[i,(spe[i,:] > -0.01) & (spe[i,:] < 0)].sum()
+
+    return lmd,spe,res
+
+def all_smooth_test(spec,wins,smooth=10,plot=False,bins=43,cols=2):
+    winame = wins.keys()
+    title  = "Integral of signal over continuum"
+    if plot:
+        fig = pl.figure()
+        pl.suptitle(title,fontsize=14)
+        rows = len(winame)/cols
+        if len(winame)%cols > 0:
+            rows+=1
+
+    print "\n"+ title
+    print "\n{:>12}   {:<6} {:<7} {}".format("","mean","std","max")
+    for i,key in enumerate(wins.keys()):
+        lm,sp,re = smooth_test(spec,wins[key],smooth)
+        print "{:>12}: {:7.3f} {:7.3f} {:8.3f}".format(key,re[:,0].mean(),re[:,0].std(),re[:,0].max())
+        if plot:
+            ax = fig.add_subplot(rows,cols,i+1)
+            ax.hist(re[:,0],bins=bins)
+            ax.axvline(0.0,linestyle="dashed",color="r")
+            ax.set_title(key)
+    if plot:
+        pl.tight_layout()
+        pl.show()
+
