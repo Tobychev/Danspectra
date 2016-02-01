@@ -2,16 +2,22 @@ from matplotlib.widgets import Cursor,AxesWidget
 import matplotlib.pyplot as pl
 import numpy as np
 
-def fit_frame(spec,idx):
+def frame_fit(spec,idx):
    return np.polyfit(spec.lmbd[idx],spec.data.transpose()[idx,:],1)
 
-def simple_fit_continium(bg,spec,idx):
-    fit = np.polyfit(spec.lmbd[idx],bg,1)
-    return fit
+def frame_subtract_cont(spec,idx):
+    fits = frame_fit(spec,idx)
+    cont = fits[1,:].reshape(len(fits[1,:]),1) + np.outer(fits[0,:],spec.lmbd)
+    return spec.data - cont
+    
+def row_subtract_cont(spec,line,idx):
+    b,a = row_fit_continuum(spec,line,idx)
+    cont = a + b*spec.lmbd
+    return spec.spec(line)-cont 
 
-def fit_continium(spec,bg,idx):
-    fit, cov = np.polyfit(spec.lmbd[idx],bg,1,cov=True)
-    return fit,cov
+def row_fit_continuum(spec,line,idx):
+    fit = np.polyfit(spec.lmbd[idx],spec.spec(line)[idx],1)
+    return fit
 
 def make_idx_from_windows(windows):
     idbg = []
