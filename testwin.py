@@ -170,3 +170,33 @@ def all_smooth_test(spec,wins,smooth=10,plot=False,bins=43,cols=2):
         pl.tight_layout()
         pl.show()
 
+def sim_poisson_noise(spec,rows):
+    fil = "{}_{}__contmap.fits"
+    cont_frame = dan.f.open(spec.Dir+fil.format(spec.wave,spec.series))
+    mean_cont  = cont_frame[0].data.mean()
+    return np.random.poisson( spec.ref*mean_cont,(rows,len(spec.ref)) )/mean_cont
+
+def fit_on_poisson_noise(spec,rows):
+    wins  = gen_all_auto_wins(spec,line="ref")
+
+    ref_fit = {}
+    for key in wins.keys():
+        idx = wins[key]
+        ref_fit[key] = np.polyfit(spec.lmbd[idx],spec.ref[idx],1)
+
+    fits = {}
+    for key in wins.keys():
+        idx  = wins[key]
+        data = sim_poisson_noise(spec,rows)
+        fits[key] = np.polyfit(spec.lmbd[idx],data.T[idx,:],1)
+
+    return wins.keys(),ref_fit,fits
+
+
+def test_fit_with_noise(spec,plot=False,bins=43,cols=2):
+    names,fit_ref,fits = fit_on_poisson_noise(spec,1e4)
+
+    title = "Distribution of intercept"
+    ks  = {key: fits[key][0,:] for key in names}
+    ref = {key: fit_ref[key][0] for key in names}
+    plot_fits_stats(ks,ref,names,title)
