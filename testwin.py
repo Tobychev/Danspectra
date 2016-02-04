@@ -45,7 +45,8 @@ def gen_man_win(spec,wins={}):
 def fit_all_windows(spec,wins):
     fits = {}
     for key in wins.keys():
-        fits[key] = con.simple_fit_continium(spec.mean[wins[key]],spec,wins[key])
+        idx = wins[key]
+        fits[key] = con.fit_continuum(spec.lmbd[idx],spec.mean[idx])
 
     return fits
 
@@ -156,10 +157,10 @@ def all_smooth_test(spec,wins,smooth=10,plot=False,bins=43,cols=2):
             rows+=1
 
     print "\n"+ title
-    print "\n{:>12}   {:<6} {:<7} {}".format("","mean","std","max")
+    print "\n{:>12}  {:<7} {:<7} {:<8} {}".format("","mean","std","max","max_row")
     for i,key in enumerate(wins.keys()):
         lm,sp,re = smooth_test(spec,wins[key],smooth)
-        print "{:>12}: {:7.3f} {:7.3f} {:8.3f}".format(key,re[:,0].mean(),re[:,0].std(),re[:,0].max())
+        print "{:>12}: {:7.3f} {:7.3f} {:8.3f} {}".format(key,re[:,0].mean(),re[:,0].std(),re[:,0].max(),re[:,0].argmax())
         if plot:
             ax = fig.add_subplot(rows,cols,i+1)
             ax.hist(re[:,0],bins=bins)
