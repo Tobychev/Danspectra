@@ -25,8 +25,4 @@ wn = tw.gen_man_win(spec2,wn)
 #refmean,refstd = tw.compare_win_continua(spec2,wn,centre="smoothmax",plot=False)
 #menmean,menstd = tw.compare_win_continua(spec2,wn,centre="mean",plot=False)
 
-for key in wn.keys():
-    l,s,r = tw.smooth_test(spec2,wn[key],17)
-    print key, np.sum(r[:,0]), np.sum(r[:,1]),len(l)
-
-
+tw.all_smooth_test(spec2,wn,smooth=10,plot=False,bins=43,cols=2)
