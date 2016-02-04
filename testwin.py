@@ -3,6 +3,31 @@ import kontin as con
 import danspec as dan
 import matplotlib.pyplot as pl
 
+def rolling_mean(data,size=10):
+    return np.convolve(data, np.ones((size,))/size, mode='valid')
+
+def plot_fits_stats(data,ref,names,title="",bins=43,cols=2):
+    fig = pl.figure()
+    pl.suptitle(title,fontsize=14)
+    rows = len(names)/cols
+    if len(names)%cols > 0:
+        rows+=1
+
+    print "\n"+ title
+    print "\n{:>12}  {:<10} {:<10} {:<10}".format("","ref","mean","std")
+    for i,key in enumerate(names):
+        print "{:>12} {:>10.3e} {:>10.3e} {:>10.3e}".format(key,
+                        ref[key],
+                        data[key].mean(),
+                        data[key].std())
+        ax = fig.add_subplot(rows,cols,i+1)
+        ax.hist(data[key],bins=bins)
+        ax.axvline(ref[key],linestyle="dashed",color="r")
+        ax.set_title(key)
+
+    pl.tight_layout()
+    pl.show()
+
 def gen_all_auto_wins(spec,wins={},line="mean"):
     metod = ["over 1","top 100","top 5%","top 20", "90-95 decile","ref top"]
     for m in metod:
@@ -105,9 +130,6 @@ def compare_win_continua(spec,wins,centre="mean",cols=2,bins=39,plot=True):
         print "{:>12}: {:+.4e} {:6.4e}".format(name,mean[i],std[i])
 
     return mean,std 
-
-def rolling_mean(data,size=10):
-    return np.convolve(data, np.ones((size,))/size, mode='valid')
 
 def smooth_test(spec,win,size):
     rows = 800
