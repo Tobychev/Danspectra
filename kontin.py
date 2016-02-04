@@ -44,11 +44,13 @@ def make_windows_from_idx(idx):
     windows.append(window)
     return windows
 
-def select_bgwin_auto(danspec,metod,line="mean"):
-    if line == "mean":
+def select_bgwin_auto(danspec,metod,row="mean"):
+    if row == "mean":
         data = danspec.mean
+    elif row == "ref":
+        data = danspec.ref
     else:
-        data = danspec.spec(line)
+        data = danspec.spec(row)
 
     if   metod == "over 1":
         return np.flatnonzero(data > 1)
