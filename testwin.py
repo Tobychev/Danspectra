@@ -203,9 +203,9 @@ def test_fit_with_noise(spec,rows,plot_excess=False,plot_cont_corr=False,plot_fi
         concorr = spec.ref - y
         ref_cor = spec.ref - (fit_ref[key][0]*spec.lmbd + fit_ref[key][1])
         zero    = np.zeros(concorr.shape)    
-        
+
         excess[key] = np.where(concorr > 0, concorr,zero).sum(axis=1) 
-        ref[key]    = np.where(ref_cor > 0, ref_cor,zero).sum() 
+        ref[key]    = np.where(ref_cor > 0, ref_cor,zero[0,:]).sum() 
         
         if plot_cont_corr:
             fig = pl.figure()
