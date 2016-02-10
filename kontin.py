@@ -114,12 +114,3 @@ a - add point to background window, after two points have been indicated a new w
             windows.append(window)
             window=[]
 
-def show_fit(spec,idx,fit,line="mean"):
-    if line == "mean":
-        data = spec.mean
-    else:
-        data = spec.spec(line)
-    pl.plot(spec.lmbd,spec.mean)
-    pl.plot(spec.lmbd[idx],spec.mean[idx],'ro')
-    pl.plot(spec.lmbd[idx], fit[1]+ fit[0]*spec.lmbd[idx])
-    pl.show()
