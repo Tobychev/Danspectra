@@ -174,7 +174,7 @@ def fit_on_poisson_noise(spec,rows):
     return wins.keys(),ref_fit,fits
 
 def test_fit_with_noise(spec,rows,plot_excess=False,plot_cont_corr=False,plot_fit_par=False,
-                        bins=43,cols=2,yscale="linear"):
+                        bins=43,cols=2,yscale="linear",cut=0):
     names,fit_ref,fits = fit_on_poisson_noise(spec,rows)
 
     title = "distribution of intercept"
@@ -219,6 +219,6 @@ def test_fit_with_noise(spec,rows,plot_excess=False,plot_cont_corr=False,plot_fi
     if plot_excess:
         title = "excess"
         #ref = {key: 0.0 for key in names}
-        vis.plot_fits_stats(excess,ref,names,title,bins,cols,yscale)
+        vis.plot_fits_stats(excess,ref,names,title,bins,cols,yscale,cutoff=cut)
         
-    return excess,ms,ks,fit_ref
+    return excess,ms,ks,ref,fit_ref
