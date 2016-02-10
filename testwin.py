@@ -157,7 +157,7 @@ def sim_poisson_noise(spec,rows):
     return np.random.poisson( spec.ref*mean_cont,(rows,len(spec.ref)) )/mean_cont
 
 def fit_on_poisson_noise(spec,rows):
-    wins  = gen_all_auto_wins(spec,line="ref")
+    wins  = gen_all_auto_wins(spec,{},line="ref")
 
     ref_fit = {}
     for key in wins.keys():
@@ -172,11 +172,52 @@ def fit_on_poisson_noise(spec,rows):
 
     return wins.keys(),ref_fit,fits
 
+def test_fit_with_noise(spec,rows,plot_excess=False,plot_cont_corr=False,plot_fit_par=False,
+                        bins=43,cols=2,yscale="linear"):
+    names,fit_ref,fits = fit_on_poisson_noise(spec,rows)
 
-def test_fit_with_noise(spec,plot=False,bins=43,cols=2):
-    names,fit_ref,fits = fit_on_poisson_noise(spec,1e4)
+    title = "distribution of intercept"
+    ms  = {key: fits[key][1,:] for key in names}
+    ref = {key: fit_ref[key][1] for key in names}
+    stats.print_dict_stats_with_ref(ms,ref,names,title)
+    if plot_fit_par:
+        vis.plot_fits_stats(ms,ref,names,title,bins,cols)
 
-    title = "Distribution of intercept"
+        
+    title = "distribution of slope"
     ks  = {key: fits[key][0,:] for key in names}
     ref = {key: fit_ref[key][0] for key in names}
-    plot_fits_stats(ks,ref,names,title)
+    stats.print_dict_stats_with_ref(ms,ref,names,title)
+    if plot_fit_par:
+        vis.plot_fits_stats(ks,ref,names,title,bins,cols)
+
+    excess = {}
+    ref = {}
+    for key in names:
+        kx = np.outer(ks[key],spec.lmbd)
+        m  = ms[key].reshape((rows,1))
+        y  = kx + m
+        extrema = np.unique(np.array([np.abs(y[:,0]).argmax(),np.abs(y[:,0]).argmin(),
+                                      np.abs(y[:,-1]).argmax(),np.abs(y[:,-1]).argmin()])  )
+        concorr = spec.ref - y
+        ref_cor = spec.ref - (fit_ref[key][0]*spec.lmbd + fit_ref[key][1])
+        zero    = np.zeros(concorr.shape)    
+        
+        excess[key] = np.where(concorr > 0, concorr,zero).sum(axis=1) 
+        ref[key]    = np.where(ref_cor > 0, ref_cor,zero).sum() 
+        
+        if plot_cont_corr:
+            fig = pl.figure()
+            ax  = fig.add_subplot(111)
+            for e in extrema:
+                ax.plot(spec.lmbd,concorr[e,:])
+            
+            pl.show()
+        
+    stats.print_dict_stats_with_ref(excess,ref,names,"Excess")
+    if plot_excess:
+        title = "excess"
+        #ref = {key: 0.0 for key in names}
+        vis.plot_fits_stats(excess,ref,names,title,bins,cols,yscale)
+        
+    return excess,ms,ks,fit_ref
