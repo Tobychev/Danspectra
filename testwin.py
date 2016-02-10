@@ -55,7 +55,6 @@ def perturb_all_windows(spec,windows,itr=103):
 
     return res
 
-
 def gen_frame_continuum(spec,win):
     fits = con.frame_fit(spec,win)
     return fits[1,:] + fits[0,:]*spec.lmbd.mean()
@@ -68,6 +67,7 @@ def all_wins_frame_continuum(spec,wins):
     for i,key in enumerate(wins.keys()):
         cont[:,i]  = gen_frame_continuum(spec,wins[key])
         names[key] = i
+
     return cont,names
 
 def compare_win_continua(spec,wins,centre="mean",cols=2,bins=39,plot=True):
@@ -154,6 +154,7 @@ def sim_poisson_noise(spec,rows):
     fil = "{}_{}__contmap.fits"
     cont_frame = dan.f.open(spec.Dir+fil.format(spec.wave,spec.series))
     mean_cont  = cont_frame[0].data.mean()
+
     return np.random.poisson( spec.ref*mean_cont,(rows,len(spec.ref)) )/mean_cont
 
 def fit_on_poisson_noise(spec,rows):
