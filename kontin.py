@@ -1,4 +1,3 @@
-from matplotlib.widgets import Cursor,AxesWidget
 import matplotlib.pyplot as pl
 import numpy as np
 
