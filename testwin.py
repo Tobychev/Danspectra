@@ -192,8 +192,10 @@ def test_fit_with_noise(spec,rows,plot_excess=False,plot_cont_corr=False,plot_fi
     if plot_fit_par:
         vis.plot_fits_stats(ks,ref,names,title,bins,cols)
 
-    excess = {}
-    ref = {}
+    excess   = {}
+    ref      = {}
+    rmse_top = {}
+    ref_rmse = {}
     for key in names:
         kx = np.outer(ks[key],spec.lmbd)
         m  = ms[key].reshape((rows,1))
@@ -204,8 +206,10 @@ def test_fit_with_noise(spec,rows,plot_excess=False,plot_cont_corr=False,plot_fi
         ref_cor = spec.ref - (fit_ref[key][0]*spec.lmbd + fit_ref[key][1])
         zero    = np.zeros(concorr.shape)    
 
-        excess[key] = np.where(concorr > 0, concorr,zero).sum(axis=1) 
-        ref[key]    = np.where(ref_cor > 0, ref_cor,zero[0,:]).sum() 
+        excess[key]   = np.where(concorr > 0, concorr,zero).sum(axis=1) 
+        rmse_top[key] = stats.rmse_at_zero_of_topq(concorr,q=50,ax=1)
+        ref[key]      = ref_cor[ref_cor > 0].sum() 
+        ref_rmse[key] = stats.rmse_at_zero_of_topq(ref_cor,q=50)
         
         if plot_cont_corr:
             fig = pl.figure()
@@ -216,9 +220,9 @@ def test_fit_with_noise(spec,rows,plot_excess=False,plot_cont_corr=False,plot_fi
             pl.show()
         
     stats.print_dict_stats_with_ref(excess,ref,names,"Excess")
+    stats.print_dict_stats_with_ref(rmse_top,ref_rmse,names,"RMSE of top half")
     if plot_excess:
         title = "excess"
-        #ref = {key: 0.0 for key in names}
         vis.plot_fits_stats(excess,ref,names,title,bins,cols,yscale,cutoff=cut)
         
-    return excess,ms,ks,ref,fit_ref
+    return [excess,ms,ks,fit_ref,rmse_top,ref_rmse]
