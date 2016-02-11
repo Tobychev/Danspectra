@@ -23,7 +23,6 @@ def plot_fits_stats(data,ref,names,title="",bins=43,cols=2,yscale="linear",cutof
     if len(names)%cols > 0:
         rows+=1
 
-
     for i,key in enumerate(names):
         if cutoff > 0:
             idx = np.where(data[key] > np.percentile(data[key],q=cutoff))
@@ -35,6 +34,5 @@ def plot_fits_stats(data,ref,names,title="",bins=43,cols=2,yscale="linear",cutof
         ax.set_yscale(yscale)
         ax.set_title(key)
         
-
     pl.tight_layout()
     pl.show()
