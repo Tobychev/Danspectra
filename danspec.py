@@ -26,6 +26,10 @@ class danspectra(object):
             self.__load_bgwindows()
         else:
             self.bgwindows  = []
+        if self.header.get("PEAKWINN") > 0:
+            self.__load_pkwindows()
+        else:
+            self.pkwindows  = []
 
     def __load_from_fits(self,filename,hdu=0):
         fits = f.open(self.Dir+filename.format(self.wave,self.series))
@@ -46,28 +50,43 @@ class danspectra(object):
             print "WARNING: Old values will be erased"
             if not raw_input("Continue Y/N? ").lower() == "y":
                 return None
-        keyword = "BGWIN{}".format
+        self.__set_windows(bgwindows,"BGWIN{}".format)
+        self.__load_bgwindows()
+
+    def set_pkwindows(self,pkwindows,warn=True):
+        if len(self.pkwindows) > 0 and warn :
+            print "WARNING: Old values will be erased"
+            if not raw_input("Continue Y/N? ").lower() == "y":
+                return None
+        self.__set_windows(pkwindows,"PEAKWIN{}".format)
+        self.__load_pkwindows()
+
+    def __set_windows(self,windows,keyword):
         LOW = 0; HIGH = 1 # Lower and upper window edge
     
         del self.header[keyword("?*")]
-        self.header.set(keyword("N"),len(bgwindows))
+        self.header.set(keyword("N"),len(windows))
    
-        bgwindows.sort() # For nicer order in header
-        for i in range(0,len(bgwindows)):
-            self.header.set(keyword(str(i+1)+"L"), bgwindows[i][LOW])   #Want index 1,..,N
-            self.header.set(keyword(str(i+1)+"H"), bgwindows[i][HIGH])
+        windows.sort() # For nicer order in header
+        for i in range(0,len(windows)):
+            self.header.set(keyword(str(i+1)+"L"), windows[i][LOW])   #Want index 1,..,N
+            self.header.set(keyword(str(i+1)+"H"), windows[i][HIGH])
     
         self.fits.flush() 
-        self.__load_bgwindows()
-        self.haswindows = True
 
     def __load_bgwindows(self):
-        keyword = "BGWIN{}".format
-        wins = self.header.get("BGWINN") 
-        window = []
-        self.bgwindows = []
+        self.bgwindows = self.__load_windows("BGWINN","BGWIN{}".format)
+
+    def __load_pkwindows(self):
+        self.pkwindows = self.__load_windows("PEAKWINN","PEAKWIN{}".format)
+
+    def __load_windows(self,head,keyword):
+        wins = self.header.get(head) 
+        window  = []
+        windows = []
         for i in range(1,wins+1):   #Want index 1,..,N
             window = []
             window.append(self.header.get(keyword(str(i)+"L")))
             window.append(self.header.get(keyword(str(i)+"H")))
-            self.bgwindows.append(window)
+            windows.append(window)
+        return windows
