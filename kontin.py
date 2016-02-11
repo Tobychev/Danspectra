@@ -44,7 +44,8 @@ def make_windows_from_idx(idx):
     windows.append(window)
     return windows
 
-def select_bgwin_auto(danspec,metod,row="mean"):
+def select_bgwin_auto(danspec,metod,row="mean",
+                        npoint=100,q=50):
     if row == "mean":
         data = danspec.mean
     elif row == "ref":
@@ -64,9 +65,24 @@ def select_bgwin_auto(danspec,metod,row="mean"):
         t5  = top_number(data,round(len(data)*0.05))[-1]
         t10 = top_number(data,round(len(data)*0.1))
         return t10[ t10 >= t5 ]
-    elif metod == "ref top":
+    elif metod == "ref top":       
         return range( danspec.ref.argmax()- 5, danspec.ref.argmax()+ 5 )
-    
+    elif metod == "segments":
+        return top_of_segments(data,npoint,q)
+
+def top_of_segments(data,npoint,q):
+    ids = (data > np.percentile(data,q)).nonzero()[0]
+    nregion = len(ids)/npoint
+    perreg  = npoint/nregion
+    regions = np.array_split(ids,nregion)
+    idx = np.array( [])
+    # Top perreg of data in each region
+    # have global indices given by reg, 
+    # top_number returns indiced local to data[reg]
+    for reg in regions:
+         idx = np.hstack( (idx, reg[top_number(data[reg],perreg)]) )
+    return idx.astype("int")
+
 def top_number(data,number):
     idx = np.argpartition(data,-number)[-number:]
     idx.sort()

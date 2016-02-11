@@ -9,7 +9,7 @@ def rolling_mean(data,size=10):
     return np.convolve(data, np.ones((size,))/size, mode='valid')
 
 def gen_all_auto_wins(spec,wins={},line="mean"):
-    metod = ["over 1","top 100","top 5%","top 20", "90-95 decile","ref top"]
+    metod = ["over 1","top 100","top 5%","top 20", "90-95 decile","ref top","segments"]
     for m in metod:
         wins[m] = con.select_bgwin_auto(spec,m,line)
 
