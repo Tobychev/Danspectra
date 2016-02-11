@@ -2,12 +2,6 @@ import numpy as np
 import pyfits as f
 import os
 
-# Consider refactoring this to only handle the reading
-# and  writing of data from the fits file, with other 
-# modules doing actual calculations. Specifically,
-# moving select_background and its collection of supporint
-# properties somwhere else
-
 class danspectra(object):
     __meanname = "{}_{}__adjustspec.fits"
     __lmbdname = "{}_{}__lambda.fits"
