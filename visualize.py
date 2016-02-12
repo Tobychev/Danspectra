@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 import matplotlib.widgets as wdg 
+
 def show_fit_with_points(spec,idx,fit,line="mean"):
     if line == "mean":
         data = spec.mean
@@ -53,7 +54,7 @@ def select_manual_windows(danspec):
         cursor = wdg.Cursor(ax,useblit=True, color='red', 
                         linewidth=1,horizOn=False)
         pl.show()
-        return make_idx_from_windows(windows)
+        return windows
 
 def __manageux(event):
     global window, windows
