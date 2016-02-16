@@ -23,7 +23,7 @@ def subdivide_line(line):
         lines = []    
         mins  = intr.manual_delete_minima(mins,line)
         for li in mins:
-            lines.append(dan.line( line.spec, (line.idx[ li[0]] ,line.idx[li[2]]) ))
+            lines.append(dan.line( line.danspec, (line.idx[ li[0]] ,line.idx[li[2]]) ))
 
         return lines
 
@@ -51,3 +51,19 @@ def is_minima(curve,point):
     else:
         return False
 
+def fit_linecores(line,xs,ys):
+    guess = line.ref.argmin()
+    bottom = line.idx[guess-4:guess+5]
+    a,b,c = np.polyfit(xs[bottom],ys.T[bottom,:],2)
+    return get_linecore(a,b,c) 
+
+def fit_linecore(line,xs,ys):
+    guess = line.ref.argmin()
+    bottom = line.idx[guess-4:guess+5]
+    a,b,c = np.polyfit(xs[bottom],ys[bottom],2)
+    return get_linecore(a,b,c)    
+
+def get_linecore(a,b,c):
+    lam_min = -b/(2*a)
+    lin_bot = np.polyval((a,b,c),lam_min)
+    return lam_min,lin_bot
