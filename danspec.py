@@ -90,3 +90,30 @@ class danspectra(object):
             window.append(self.header.get(keyword(str(i)+"H")))
             windows.append(window)
         return windows
+
+class line(object):
+    def __init__(self,spec,winbounds):
+        self.idx  = self.__trim_line_indices(winbounds,spec)
+        self.win  = (self.idx[0], self.idx[-1])       
+        self.lmbd = spec.lmbd[self.idx]
+        self.ref  = spec.ref[self.idx]
+        self.name = str(self.lmbd.mean())
+        self.spec = spec
+
+    def __repr__(self):
+        return "Line {} [{} to {}]".format(self.name,self.idx[0],self.idx[-1])
+    
+    def __trim_line_indices(self,winbounds,spec):
+        # Trims out values above one
+        idx = range(winbounds[0],winbounds[1]+1)
+        tmp = np.where(spec.ref[idx] > 1)[0]
+        cut = np.where(np.diff(tmp) > 1)[0] 
+        if len(tmp) == 0:
+            return idx
+        elif len(cut) > 0:
+            return idx[tmp[cut]:tmp[cut+2]]
+        elif tmp[0] == 0:
+            return idx[tmp[-1]:]
+        else:
+            return idx[:tmp[1]]
+        

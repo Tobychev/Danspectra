@@ -1,6 +1,34 @@
 import numpy as np
 import matplotlib.pyplot as pl
-import matplotlib.widgets as wdg 
+
+def show_linegroup_on_curve(lines,xs,ys):
+    pl.plot(xs,ys)
+    for line in lines:
+        pl.plot(line.lmbd,line.ref,'ro-')
+
+    pl.show()
+
+def show_autoline_on_curve(autoline,xs,ys):
+    line = list(autoline)
+    pl.plot(xs,ys)
+    pl.plot(xs[line],ys[line],'ro-')
+    pl.show()
+
+def make_line_on_curve(line,xs,ys,ax,colour=""):
+    ax.plot(xs[line.idx],ys[line.idx],'o',c=colour)
+    return ax
+
+def show_spec_lines(spec,lines):
+    fig = pl.figure()
+    ax  = fig.add_subplot(1,1,1)
+    colour = get_colours(len(lines))
+
+    ax.plot(spec.lmbd,spec.ref)
+    for i,line in enumerate(lines):
+        ax = make_line_on_curve(line,spec.lmbd,spec.ref,ax,colour=next(colour))
+
+    pl.show()
+
 
 def show_fit_with_points(spec,idx,fit,line="mean"):
     if line == "mean":
