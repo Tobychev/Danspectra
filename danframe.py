@@ -2,7 +2,7 @@ import numpy as np
 import pyfits as f
 import os
 
-class danspectra(object):
+class danframe(object):
     __meanname = "{}_{}__adjustspec.fits"
     __lmbdname = "{}_{}__lambda.fits"
     __refname  = "{}_{}__adjustfts.fits"
@@ -91,31 +91,3 @@ class danspectra(object):
             windows.append(window)
         return windows
 
-class line(object):
-    def __init__(self,spec,winbounds):
-        self.idx  = self.__trim_line_indices(winbounds,spec)
-        self.win  = (self.idx[0], self.idx[-1])       
-        self.lmbd = spec.lmbd[self.idx]
-        self.ref  = spec.ref[self.idx]
-        self.name = str(self.lmbd.mean())
-        self.danspec = spec
-
-    def __repr__(self):
-        return "Line {} [{} to {}]".format(self.name,self.idx[0],self.idx[-1])
-    
-    def __trim_line_indices(self,winbounds,spec):
-        # Trims out values above one
-        idx = range(winbounds[0],winbounds[1]+1)
-        tmp = np.where(spec.ref[idx] > 1)[0]
-        cut = np.where(np.diff(tmp) > 1)[0] 
-        if len(tmp) <  2:
-            return idx
-        elif len(tmp) == 2 and len(cut) == 1:
-            return idx
-        elif len(cut) > 1:
-            return idx[tmp[cut]:tmp[cut+2]]
-        elif tmp[0] == 0:
-            return idx[tmp[-1]:]
-        else:
-            return idx[:tmp[1]]
-        
