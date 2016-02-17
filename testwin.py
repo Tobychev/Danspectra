@@ -1,7 +1,7 @@
 import stats
 import numpy as np
 import kontin as con
-import danspec as dan
+import danframe as dan
 import visualize as vis
 import matplotlib.pyplot as pl
 
