@@ -10,10 +10,10 @@ def make_pkwin_from_linegroup(lines):
 
     return pkwin
 
-def make_lines_from_wins(danspec,wins):
+def make_lines_from_wins(danspec_sac,wins):
     lines = []
     for item in wins:
-        lines.append(dan.line(danspec,item))
+        lines.append(line(item,danspec_sac))
 
     return lines
 
@@ -35,21 +35,18 @@ def get_linecore(a,b,c):
     return lam_min,lin_bot
 
 class line(object):
-    def __init__(self,spec,winbounds):
-        self.idx  = self.__trim_line_indices(winbounds,spec)
+    def __init__(self,winbounds,group):
+        self.idx  = self.__trim_line_indices(winbounds,group.ref)
         self.win  = (self.idx[0], self.idx[-1])       
-        self.lmbd = spec.lmbd[self.idx]
-        self.ref  = spec.ref[self.idx]
-        self.name = str(self.lmbd.mean())
-        self.danspec = spec
+        self.name = str(group.lmbd[self.idx].mean())
 
     def __repr__(self):
         return "Line {} [{} to {}]".format(self.name,self.idx[0],self.idx[-1])
     
-    def __trim_line_indices(self,winbounds,spec):
+    def __trim_line_indices(self,winbounds,ref):
         # Trims out values above one
         idx = range(winbounds[0],winbounds[1]+1)
-        tmp = np.where(spec.ref[idx] > 1)[0]
+        tmp = np.where(ref[idx] > 1)[0]
         cut = np.where(np.diff(tmp) > 1)[0] 
         if len(tmp) <  2:
             return idx
@@ -61,19 +58,6 @@ class line(object):
             return idx[tmp[-1]:]
         else:
             return idx[:tmp[1]]
-
-    def subdivide_line(self, line):
-        mins = self.__find_minima(line.ref)
-        if len(mins) > 1:
-            lines = []    
-            mins  = intr.manual_delete_minima(mins,line)
-            for li in mins:
-                lines.append(dan.line( line.danspec, (line.idx[ li[0]] ,line.idx[li[2]]) ))
-
-            return lines
-
-        else:
-            return line
 
     def __find_minima(self,curve):
         deriv = np.diff(curve)
@@ -92,3 +76,30 @@ class line(object):
             return True
         else:
             return False
+
+    def subdivide_line(self, group):
+        mins = self.__find_minima(group.ref[self.idx])
+        if len(mins) > 1:
+            lines = []    
+            mins  = intr.manual_delete_minima(mins,group)
+            for li in mins:
+                lines.append(line( (line.idx[ li[0]] ,line.idx[li[2]]),group ))
+
+            return lines
+
+        else:
+            return line
+    
+    def measure_linecores(self,group):
+        nrows = group.frames[0].data.shape[0]
+        out   = np.zeros((len(group.frames)*2,nrows))
+        for i,frame in enumerate(group.frames):
+            guess   = group.ref[self.idx].argmin()
+            bottom  = self.idx[guess-4:guess+5]   
+            a,b,c   = np.polyfit(group.lmbd[bottom],frame.data.T[bottom,:],2)
+            lam_min = -b/(2*a)
+            lin_bot = np.polyval((a,b,c),lam_min)
+            out[2*i,:]  = lam_min
+            out[2*i+1:] = lin_bot
+        return out
+
