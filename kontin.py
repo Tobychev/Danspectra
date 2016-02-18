@@ -93,24 +93,13 @@ def save_bgwin_from_idx(danframe,idx):
 
 
 class continua(object):
-    def __init__(self,danframe,extras=[]):
+    def __init__(self,danframe,method):
         self.frame = danframe
-        self.top20 = self.auto_fit_frame("top 20")
-        self.top5p = self.auto_fit_frame("top 5%")
-        self.segmt = selt.auto_fit_frame("segments")
-        if len(extras) > 0:
-            self.extra = {}
-            for method in extras:           
-                self.extra[method] = self.auto_fit_frame(method)
+        self.fit   = self.auto_fit_frame(method,self.frame.group.ref)
 
-    def top20cont(self,wavlen):
-        return self.top20["k"]*wavlen + self.top20["m"]
-
-    def top5pcont(self,wavlen):
-        return self.top5p["k"]*wavlen + self.top5p["m"]
-
-    def segmtcont(self,wavlen):
-        return self.segmt["k"]*wavlen + self.segmt["m"]
+    def norm(self):
+        dim = len(self.fit["m"])
+        return np.outer(self.fit["k"],self.frame.group.lmbd)+ self.fit["m"].reshape((dim,1))
 
     def __top_number(self,data,number):
         idx = np.argpartition(data,-number)[-number:]
@@ -128,26 +117,37 @@ class continua(object):
         # top_number returns indiced local to data[reg]
         for reg in regions:
              idx = np.hstack( (idx, reg[top_number(data[reg],perreg)]) )
-    return idx.astype("int")
+        return idx.astype("int")
 
-    def auto_fit_frame(self,method):
-        idx = self.auto_select_bgwin(method)
-        k,m = np.polyfit(self.frame.lmbd[idx],self.frame.data.transpose()[idx,:],1)
+    def auto_fit_frame(self,method,ref):
+        idx = self.auto_select_bgwin(method,ref)
+        k,m = np.polyfit(self.frame.group.lmbd[idx],self.frame.data.transpose()[idx,:],1)
         return {"k":k,"m":m}
             
-    def auto_select_bgwin(self,method, npoint=100,q=50):
-        data = self.frame.ref
-
-        if   metod == "top 100":
+    def auto_select_bgwin(self,method,data, npoint=100,q=50):
+        if   method == "top 100":
             return top_number(data,100)
-        elif metod == "top 5%":
+        elif method == "top 5%":
             return top_number(data,round(len(data)*0.05))
-        elif metod == "top 20":
+        elif method == "top 20":
             return top_number(data,round(len(data)*0.1))
-        elif metod == "90-95 decile":
+        elif method == "90-95 decile":
             t5  = top_number(data,round(len(data)*0.05))[-1]
             t10 = top_number(data,round(len(data)*0.1))
             return t10[ t10 >= t5 ]
-        elif metod == "segments":
+        elif method == "segments":
             return top_of_segments(data,npoint,q)
 
+class refcontinua(continua):
+    
+    def __init__(self,group,method,ref):
+        self.group = group
+        self.fit   = self.auto_fit_frame(method,ref)
+
+    def norm(self):
+        return self.fit["k"]*self.group.lmbd + self.fit["m"]
+
+    def auto_fit_frame(self,method,ref):
+        idx = self.auto_select_bgwin(method,ref)
+        k,m = np.polyfit(self.group.lmbd[idx],ref[idx],1)
+        return {"k":k,"m":m}
