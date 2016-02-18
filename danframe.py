@@ -1,8 +1,100 @@
+import pyfits as fits
+import kontin as con
 import numpy as np
-import pyfits as f
+import glob as g
 import os
 
+class frameseries(object):
+    __lmbdname = "{}_{}__lambda.fits"
+    __refname  = "{}_{}__adjustfts.fits"
+    __savename = "{}_{}__metadata"
+
+    def __init__(self,fileglob,method):
+        self.__parse_fileglob(fileglob)
+        self.lmbd  = self.__load_from_fits(self.Dir+self.__lmbdname)
+        self.files = g.glob(self.glob) ; self.files.sort()
+        tmpref     = self.__load_from_fits(self.Dir+self.__refname)
+        self.ref   = tmpref/con.refcontinua(self,method,tmpref).norm() 
+        self.frames = []
+        for fil in self.files:
+            self.frames.append(
+                danframe(fil,self,method))
+
+
+    def __parse_fileglob(self,fileglob):
+        self.glob = fileglob +"_[1-9]*" 
+        if fileglob.find("/") > 0:
+            self.Dir  = "/".join(fileglob.split("/")[:-1])+"/"  # everything before the last '/'
+        else:
+            self.Dir  = ""
+        filename    = self.glob.split("/")[-1]
+        self.series = filename.split("_")[1]
+        self.wave   = filename.split("_")[0]
+
+    def __load_from_fits(self,filename,hdu=0):
+        fits = f.open(filename.format(self.wave,self.series))
+        return fits[hdu].data
+
+    def set_bgwindows(self,bgwindows,warn=True):
+        if len(self.bgwindows) > 0 and warn :
+            print "WARNING: Old values will be erased"
+            if not raw_input("Continue Y/N? ").lower() == "y":
+                return None
+        self.__set_windows(bgwindows,"bgwin")
+        self.__load_bgwindows()
+
+    def set_pkwindows(self,pkwindows,warn=True):
+        if len(self.pkwindows) > 0 and warn :
+            print "WARNING: Old values will be erased"
+            if not raw_input("Continue Y/N? ").lower() == "y":
+                return None
+        self.__set_windows(pkwindows,"peakwin")
+        self.__load_pkwindows()
+
+    def __set_windows(self,windows,keyword):
+        windows.sort() # For nicer order
+        with open(self.__savename.format(self.wave,self.series),"r+b") as metafile:
+            try:
+                meta =  cPickle.load(metafile)
+            except EOFError:
+                meta = {}
+        meta[keyword] = windows
+        with open(self.__savename.format(self.wave,self.series),"wb") as metafile:
+            cPickle.dump(meta,metafile,protocol=1)
+
+    def __load_bgwindows(self):
+        self.bgwindows = self.__load_windows("bgwin")
+
+    def __load_pkwindows(self):
+        self.pkwindows = self.__load_windows("peakwin")
+
+    def __load_windows(self,keyword):
+        with open(self.__savename.format(self.wave,self.series),"r+b") as metafile:
+            try:
+                meta =  cPickle.load(metafile)
+            except EOFError:
+                return []
+        return meta[keyword]
+
 class danframe(object):
+    def __init__(self,filename,group,method):
+        self.fits   = fits.open(filename,mode="update")
+        self.name   = filename.split("/")[-1]
+        self.group  = group
+        self.data   = self.fits[0].data 
+        self.data   = self.data / con.continua(self,method).norm()
+        self.header = self.fits[0].header
+    def spec(self,row):
+        return self.data[row,:]
+
+    def col(self,col):
+        return self.data[:,col]
+
+    def specplot(self,yval):
+        pl.plot(self.lmbd,yval)
+        pl.show()
+
+class danframe_sac(object):
     __meanname = "{}_{}__adjustspec.fits"
     __lmbdname = "{}_{}__lambda.fits"
     __refname  = "{}_{}__adjustfts.fits"
