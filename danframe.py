@@ -1,5 +1,6 @@
 import pyfits as fits
 import kontin as con
+import cPickle as pic
 import numpy as np
 import glob as g
 import os
@@ -15,6 +16,12 @@ class frameseries(object):
         self.files = g.glob(self.glob) ; self.files.sort()
         tmpref     = self.__load_from_fits(self.Dir+self.__refname)
         self.ref   = tmpref/con.refcontinua(self,method,tmpref).norm() 
+        self.meta  = self.__load_meta()
+        try:
+            self.pkwindows = self.meta["peakwin"] 
+        except KeyError:
+            self.pkwindows = []
+
         self.frames = []
         for fil in self.files:
             self.frames.append(
@@ -32,15 +39,16 @@ class frameseries(object):
         self.wave   = filename.split("_")[0]
 
     def __load_from_fits(self,filename,hdu=0):
-        fits = f.open(filename.format(self.wave,self.series))
-        return fits[hdu].data
+        fit = fits.open(filename.format(self.wave,self.series))
+        return fit[hdu].data
 
     def set_bgwindows(self,bgwindows,warn=True):
         if len(self.bgwindows) > 0 and warn :
             print "WARNING: Old values will be erased"
             if not raw_input("Continue Y/N? ").lower() == "y":
                 return None
-        self.__set_windows(bgwindows,"bgwin")
+        bgwindows.sort()
+        self.__set_meta(bgwindows,"bgwin")
         self.__load_bgwindows()
 
     def set_pkwindows(self,pkwindows,warn=True):
@@ -48,33 +56,37 @@ class frameseries(object):
             print "WARNING: Old values will be erased"
             if not raw_input("Continue Y/N? ").lower() == "y":
                 return None
-        self.__set_windows(pkwindows,"peakwin")
-        self.__load_pkwindows()
+        pkwindows.sort()
+        self.__set_meta(pkwindows,"peakwin")
+        self.pkwindows =self.__load_meta("peakwin")
 
-    def __set_windows(self,windows,keyword):
-        windows.sort() # For nicer order
-        with open(self.__savename.format(self.wave,self.series),"r+b") as metafile:
+    def __set_meta(self,metadata,keyword=""):
+        with open(self.Dir+self.__savename.format(self.wave,self.series),"r+b") as metafile:
             try:
-                meta =  cPickle.load(metafile)
+                meta =  pic.load(metafile)
             except EOFError:
                 meta = {}
-        meta[keyword] = windows
-        with open(self.__savename.format(self.wave,self.series),"wb") as metafile:
-            cPickle.dump(meta,metafile,protocol=1)
+        if keyword != "":
+            meta[keyword] = metadata
+        else:
+            meta = metadata
+        with open(self.Dir+self.__savename.format(self.wave,self.series),"wb") as metafile:
+            pic.dump(meta,metafile,protocol=1)
 
-    def __load_bgwindows(self):
-        self.bgwindows = self.__load_windows("bgwin")
-
-    def __load_pkwindows(self):
-        self.pkwindows = self.__load_windows("peakwin")
-
-    def __load_windows(self,keyword):
-        with open(self.__savename.format(self.wave,self.series),"r+b") as metafile:
-            try:
-                meta =  cPickle.load(metafile)
-            except EOFError:
-                return []
-        return meta[keyword]
+    def __load_meta(self,keyword=""):
+        try:        
+            with open(self.Dir+self.__savename.format(self.wave,self.series),"r+b") as metafile:
+                meta =  pic.load(metafile)
+        except EOFError:
+            return {}
+        except IOError:
+            fil = open(self.Dir+self.__savename.format(self.wave,self.series),"w")
+            fil.close()
+            return {}
+        if keyword == "":
+            return meta
+        else:
+            return meta[keyword]
 
 class danframe(object):
     def __init__(self,filename,group,method):
@@ -106,7 +118,7 @@ class danframe_sac(object):
         else:
             self.Dir  = ""
 
-        self.fits   = f.open(self.Dir+self.filename,mode="update")
+        self.fits   = fits.open(self.Dir+self.filename,mode="update")
         self.data   = self.fits[0].data
         self.header = self.fits[0].header
         self.series = self.filename.split("_")[1]
@@ -124,8 +136,8 @@ class danframe_sac(object):
             self.pkwindows  = []
 
     def __load_from_fits(self,filename,hdu=0):
-        fits = f.open(self.Dir+filename.format(self.wave,self.series))
-        return fits[hdu].data
+        fit = fits.open(self.Dir+filename.format(self.wave,self.series))
+        return fit[hdu].data
 
     def spec(self,row):
         return self.data[row,:]
