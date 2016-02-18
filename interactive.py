@@ -39,14 +39,14 @@ a - add point to window, after two points have been indicated a new window is de
             windows.append(window)
             window=[]
 
-def manual_delete_minima(mins,line):
+def manual_delete_minima(mins,group):
     outlist = list(mins)
     for itm in mins:
         idx = list(itm)
         fig = pl.figure()
         ax  = fig.add_subplot(111)
-        ax.plot(line.lmbd,line.ref)
-        ax.plot(line.lmbd[idx],line.ref[idx],'ro-')
+        ax.plot(group.lmbd,group.ref)
+        ax.plot(group.lmbd[idx],group.ref[idx],'ro-')
         axis = wdg.AxesWidget(ax)
         axis.connect_event("key_press_event",lambda x: __minima_delete(outlist,itm,x))
         pl.show()
