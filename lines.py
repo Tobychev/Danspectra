@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import danspec as dan
 import interactive as intr
+import collections as col
 
 def make_pkwin_from_linegroup(lines):
     pkwin = [] 
@@ -33,6 +34,10 @@ def get_linecore(a,b,c):
     lam_min = -b/(2*a)
     lin_bot = np.polyval((a,b,c),lam_min)
     return lam_min,lin_bot
+
+line_core_indices = col.namedtuple("Line_core_indices",["lcen","lbot","cont"])
+lc = line_core_indices(0,1,2)
+
 
 class line(object):
     def __init__(self,winbounds,group):
@@ -86,20 +91,22 @@ class line(object):
                 lines.append(line( (line.idx[ li[0]] ,line.idx[li[2]]),group ))
 
             return lines
-
         else:
             return line
     
     def measure_linecores(self,group):
         nrows = group.frames[0].data.shape[0]
-        out   = np.zeros((len(group.frames)*2,nrows))
-        for i,frame in enumerate(group.frames):
+        out   = np.zeros((len(group.frames)*3,nrows))
+        i = 0
+        for frame in group.frames:
             guess   = group.ref[self.idx].argmin()
             bottom  = self.idx[guess-4:guess+5]   
             a,b,c   = np.polyfit(group.lmbd[bottom],frame.data.T[bottom,:],2)
             lam_min = -b/(2*a)
             lin_bot = np.polyval((a,b,c),lam_min)
-            out[2*i,:]  = lam_min
-            out[2*i+1:] = lin_bot
+            out[i,:]  = lam_min
+            out[i+1:] = lin_bot
+            out[i+2:] = frame.cont.val(lam_min) 
+            i +=3
         return out
 
