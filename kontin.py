@@ -95,11 +95,14 @@ def save_bgwin_from_idx(danframe,idx):
 class continua(object):
     def __init__(self,danframe,method):
         self.frame = danframe
-        self.fit   = self.auto_fit_frame(method,self.frame.group.ref)
+        self.fit   = self.auto_fit_frame(method,danframe.group.ref)
 
     def norm(self):
         dim = len(self.fit["m"])
         return np.outer(self.fit["k"],self.frame.group.lmbd)+ self.fit["m"].reshape((dim,1))
+
+    def val(self,lam):
+        return self.fit["k"]*lam+ self.fit["m"]
 
     def __top_number(self,data,number):
         idx = np.argpartition(data,-number)[-number:]
@@ -137,9 +140,9 @@ class continua(object):
             return t10[ t10 >= t5 ]
         elif method == "segments":
             return top_of_segments(data,npoint,q)
-
+  
+  
 class refcontinua(continua):
-    
     def __init__(self,group,method,ref):
         self.group = group
         self.fit   = self.auto_fit_frame(method,ref)
