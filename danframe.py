@@ -12,11 +12,10 @@ class frameseries(object):
 
     def __init__(self,fileglob,method):
         self.__parse_fileglob(fileglob)
+        self.meta  = self.__load_meta()
+        self.ref   = self.__load_from_fits(self.Dir+self.__refname)
         self.lmbd  = self.__load_from_fits(self.Dir+self.__lmbdname)
         self.files = g.glob(self.glob) ; self.files.sort()
-        tmpref     = self.__load_from_fits(self.Dir+self.__refname)
-        self.ref   = tmpref/con.refcontinua(self,method,tmpref).norm() 
-        self.meta  = self.__load_meta()
         try:
             self.pkwindows = self.meta["peakwin"] 
         except KeyError:
@@ -26,7 +25,6 @@ class frameseries(object):
         for fil in self.files:
             self.frames.append(
                 danframe(fil,self,method))
-
 
     def __parse_fileglob(self,fileglob):
         self.glob = fileglob +"_[1-9]*" 
@@ -88,14 +86,16 @@ class frameseries(object):
         else:
             return meta[keyword]
 
+
 class danframe(object):
     def __init__(self,filename,group,method):
         self.fits   = fits.open(filename,mode="update")
         self.name   = filename.split("/")[-1]
         self.group  = group
         self.data   = self.fits[0].data 
-        self.data   = self.data / con.continua(self,method).norm()
         self.header = self.fits[0].header
+        self.cont   = con.continua(self,method)
+
     def spec(self,row):
         return self.data[row,:]
 
@@ -194,4 +194,3 @@ class danframe_sac(object):
             window.append(self.header.get(keyword(str(i)+"H")))
             windows.append(window)
         return windows
-
