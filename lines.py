@@ -11,10 +11,10 @@ def make_pkwin_from_linegroup(lines):
 
     return pkwin
 
-def make_lines_from_wins(danspec_sac,wins):
+def make_lines_from_wins(frameseries,wins):
     lines = []
     for item in wins:
-        lines.append(line(item,danspec_sac))
+        lines.append(line(item,frameseries))
 
     return lines
 
