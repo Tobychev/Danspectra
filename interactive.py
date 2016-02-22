@@ -1,5 +1,6 @@
 import matplotlib.pyplot as pl
 import matplotlib.widgets as wdg 
+import lines as lin
 
 window  = []
 windows = []
@@ -67,3 +68,21 @@ k - keep this minima
     elif event.key == "k":
         print "Minima {} saved".format(item)
         pl.close()
+
+
+def select_linecore(measurement):
+    fig = pl.figure()
+    ax  = fig.add_subplot(1,2,1)
+    ax.plot(measurement[lin.lc.cont,:],measurement[lin.lc.lbot,:],'ro',alpha=0.1,picker=5)
+    ax.set_title("Line bottom vs Continua")
+    ax2  = fig.add_subplot(1,2,2)
+    ax2.plot(measurement[lin.lc.cont,:],measurement[lin.lc.lcen,:],'ro',alpha=0.1,picker=5)
+    ax.set_title("Line centre vs Continua")
+    fig.canvas.mpl_connect("pick_event",__onpick)
+    pl.show()
+
+def __onpick(event):
+    curve = event.artist
+    xs, ys = curve.get_xdata(),curve.get_ydata()
+    idx = event.ind
+    print event.ind, xs[idx],ys[idx]
