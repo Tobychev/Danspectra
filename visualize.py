@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 import matplotlib.cm as cm
+import lines as lin
 
 def get_colours(num,colour_name="Oranges"):
     return iter(cm.__dict__[colour_name](np.linspace(0,1,num)))
@@ -78,3 +79,8 @@ def plot_fits_stats(data,ref,names,title="",bins=43,cols=2,yscale="linear",cutof
     pl.tight_layout()
     pl.show()
 
+def show_contfit(frame,line):
+    xs  = frame.group.lmbd
+    ys  = frame.spec(line)
+    fit = (frame.cont.fit["k"][line],frame.cont.fit["m"][line])
+    show_fit_on_curve(fit,xs,ys)
