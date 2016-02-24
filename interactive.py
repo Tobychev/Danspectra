@@ -77,7 +77,7 @@ def select_linecore(measurement):
     ax.set_title("Line bottom vs Continua")
     ax2  = fig.add_subplot(1,2,2)
     ax2.plot(measurement[lin.lc.cont,:],measurement[lin.lc.lcen,:],'ro',alpha=0.1,picker=5)
-    ax.set_title("Line centre vs Continua")
+    ax2.set_title("Line centre vs Continua")
     fig.canvas.mpl_connect("pick_event",__onpick)
     pl.show()
 
