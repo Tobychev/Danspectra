@@ -2,7 +2,7 @@ import matplotlib.pyplot as pl
 import numpy as np
 
 def frame_fit(frame,idx):
-   return np.polyfit(frame.lmbd[idx],frame.data.transpose()[idx,:],1)
+    return np.polyfit(frame.lmbd[idx],frame.data.transpose()[idx,:],1)
 
 def frame_subtract_cont(frame,idx):
     fits = frame_fit(frame,idx)
