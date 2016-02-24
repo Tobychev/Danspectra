@@ -50,7 +50,7 @@ class line(object):
     
     def __trim_line_indices(self,winbounds,ref):
         # Trims out values above one
-        idx = range(winbounds[0],winbounds[1]+1)
+        idx = np.arange(winbounds[0],winbounds[1]+1)
         tmp = np.where(ref[idx] > 1)[0]
         cut = np.where(np.diff(tmp) > 1)[0] 
         if len(tmp) <  2:
@@ -82,6 +82,18 @@ class line(object):
         else:
             return False
 
+    def __select_bottom(self,spectra,cent):
+        shift = np.arange(-3,4)
+        bot = self.idx[cent+shift]
+        for i in range(1,20):
+            mn = spectra[bot].argmin()
+            cent = cent + shift[mn]
+            bot = self.idx[cent+shift]     
+            if not shift[mn]:
+                return bot
+
+        raise Exception("Did not converge")        
+
     def subdivide_line(self, group):
         mins = self.__find_minima(group.ref[self.idx])
         if len(mins) > 1:
@@ -104,9 +116,25 @@ class line(object):
             a,b,c   = np.polyfit(group.lmbd[bottom],frame.data.T[bottom,:],2)
             lam_min = -b/(2*a)
             lin_bot = np.polyval((a,b,c),lam_min)
-            out[i,:]  = lam_min
-            out[i+1:] = lin_bot
-            out[i+2:] = frame.cont.val(lam_min) 
+            out[i,:]   = lam_min
+            out[i+1,:] = lin_bot
+            out[i+2,:] = frame.cont.val(lam_min) 
             i +=3
         return out
 
+    def byline_measure_linecores(self,group):
+        nrows = group.frames[0].data.shape[0]
+        out   = np.zeros((len(group.frames)*3,nrows))
+        i = 0
+        for frame in group.frames:
+            for row in range(0,frame.data.shape[0]):
+                cent = spectra[line.idx].argmin()
+                bottom = line.idx[cent+np.arange(-3,4)]
+                a,b,c   = np.polyfit(group.lmbd[bottom],frame.data[row,bottom],2)
+                lam_min = -b/(2*a)
+                lin_bot = np.polyval((a,b,c),lam_min)
+                out[i,row]  = lam_min
+                out[i+1,row] = lin_bot
+                out[i+2,row] = frame.cont.val(lam_min)[row]
+            i +=3
+        return out
