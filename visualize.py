@@ -84,3 +84,23 @@ def show_contfit(frame,line):
     ys  = frame.spec(line)
     fit = (frame.cont.fit["k"][line],frame.cont.fit["m"][line])
     show_fit_on_curve(fit,xs,ys)
+
+def show_line_and_corefit(line,frame,row,width=3,fast=True):
+    spe     = frame.data[row,:]
+    ref,lmd = frame.group.ref,frame.group.lmbd
+    if fast:
+        guess   = frame.group.ref[line.idx].argmin()
+        bottom  = line.idx[slice(guess-4,guess+5)]
+    else:
+        guess   = spe[line.idx].argmin()
+        bottom  = line.idx[guess+np.arange(-width,width+1)]
+    a,b,c   = np.polyfit(lmd[bottom],spe[bottom],2)
+    fit     = np.polyval((a,b,c),lmd[line.idx]); 
+    idfit = line.idx[fit < 1.05]
+    fit   = fit[fit < 1.05]
+
+    pl.plot(lmd[line.idx],spe[line.idx],'b')
+    pl.plot(lmd[bottom],spe[bottom],'*k')
+    pl.plot(lmd[idfit],fit,'r')
+
+    pl.show()
