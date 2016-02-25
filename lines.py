@@ -128,12 +128,12 @@ class line(object):
         i = 0
         for frame in group.frames:
             for row in range(0,frame.data.shape[0]):
-                cent = spectra[line.idx].argmin()
-                bottom = line.idx[cent+np.arange(-3,4)]
+                cent    = frame.data[row,self.idx].argmin()
+                bottom  = self.idx[cent+np.arange(-3,4)]
                 a,b,c   = np.polyfit(group.lmbd[bottom],frame.data[row,bottom],2)
                 lam_min = -b/(2*a)
                 lin_bot = np.polyval((a,b,c),lam_min)
-                out[i,row]  = lam_min
+                out[i,row]   = lam_min
                 out[i+1,row] = lin_bot
                 out[i+2,row] = frame.cont.val(lam_min)[row]
             i +=3
