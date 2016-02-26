@@ -143,14 +143,14 @@ class continua(object):
   
   
 class refcontinua(continua):
-    def __init__(self,group,method,ref):
+    def __init__(self,group,method):
         self.group = group
-        self.fit   = self.auto_fit_frame(method,ref)
+        self.fit   = self.auto_fit_frame(method)
 
-    def norm(self):
+    def cont(self):
         return self.fit["k"]*self.group.lmbd + self.fit["m"]
 
-    def auto_fit_frame(self,method,ref):
-        idx = self.auto_select_bgwin(method,ref)
-        k,m = np.polyfit(self.group.lmbd[idx],ref[idx],1)
+    def auto_fit_frame(self,method):
+        idx = self.auto_select_bgwin(method,self.group.ref)
+        k,m = np.polyfit(self.group.lmbd[idx],self.group.ref[idx],1)
         return {"k":k,"m":m}

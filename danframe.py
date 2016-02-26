@@ -16,6 +16,9 @@ class frameseries(object):
         self.ref   = self.__load_from_fits(self.Dir+self.__refname)
         self.lmbd  = self.__load_from_fits(self.Dir+self.__lmbdname)
         self.files = g.glob(self.glob) ; self.files.sort()
+        self.refcon = con.refcontinua(self,method)
+        self.ref   = self.ref/self.refcon.cont()
+
         try:
             self.pkwindows = self.meta["peakwin"] 
         except KeyError:
