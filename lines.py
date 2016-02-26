@@ -24,12 +24,6 @@ def fit_linecores(line,xs,ys):
     a,b,c = np.polyfit(xs[bottom],ys.T[bottom,:],2)
     return get_linecore(a,b,c) 
 
-def fit_linecore(line,xs,ys):
-    guess = line.ref.argmin()
-    bottom = line.idx[guess-4:guess+5]
-    a,b,c = np.polyfit(xs[bottom],ys[bottom],2)
-    return get_linecore(a,b,c)    
-
 def get_linecore(a,b,c):
     lam_min = -b/(2*a)
     lin_bot = np.polyval((a,b,c),lam_min)
@@ -42,12 +36,20 @@ lc = line_core_indices(0,1,2)
 class line(object):
     def __init__(self,winbounds,group):
         self.idx  = self.__trim_line_indices(winbounds,group.ref)
-        self.win  = (self.idx[0], self.idx[-1])       
-        self.name = str(group.lmbd[self.idx].mean())
+        self.win  = (self.idx[0], self.idx[-1])
+        self.cent = self.__get_refcentre(group)
+        self.name = "{:6.3f}".format(self.cent)
 
     def __repr__(self):
         return "Line {} [{} to {}]".format(self.name,self.idx[0],self.idx[-1])
-    
+
+    def __get_refcentre(self,group):
+        bot   = slice(group.ref[slice(self.win[0],self.win[1])].argmin()-3,group.ref[slice(self.win[0],self.win[1])].argmin()+4)
+        a,b,c = np.polyfit(group.lmbd[bot],group.ref[bot],2)
+        return -b/(2*a)
+
+
+
     def __trim_line_indices(self,winbounds,ref):
         # Trims out values above one
         idx = np.arange(winbounds[0],winbounds[1]+1)
