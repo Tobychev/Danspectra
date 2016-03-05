@@ -19,6 +19,8 @@ myst = lins[3]
 
 frm = s6405_t5p.frames[0]
 
+frm.data = frm.data/frm.cont.norm()
+
 spec = frm.data[331,:]
 lam  = frm.group.lmbd
 
