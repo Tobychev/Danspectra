@@ -70,14 +70,10 @@ k - keep this minima
         pl.close()
 
 
-def select_linecore(measurement):
+def pick_extrema_scatteplot(xs,ys):
     fig = pl.figure()
-    ax  = fig.add_subplot(1,2,1)
-    ax.plot(measurement[lin.lc.cont,:],measurement[lin.lc.lbot,:],'ro',alpha=0.1,picker=5)
-    ax.set_title("Line bottom vs Continua")
-    ax2  = fig.add_subplot(1,2,2)
-    ax2.plot(measurement[lin.lc.cont,:],measurement[lin.lc.lcen,:],'ro',alpha=0.1,picker=5)
-    ax2.set_title("Line centre vs Continua")
+    ax  = fig.add_subplot(1,1,1)
+    ax.plot(xs,ys,'ro',alpha=0.1,picker=5)
     fig.canvas.mpl_connect("pick_event",__onpick)
     pl.show()
 
