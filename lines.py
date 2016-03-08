@@ -1,8 +1,12 @@
+#encoding: utf-8
 import numpy as np
-import scipy as sp
+import scipy.signal as ss
 import danspec as dan
 import interactive as intr
 import collections as col
+import numpy.polynomial.polynomial as pol
+
+cv = 299792.458
 
 def make_pkwin_from_linegroup(lines):
     pkwin = [] 
@@ -29,26 +33,32 @@ def get_linecore(a,b,c):
     lin_bot = np.polyval((a,b,c),lam_min)
     return lam_min,lin_bot
 
-line_core_indices = col.namedtuple("Line_core_indices",["lcen","lbot","cont"])
-lc = line_core_indices(0,1,2)
+line_core_indices = col.namedtuple("Line_core_indices",["lcen","lbot","cont","Errs","EW","EWcont"])
+lc = line_core_indices(0,1,2,3,0,1)
+
+def smooth(data,method):
+    if   method == "boxcar":
+        return np.convolve(data,np.array([1,1,1,1])/4.,"valid")
+    elif method == "savgol":
+        return ss.savgol_filter(data,5,3)
+    return data
 
 
 class line(object):
-    def __init__(self,winbounds,group):
+    def __init__(self,winbounds,group,weak=False):
         self.idx  = self.__trim_line_indices(winbounds,group.ref)
         self.win  = (self.idx[0], self.idx[-1])
         self.cent = self.__get_refcentre(group)
         self.name = "{:6.3f}".format(self.cent)
+        self.weak = weak
 
     def __repr__(self):
         return "Line {} [{} to {}]".format(self.name,self.idx[0],self.idx[-1])
 
     def __get_refcentre(self,group):
         bot   = slice(group.ref[slice(self.win[0],self.win[1])].argmin()-3,group.ref[slice(self.win[0],self.win[1])].argmin()+4)
-        a,b,c = np.polyfit(group.lmbd[bot],group.ref[bot],2)
+        a,b,c = np.polyfit(group.lmbd[self.idx[bot]],group.ref[self.idx[bot]],2)
         return -b/(2*a)
-
-
 
     def __trim_line_indices(self,winbounds,ref):
         # Trims out values above one
@@ -110,33 +120,40 @@ class line(object):
     
     def measure_linecores(self,group):
         nrows = group.frames[0].data.shape[0]
-        out   = np.zeros((len(group.frames)*3,nrows))
+        out   = np.zeros((len(group.frames)*4,nrows))
+        guess   = group.ref[self.idx].argmin()
+        width = len(self.idx)*0.16 # Min fraction of points to be used in fit
+        if width%2 == 0:
+            width +=1
+        dwn = int(width - 1)/2; up = dwn+1
+        bottom  = self.idx[guess + np.arange(-dwn,up)]   
+        test    = self.idx[guess + np.arange(-(dwn+1),(up+1))]
         i = 0
         for frame in group.frames:
-            guess   = group.ref[self.idx].argmin()
-            bottom  = self.idx[guess-4:guess+5]   
-            a,b,c   = np.polyfit(group.lmbd[bottom],frame.data.T[bottom,:],2)
+            fit     = pol.polyfit(group.lmbd[bottom],frame.data[:,bottom].T,2)
+            a,b,c   = fit[2,:],fit[1,:],fit[0,:]
             lam_min = -b/(2*a)
-            lin_bot = np.polyval((a,b,c),lam_min)
-            out[i,:]   = lam_min
+            lin_bot = pol.polyval(lam_min,fit,tensor=False)
+            pred    = pol.polyval(group.lmbd[test],fit)
+
+            out[i,:]   = cv*(lam_min-self.cent)/self.cent
             out[i+1,:] = lin_bot
             out[i+2,:] = frame.cont.val(lam_min) 
-            i +=3
+            # Extra error term to penalize fits that gets wildly off center, with extra weight so it *hurts*
+            out[i+3,:] = np.sqrt( np.mean( (frame.data[:,test]-pred)**2,axis=1) + 2*(lam_min-self.cent)**2 )
+
+            i +=4
         return out
 
-    def byline_measure_linecores(self,group):
+    def measure_EW(self,group):
         nrows = group.frames[0].data.shape[0]
-        out   = np.zeros((len(group.frames)*3,nrows))
+        out   = np.zeros((len(group.frames)*2,nrows))        
         i = 0
         for frame in group.frames:
-            for row in range(0,frame.data.shape[0]):
-                cent    = frame.data[row,self.idx].argmin()
-                bottom  = self.idx[cent+np.arange(-3,4)]
-                a,b,c   = np.polyfit(group.lmbd[bottom],frame.data[row,bottom],2)
-                lam_min = -b/(2*a)
-                lin_bot = np.polyval((a,b,c),lam_min)
-                out[i,row]   = lam_min
-                out[i+1,row] = lin_bot
-                out[i+2,row] = frame.cont.val(lam_min)[row]
-            i +=3
+            dlam = np.diff(group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]).reshape((-1,1))*np.ones(nrows)
+            out[i,:]   = ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
+            out[i+1,:] = frame.cont.val(self.cent) 
+
+            i +=2
         return out
+
