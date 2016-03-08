@@ -14,6 +14,7 @@ if False:
     pl.step(ecdf3.x, ecdf3.y)
     pl.show()
 
+line = SiFe
 dpdf1 = (1-spec[line.idx])/np.sum(1-spec[line.idx])
 dpdf2 = (1-spec2[line.idx])/np.sum(1-spec2[line.idx])
 dpdf3 = (1-spec3[line.idx])/np.sum(1-spec3[line.idx])
