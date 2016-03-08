@@ -10,14 +10,17 @@ class frameseries(object):
     __refname  = "{}_{}__adjustfts.fits"
     __savename = "{}_{}__metadata"
 
-    def __init__(self,fileglob,method):
+    def __init__(self,fileglob,method,rows=800):
         self.__parse_fileglob(fileglob)
         self.meta  = self.__load_meta()
         self.ref   = self.__load_from_fits(self.Dir+self.__refname)
         self.lmbd  = self.__load_from_fits(self.Dir+self.__lmbdname)
         self.files = g.glob(self.glob) ; self.files.sort()
+        self.rows  = range(0,rows)
         self.refcon = con.refcontinua(self,method)
         self.ref   = self.ref/self.refcon.cont()
+
+        self.veto_rows([0,799])
 
         try:
             self.pkwindows = self.meta["peakwin"] 
@@ -42,6 +45,25 @@ class frameseries(object):
     def __load_from_fits(self,filename,hdu=0):
         fit = fits.open(filename.format(self.wave,self.series))
         return fit[hdu].data
+
+    def normalize(self):
+        for frame in self.frames:
+            frame.data = frame.data/frame.cont.norm()
+
+    def veto_rows(self,rows):
+        if not isinstance(rows,list):
+            rows = [rows]
+        for itm in rows:
+            try:
+                self.rows.remove(itm)
+            except ValueError:
+                print "Row {} not found".format(itm)
+
+    def veto_and_update_rows(rows):
+        if len(rows) > 0:
+            self.veto_rows(rows)
+        for frm in self.frames:
+            frm.update_veto()            
 
     def set_bgwindows(self,bgwindows,warn=True):
         if len(self.bgwindows) > 0 and warn :
@@ -95,9 +117,14 @@ class danframe(object):
         self.fits   = fits.open(filename,mode="update")
         self.name   = filename.split("/")[-1]
         self.group  = group
-        self.data   = self.fits[0].data 
+        self.rdata  = self.fits[0].data 
+        self.data   = self.rdata[self.group.rows,:]
         self.header = self.fits[0].header
         self.cont   = con.continua(self,method)
+        #print "Frame {} has dimensions {}".format(self.name,self.rdata.shape)
+
+    def update_veto(self):
+        self.data   = self.rdata[self.group.cols,:]
 
     def spec(self,row):
         return self.data[row,:]
