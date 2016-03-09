@@ -1,7 +1,7 @@
 #encoding: utf-8
 import numpy as np
 import scipy.signal as ss
-import danspec as dan
+import danframe as dan
 import interactive as intr
 import collections as col
 import numpy.polynomial.polynomial as pol
@@ -125,7 +125,7 @@ class line(object):
         width = len(self.idx)*0.16 # Min fraction of points to be used in fit
         if width%2 == 0:
             width +=1
-        dwn = int(width - 1)/2; up = dwn+1
+        dwn = int((width - 1)/2); up = dwn+1
         bottom  = self.idx[guess + np.arange(-dwn,up)]   
         test    = self.idx[guess + np.arange(-(dwn+1),(up+1))]
         i = 0

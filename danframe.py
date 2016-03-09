@@ -1,6 +1,6 @@
-import pyfits as fits
+import astropy.io.fits as fits
 import kontin as con
-import cPickle as pic
+import pickle as pic
 import numpy as np
 import glob as g
 import os
