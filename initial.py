@@ -1,17 +1,18 @@
 import matplotlib.pyplot as pl
-import kontin as con
+from . import kontin as con
 import numpy as np
-import danframe as dan
-import testwin as tw
-import visualize as vis
-import lines as lin
-import interactive as intr
-reload(dan)
-reload(tw)
-reload(con)
-reload(lin)
-reload(vis)
-reload(intr)
+from . import danframe as dan
+from . import testwin as tw
+from . import visualize as vis
+from . import lines as lin
+from . import interactive as intr
+import imp
+imp.reload(dan)
+imp.reload(tw)
+imp.reload(con)
+imp.reload(lin)
+imp.reload(vis)
+imp.reload(intr)
 
 def find_nearest(array,value):
     return (np.abs(array-value)).argmin()
@@ -36,5 +37,6 @@ l1 = lines[2]
 #con6405 = con.continua(spec2)
 
 fil = "local_data/6405_aS1"
-spec2 = dan.frameseries(fil,"top 5%")
+spec6405 = dan.frameseries(fil,"top 5%")
 
+l6407 = l1.measure_linecores(spec6405)

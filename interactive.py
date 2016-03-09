@@ -1,12 +1,12 @@
 import matplotlib.pyplot as pl
 import matplotlib.widgets as wdg 
-import lines as lin
+from . import lines as lin
 
 window  = []
 windows = []
 def select_manual_windows(danspec):
         global windows
-        print "Selecting windows"
+        print("Selecting windows")
 
         windows = []
         fig = pl.figure()
@@ -23,12 +23,12 @@ def select_manual_windows(danspec):
 def __bg_window_select(event):
     global window, windows
     if event.key == "?":
-        print """ 
+        print(""" 
 a - add point to window, after two points have been indicated a new window is defined
-"""            
+""")            
     elif event.key == "a":
         pos = int(round(event.xdata))
-        print "adding ", pos
+        print("adding ", pos)
         if len(window) == 0:
             window.append(pos)
         elif len(window) == 1:
@@ -57,16 +57,16 @@ def manual_delete_minima(mins,group):
 
 def __minima_delete(minlist,item,event):
     if event.key == "?":
-        print """
+        print("""
 d - delete this minima
 k - keep this minima
-"""
+""")
     elif event.key == "d":
         minlist.remove(item)
-        print "Minima {} removed".format(item)
+        print("Minima {} removed".format(item))
         pl.close()
     elif event.key == "k":
-        print "Minima {} saved".format(item)
+        print("Minima {} saved".format(item))
         pl.close()
 
 
@@ -81,4 +81,4 @@ def __onpick(event):
     curve = event.artist
     xs, ys = curve.get_xdata(),curve.get_ydata()
     idx = event.ind
-    print event.ind, xs[idx],ys[idx]
+    print(event.ind, xs[idx],ys[idx])

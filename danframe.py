@@ -1,6 +1,6 @@
-import pyfits as fits
-import kontin as con
-import cPickle as pic
+import astropy.io.fits as fits
+from . import kontin as con
+import pickle as pic
 import numpy as np
 import glob as g
 import os
@@ -16,7 +16,7 @@ class frameseries(object):
         self.ref   = self.__load_from_fits(self.Dir+self.__refname)
         self.lmbd  = self.__load_from_fits(self.Dir+self.__lmbdname)
         self.files = g.glob(self.glob) ; self.files.sort()
-        self.rows  = range(0,rows)
+        self.rows  = list(range(0,rows))
         self.refcon = con.refcontinua(self,method)
         self.ref   = self.ref/self.refcon.cont()
 
@@ -57,7 +57,7 @@ class frameseries(object):
             try:
                 self.rows.remove(itm)
             except ValueError:
-                print "Row {} not found".format(itm)
+                print("Row {} not found".format(itm))
 
     def veto_and_update_rows(rows):
         if len(rows) > 0:
@@ -67,8 +67,8 @@ class frameseries(object):
 
     def set_bgwindows(self,bgwindows,warn=True):
         if len(self.bgwindows) > 0 and warn :
-            print "WARNING: Old values will be erased"
-            if not raw_input("Continue Y/N? ").lower() == "y":
+            print("WARNING: Old values will be erased")
+            if not input("Continue Y/N? ").lower() == "y":
                 return None
         bgwindows.sort()
         self.__set_meta(bgwindows,"bgwin")
@@ -76,8 +76,8 @@ class frameseries(object):
 
     def set_pkwindows(self,pkwindows,warn=True):
         if len(self.pkwindows) > 0 and warn :
-            print "WARNING: Old values will be erased"
-            if not raw_input("Continue Y/N? ").lower() == "y":
+            print("WARNING: Old values will be erased")
+            if not input("Continue Y/N? ").lower() == "y":
                 return None
         pkwindows.sort()
         self.__set_meta(pkwindows,"peakwin")
@@ -181,16 +181,16 @@ class danframe_sac(object):
 
     def set_bgwindows(self,bgwindows,warn=True):
         if len(self.bgwindows) > 0 and warn :
-            print "WARNING: Old values will be erased"
-            if not raw_input("Continue Y/N? ").lower() == "y":
+            print("WARNING: Old values will be erased")
+            if not input("Continue Y/N? ").lower() == "y":
                 return None
         self.__set_windows(bgwindows,"BGWIN{}".format)
         self.__load_bgwindows()
 
     def set_pkwindows(self,pkwindows,warn=True):
         if len(self.pkwindows) > 0 and warn :
-            print "WARNING: Old values will be erased"
-            if not raw_input("Continue Y/N? ").lower() == "y":
+            print("WARNING: Old values will be erased")
+            if not input("Continue Y/N? ").lower() == "y":
                 return None
         self.__set_windows(pkwindows,"PEAKWIN{}".format)
         self.__load_pkwindows()

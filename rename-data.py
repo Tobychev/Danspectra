@@ -1,5 +1,5 @@
 #encoding: utf-8
-import pyfits as f
+import astropy.io.fits as f
 import os
 import re
 
@@ -30,7 +30,7 @@ def rename_data():
         (manad,dag,typ,serie,angstrom,runnr) = parse_dan_filename(name)
         new_series = serie+manad[0]+dag[-1]
         new_name   = "{}_{}_{}_{}.fits".format(angstrom,new_series,runnr,typ)
-        print "Filnamn: {:<50} Nytt filnamn {:<50}".format(Dir+name,Dir+new_name)
-        print "Renaming disabled for safety"
+        print("Filnamn: {:<50} Nytt filnamn {:<50}".format(Dir+name,Dir+new_name))
+        print("Renaming disabled for safety")
         #os.rename(Dir+name,Dir+new_name)
 

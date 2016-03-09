@@ -2,7 +2,7 @@
 import numpy as np
 import scipy.signal as ss
 import danspec as dan
-import interactive as intr
+from . import interactive as intr
 import collections as col
 import numpy.polynomial.polynomial as pol
 

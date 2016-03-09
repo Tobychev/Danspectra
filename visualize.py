@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 import matplotlib.cm as cm
-import lines as lin
+from . import lines as lin
 
 def get_colours(num,colour_name="Oranges"):
     return iter(cm.__dict__[colour_name](np.linspace(0,1,num)))
@@ -69,7 +69,7 @@ def plot_fits_stats(data,ref,names,title="",bins=43,cols=2,yscale="linear",cutof
         if cutoff > 0:
             idx = np.where(data[key] > np.percentile(data[key],q=cutoff))
         else:
-            idx = range(0,len(data[key]))
+            idx = list(range(0,len(data[key])))
         ax = fig.add_subplot(rows,cols,i+1)
         ax.hist(data[key][idx],bins=bins)
         ax.axvline(ref[key],linestyle="dashed",color="r")
