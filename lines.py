@@ -138,7 +138,7 @@ class line(object):
 
             out[i,:]   = cv*(lam_min-self.cent)/self.cent
             out[i+1,:] = lin_bot
-            out[i+2,:] = frame.cont.val(lam_min) 
+            out[i+2,:] = frame.cont.val(self.cent) 
             # Extra error term to penalize fits that gets wildly off center, with extra weight so it *hurts*
             out[i+3,:] = np.sqrt( np.mean( (frame.data[:,test]-pred)**2,axis=1) + 2*(lam_min-self.cent)**2 )
 
