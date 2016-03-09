@@ -1,6 +1,6 @@
 import matplotlib.pyplot as pl
 import matplotlib.widgets as wdg 
-from . import lines as lin
+import lines as lin
 
 window  = []
 windows = []

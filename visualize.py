@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 import matplotlib.cm as cm
-from . import lines as lin
+import lines as lin
 
 def get_colours(num,colour_name="Oranges"):
     return iter(cm.__dict__[colour_name](np.linspace(0,1,num)))

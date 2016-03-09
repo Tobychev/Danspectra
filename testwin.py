@@ -1,8 +1,8 @@
-from . import stats
+import stats
 import numpy as np
-from . import kontin as con
-from . import danframe as dan
-from . import visualize as vis
+import kontin as con
+import danframe as dan
+import visualize as vis
 import matplotlib.pyplot as pl
 
 def rolling_mean(data,size=10):

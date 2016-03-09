@@ -1,5 +1,5 @@
 import astropy.io.fits as fits
-from . import kontin as con
+import kontin as con
 import pickle as pic
 import numpy as np
 import glob as g
