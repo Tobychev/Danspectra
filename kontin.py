@@ -21,7 +21,7 @@ def row_fit_continuum(frame,line,idx):
 def make_idx_from_windows(windows):
     idbg = []
     for win in windows:
-        idbg = idbg + range(win[0],win[1]+1)
+        idbg = idbg + list(range(win[0],win[1]+1))
     return idbg
 
 def make_windows_from_idx(idx):
@@ -35,7 +35,7 @@ def make_windows_from_idx(idx):
     # edge by hand.
     for i in range(1,len(idx)-1):
         if idx[i]+1 != idx[i+1]:
-            print idx[i]+1, idx[i+1]
+            print(idx[i]+1, idx[i+1])
             window.append(idx[i])
             windows.append(window)
             window = [idx[i+1]]
@@ -65,7 +65,7 @@ def select_bgwin_auto(danframe,metod,row="mean",
         t10 = top_number(data,round(len(data)*0.1))
         return t10[ t10 >= t5 ]
     elif metod == "ref top":       
-        return range( danframe.ref.argmax()- 5, danframe.ref.argmax()+ 5 )
+        return list(range( danframe.ref.argmax()- 5, danframe.ref.argmax()+ 5))
     elif metod == "segments":
         return top_of_segments(data,npoint,q)
 
