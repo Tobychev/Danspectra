@@ -1,4 +1,3 @@
-#encoding: utf8
 from wipfile import * 
 
 import statsmodels.api as sm

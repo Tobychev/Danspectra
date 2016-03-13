@@ -58,5 +58,5 @@ def animate(i):
 fig.canvas.mpl_connect('button_press_event', onClick)
 anim = animation.FuncAnimation(fig, animate, init_func=animinit,
                     frames=798, interval=325, blit=True)
-anim.save('frame_aS1_381_rollmean3.mp4', fps=3)
+#anim.save('frame_aS1_381_rollmean3.mp4', fps=3)
 pl.show()

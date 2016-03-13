@@ -1,4 +1,3 @@
-#encoding: utf8
 from wipfile import * 
 import numpy.polynomial.polynomial as pol
 s6405_seg = dan.frameseries("data/6405_aS1","segments")
@@ -44,7 +43,7 @@ if False: #SiFe scatter
 #vis.show_line_and_corefit(SiFe,s6405_t5p.frames[0],331)
 
 cv = 299792.458
-line  = lins[4]
+line  = lins[0]
 frame = s6405_seg.frames[0]
 lmbd  = frame.group.lmbd
 
@@ -54,8 +53,8 @@ lmbd  = frame.group.lmbd
 width = len(line.idx)*0.16 # Fraction of points to be used
 if width%2 == 0:
     width +=1
-dwn = int(width - 1)/2; up = dwn+1
-print width,dwn,up
+dwn = int((width - 1)/2); up = dwn+1
+print(width,dwn,up)
 
 
 #####
@@ -130,9 +129,9 @@ if True:
         out[2,row] = frame.cont.val(lam_min2)[row]
         out[3,row] = np.sqrt( np.mean( (frame.data[row,test2]-prd)**2) + 2*(lam_min2-line.cent)**2)
 
-        print "Row {}".format(row)
-        print "Global fit: cent = {}, bot = {}, RMSE = {}".format( lam_min[row], lin_bot[row],  err[row] )
-        print "Line fit:   cent = {}, bot = {}, RMSE = {}".format(out[0,row], lin_bot2,  out[3,row])
+        print("Row {}".format(row))
+        print("Global fit: cent = {}, bot = {}, RMSE = {}".format( lam_min[row], lin_bot[row],  err[row] ))
+        print("Line fit:   cent = {}, bot = {}, RMSE = {}".format(out[0,row], lin_bot2,  out[3,row]))
         pl.step(lmbd[line.idx],frame.data[row,line.idx])
         pl.step(lmbd[bottom],frame.data[row,bottom])
         pl.plot(lmbd[line.idx][guess],frame.data[row,line.idx][guess],'o')

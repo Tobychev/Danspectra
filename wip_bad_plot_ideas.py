@@ -1,7 +1,7 @@
 #Plot trying to show development of the unkonwn line in 3d, didn't work
 if True:
     lbox3 = np.convolve(lam[line.idx],np.ones(3)/3.,"valid")
-    rows = range(0,frm.data.shape[0])
+    rows = list(range(0,frm.data.shape[0]))
 
     #Xs,Ys = np.meshgrid(lbox3,np.linspace(0,2000,num=798))
     #Zs = []

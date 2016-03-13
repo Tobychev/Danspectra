@@ -5,8 +5,9 @@ import danframe as dan
 import kontin as con
 import lines as lin
 import numpy as np
+import imp
 
-reload(vis);reload(dan);reload(lin);reload(intr)
+imp.reload(vis);imp.reload(dan);imp.reload(lin);imp.reload(intr)
 
 s6405_t5p = dan.frameseries("data/6405_aS1","top 5%")
 
