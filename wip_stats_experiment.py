@@ -3,7 +3,6 @@ import statsmodels.distributions.empirical_distribution as empd
 
 s6405_t5p.normalize()
 frm = s6405_t5p.frames[0]
-#frm.data = frm.data/frm.cont.norm()
 line = FeI
 
 if False:

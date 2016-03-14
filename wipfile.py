@@ -18,12 +18,3 @@ FeI  = lins[1]
 SiFe = lins[2]
 myst = lins[3]
 CNq  = lins[4]
-
-frm = s6405_t5p.frames[0]
-
-frm.data = frm.data/frm.cont.norm()
-
-spec = frm.data[331,:]
-lam  = frm.group.lmbd
-
-line = myst

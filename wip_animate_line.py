@@ -9,6 +9,10 @@ def linevel(lam):
     c = 299792.458 # km/s
     return c*(lam - line.cent)/line.cent
 
+s6405_t5p.normalize()
+frm = s6405_t5p.frames[0]
+line = myst
+
 lam  = frm.group.lmbd
 lbox3 = np.convolve(lam[line.idx],np.ones(3)/3.,"valid")
 lbox3 = linevel(lbox3)

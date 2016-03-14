@@ -1,7 +1,8 @@
 from wipfile import * 
 import numpy.polynomial.polynomial as pol
 s6405_seg = dan.frameseries("data/6405_aS1","segments")
-
+s6405_seg.normalize()
+s6405_t5p.normalize()
 #####
 #
 # Conclusions
