@@ -218,13 +218,8 @@ class line(object):
         mu4  = np.sum(dpdf*(x-mu)**4,axis=1)
         mu   = mu.reshape(-1) # Undoing reshape to allow assignment
 
-        try:
-            skew = mu3/mu2**(3/2) 
-        except FloatingPointError:
-            print(">> "+ frame.name)
-            for i,val in enumerate(mu2):
-                if val < 0:
-                    print(i,val)
-            skew = 0
-        return mu,mu2,skew,(mu4/mu2**2 - 3)
+
+        skew = mu3/mu2**(3/2) 
+        kurt = (mu4/mu2**2 - 3)
+        return mu,mu2,skew,kurt
 
