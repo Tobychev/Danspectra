@@ -104,3 +104,47 @@ def show_line_and_corefit(line,frame,row,width=3,fast=True):
     pl.plot(lmd[idfit],fit,'r')
 
     pl.show()
+
+def plot_linemap(measure,line):
+    vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8
+    cuts = measure[err] < np.percentile(measure[err],89)
+
+    pl.subplot(3,2,1)
+    pl.plot(measure[con][cuts],measure[ew][cuts],'bo',alpha=0.2);
+    pl.title("Equivalent width, " + str(line))
+    pl.ylabel("Equivalent width")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,2)
+    pl.plot(measure[con][cuts],measure[vel][cuts],'bo',alpha=0.2);
+    pl.title("Line centre, " + str(line))
+    pl.ylabel("Line centre")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,3)
+    pl.plot(measure[con][cuts],measure[ske][cuts],'bo',alpha=0.2);
+    pl.title("Line skewness, " + str(line))
+    pl.ylabel("Skewness")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,4)
+    pl.plot(measure[con][cuts],measure[bot][cuts]/measure[con][cuts],'bo',alpha=0.2);
+    pl.title("Relative line bottom, " + str(line))
+    pl.ylabel("Relative Line min intesity")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,5)
+    pl.plot(measure[con][cuts],measure[kur][cuts],'bo',alpha=0.2);
+    pl.title("Line kurtosis, " + str(line))
+    pl.ylabel("Kurtosis")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,6)
+    pl.plot(measure[con][cuts],measure[var][cuts],'bo',alpha=0.2);
+    pl.title("Line variance, " + str(line))
+    pl.ylabel("variance")
+    pl.xlabel("Continuum intensity")
+    pl.subplots_adjust(left=0.1, bottom=0.07, right=0.95, top=0.95,wspace=0.43, hspace=0.43)
+
+    pl.show()
+
