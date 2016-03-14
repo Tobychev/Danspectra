@@ -24,7 +24,7 @@ def gen_man_win(spec,wins={}):
 
 def fit_all_windows(spec,wins):
     fits = {}
-    for key in wins.keys():
+    for key in list(wins.keys()):
         idx = wins[key]
         fits[key] = con.fit_continuum(spec.lmbd[idx],spec.mean[idx])
 
@@ -44,13 +44,13 @@ def perturb_window_fit(spec,window,itr=103):
         c_cont = fits[:,1] + fits[:,0]*spec.lmbd.mean() -1 # Minus one only for meanspec 
         key = round(fraction/len(window),3)
         perbs[i,:] = [key, c_cont.mean(), c_cont.std() , c_cont.std()/c_cont.mean()]
-        print msg(key,perbs[i,0],perbs[i,1],perbs[i,2])
+        print(msg(key,perbs[i,0],perbs[i,1],perbs[i,2]))
 
     return perbs
 
 def perturb_all_windows(spec,windows,itr=103):
     res = {}
-    for key in windows.keys():
+    for key in list(windows.keys()):
         res[key] = perturb_window_fit(spec,windows[key],itr)
 
     return res
@@ -63,7 +63,7 @@ def all_wins_frame_continuum(spec,wins):
     lines = 800
     names = {}
     cont  = np.zeros((lines,
-                      len(wins.keys()) ))
+                      len(list(wins.keys())) ))
     for i,key in enumerate(wins.keys()):
         cont[:,i]  = gen_frame_continuum(spec,wins[key])
         names[key] = i
@@ -105,10 +105,10 @@ def compare_win_continua(spec,wins,centre="mean",cols=2,bins=39,plot=True):
 
     std  = conts.std(axis=0)
     mean = conts.mean(axis=0)
-    print "\n"+ title
-    print "\n{:>12}   {:<10} {}".format("","mean","std")
+    print("\n"+ title)
+    print("\n{:>12}   {:<10} {}".format("","mean","std"))
     for i,name in enumerate(winame):
-        print "{:>12}: {:+.4e} {:6.4e}".format(name,mean[i],std[i])
+        print("{:>12}: {:+.4e} {:6.4e}".format(name,mean[i],std[i]))
 
     return mean,std 
 
@@ -127,7 +127,7 @@ def smooth_test(spec,win,size):
     return lmd,spe,res
 
 def all_smooth_test(spec,wins,smooth=10,plot=False,bins=43,cols=2):
-    winame = wins.keys()
+    winame = list(wins.keys())
     title  = "Integral of signal over continuum"
     if plot:
         fig = pl.figure()
@@ -136,11 +136,11 @@ def all_smooth_test(spec,wins,smooth=10,plot=False,bins=43,cols=2):
         if len(winame)%cols > 0:
             rows+=1
 
-    print "\n"+ title
-    print "\n{:>12}  {:<7} {:<7} {:<8} {}".format("","mean","std","max","max_row")
+    print("\n"+ title)
+    print("\n{:>12}  {:<7} {:<7} {:<8} {}".format("","mean","std","max","max_row"))
     for i,key in enumerate(wins.keys()):
         lm,sp,re = smooth_test(spec,wins[key],smooth)
-        print "{:>12}: {:7.3f} {:7.3f} {:8.3f} {}".format(key,re[:,0].mean(),re[:,0].std(),re[:,0].max(),re[:,0].argmax())
+        print("{:>12}: {:7.3f} {:7.3f} {:8.3f} {}".format(key,re[:,0].mean(),re[:,0].std(),re[:,0].max(),re[:,0].argmax()))
         if plot:
             ax = fig.add_subplot(rows,cols,i+1)
             ax.hist(re[:,0],bins=bins)
@@ -161,17 +161,17 @@ def fit_on_poisson_noise(spec,rows):
     wins  = gen_all_auto_wins(spec,{},line="ref")
 
     ref_fit = {}
-    for key in wins.keys():
+    for key in list(wins.keys()):
         idx = wins[key]
         ref_fit[key] = np.polyfit(spec.lmbd[idx],spec.ref[idx],1)
 
     fits = {}
-    for key in wins.keys():
+    for key in list(wins.keys()):
         idx  = wins[key]
         data = sim_poisson_noise(spec,rows)
         fits[key] = np.polyfit(spec.lmbd[idx],data.T[idx,:],1)
 
-    return wins.keys(),ref_fit,fits
+    return list(wins.keys()),ref_fit,fits
 
 def test_fit_with_noise(spec,rows,plot_excess=False,plot_cont_corr=False,plot_fit_par=False,
                         bins=43,cols=2,yscale="linear",cut=0):
