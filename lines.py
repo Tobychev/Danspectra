@@ -157,3 +157,74 @@ class line(object):
             i +=2
         return out
 
+    def measure(self,group):
+        nrows = group.frames[0].data.shape[0]
+        nfram = len(group.frames)
+        guess = group.ref[self.idx].argmin()
+        width = len(self.idx)*0.16 # Min fraction of points to be used in fit
+
+        vel = np.zeros((nfram,nrows))
+        bot = np.zeros((nfram,nrows))
+        con = np.zeros((nfram,nrows))
+        err = np.zeros((nfram,nrows))
+        ew  = np.zeros((nfram,nrows))
+        mn  = np.zeros((nfram,nrows))
+        var = np.zeros((nfram,nrows))
+        ske = np.zeros((nfram,nrows))
+        kur = np.zeros((nfram,nrows))
+
+        if width%2 == 0:
+            width +=1
+        dwn = int((width - 1)/2); up = dwn+1
+
+        bottom  = self.idx[guess + np.arange(-dwn,up)]   
+        test    = self.idx[guess + np.arange(-(dwn+1),(up+1))]
+        for i,frame in enumerate(group.frames):
+            con[i,:] = frame.cont.val(self.cent)
+            vel[i,:],bot[i,:],err[i,:] = self.__linfit(frame,bottom,test)
+            ew[i,:] = self.__equivalent_width(frame,nrows)
+            mn[i,:],var[i,:],ske[i,:],kur[i,:] = self.__moments(frame)
+
+        return (vel.reshape(1,-1),bot.reshape(1,-1),con.reshape(1,-1),err.reshape(1,-1),
+                ew.reshape(1,-1) ,mn.reshape(1,-1) ,var.reshape(1,-1),ske.reshape(1,-1),
+                kur.reshape(1,-1))
+
+    def __linfit(self,frame,bottom,test):
+        cv = 299792.458
+        fit   = pol.polyfit(frame.group.lmbd[bottom],frame.data[:,bottom].T,2)
+        a,b,c = fit[2,:],fit[1,:],fit[0,:]
+        lmin  = -b/(2*a)
+        bot   = pol.polyval(lmin,fit,tensor=False)
+        pred  = pol.polyval(frame.group.lmbd[test],fit)
+        vel   = cv*(lmin-self.cent)/self.cent
+        # Error of fit with extra error term to penalize fits 
+        # that gets wildly off center, with extra weight so it *hurts*
+        err   = np.sqrt( np.mean( (frame.data[:,test]-pred)**2,axis=1) 
+                                         + 2*(lmin-self.cent)**2 )
+        return vel,bot,err
+
+    def __equivalent_width(self,frame,nrows):
+        dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
+                       ).reshape((-1,1))*np.ones(nrows)
+        return ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström          
+
+    def __moments(self,frame):
+        x    = frame.group.lmbd[self.idx]
+        dpdf = (1-frame.data[:,self.idx]/frame.data[:,self.idx].max(axis=1).reshape(-1,1))
+        dpdf = dpdf/dpdf.sum(axis=1).reshape(-1,1)
+        mu   = np.sum(dpdf*x,axis=1).reshape(-1,1) # Reshaping enables broadcasting
+        mu2  = np.sum(dpdf*(x-mu)**2,axis=1)
+        mu3  = np.sum(dpdf*(x-mu)**3,axis=1)
+        mu4  = np.sum(dpdf*(x-mu)**4,axis=1)
+        mu   = mu.reshape(-1) # Undoing reshape to allow assignment
+
+        try:
+            skew = mu3/mu2**(3/2) 
+        except FloatingPointError:
+            print(">> "+ frame.name)
+            for i,val in enumerate(mu2):
+                if val < 0:
+                    print(i,val)
+            skew = 0
+        return mu,mu2,skew,(mu4/mu2**2 - 3)
+
