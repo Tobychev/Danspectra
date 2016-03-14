@@ -21,6 +21,7 @@ class frameseries(object):
         self.ref   = self.ref/self.refcon.cont()
 
         self.veto_rows([0,799])
+        self.normed = False
 
         try:
             self.pkwindows = self.meta["peakwin"] 
@@ -47,8 +48,10 @@ class frameseries(object):
         return fit[hdu].data
 
     def normalize(self):
-        for frame in self.frames:
-            frame.data = frame.data/frame.cont.norm()
+        if not self.normed:
+            for frame in self.frames:
+                frame.data = frame.data/frame.cont.norm()
+        self.normed = True
 
     def veto_rows(self,rows):
         if not isinstance(rows,list):
