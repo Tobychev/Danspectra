@@ -59,7 +59,7 @@ def select_bgwin_auto(danframe,metod,row="mean",
     elif metod == "top 5%":
         return top_number(data,round(len(data)*0.05))
     elif metod == "top 20":
-        return top_number(data,round(len(data)*0.1))
+        return top_number(data,20)
     elif metod == "90-95 decile":
         t5  = top_number(data,round(len(data)*0.05))[-1]
         t10 = top_number(data,round(len(data)*0.1))
@@ -133,7 +133,7 @@ class continua(object):
         elif method == "top 5%":
             return top_number(data,round(len(data)*0.05))
         elif method == "top 20":
-            return top_number(data,round(len(data)*0.1))
+            return top_number(data,20)
         elif method == "90-95 decile":
             t5  = top_number(data,round(len(data)*0.05))[-1]
             t10 = top_number(data,round(len(data)*0.1))
