@@ -10,27 +10,32 @@ cuts = FeImes[err] < np.percentile(FeImes[err],89)
 
 import pyqt_fit as fitter
 import pyqt_fit.nonparam_regression as smooth
-#k0 = smooth.NonParamRegression(FeImes[con][cuts],FeImes[ew][cuts],
-#                                method=fitter.npr_methods.SpatialAverage())
+k0 = smooth.NonParamRegression(FeImes[con][cuts],FeImes[ew][cuts],
+                                method=fitter.npr_methods.SpatialAverage())
 #k1 = smooth.NonParamRegression(FeImes[con][cuts],FeImes[ew][cuts],
 #                                method=fitter.npr_methods.LocalPolynomialKernel(q=1))
-#k0.fit()
+k0.fit()
 #k1.fit()
 
 import statsmodels.nonparametric as npar
 import statsmodels.nonparametric.kde as kde
 
 
-kcon = kde.KDEUnivariate(FeImes[con][cuts])
-kcon.fit()
-kew = kde.KDEUnivariate(FeImes[ew][cuts])
-kew.fit()
+#kcon = kde.KDEUnivariate(FeImes[con][cuts])
+#kcon.fit()
+#kew = kde.KDEUnivariate(FeImes[ew][cuts])
+#kew.fit()
 
-a, xs = np.histogram(FeImes[con][cuts],63)
-a, ys = np.histogram(FeImes[ew][cuts],63)
+#count, ys = np.histogram(FeImes[ew][cuts],63)
+count, xs = np.histogram(FeImes[con][cuts],63)
+
+tmp, = np.where(count > 7)
+xs = xs[slice(tmp[0],tmp[-1])]
+#ys = ys[slice(tmp[0],tmp[-1])]
 
 pl.figure(1)
 pl.plot(FeImes[con][cuts],FeImes[ew][cuts],'bo',alpha=0.02);
+pl.plot(xs,k0.evaluate(xs),'r',label="Kernel regression")
 #pl.plot(xs,kcon.evaluate(xs),label="Continuum density")
 #pl.plot(kew.evaluate(ys),ys,label="EW density")
 pl.title("Line bottom , FeI " + str(FeI))
