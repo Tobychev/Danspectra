@@ -11,7 +11,14 @@ def linevel(lam):
 
 s6405_t5p.normalize()
 frm = s6405_t5p.frames[0]
-line = myst
+line = CNq  
+
+mes = myst.measure(s6405_t5p)
+frmcon = mes[2][:,:798]
+
+sdata = frm.data[np.argsort(frmcon),:].reshape(798,-1)
+
+frmcon.sort()
 
 lam  = frm.group.lmbd
 lbox3 = np.convolve(lam[line.idx],np.ones(3)/3.,"valid")
@@ -46,7 +53,7 @@ def onClick(event):
         anim.event_source.start()
 
 def animate(i):
-    data = frm.data[i,line.idx]
+    data = sdata[i,line.idx]
     ys = np.convolve(data,np.ones(3)/3.,"valid"); xs = lbox3; method="rolling mean 3 points"
 #    spli = intr.splrep(np.flipud(lam[line.idx]) ,np.flipud(data),s=0.007)  #Spline interpolation, smoothing hand-chosen, 0.0055 good
 #    ys = intr.splev(lam[line.idx],spli); xs = lam[line.idx]; method="spline smoot s=0.007" 
@@ -55,7 +62,7 @@ def animate(i):
 #    ys = sg.savgol_filter(data[i,line.idx],7,3); xs = lsav73; method="Savgol filter p=7 n=3 "
 #    ys = data; xs = lam[line.idx] 
     curve.set_data(xs, ys)
-    text.set_text('Row {}, method {} '.format(i+1,method) )
+    text.set_text('Row {}, con {:.4f}, method {} '.format(i+1,frmcon[0,i],method) )
     return curve,text
 
 
