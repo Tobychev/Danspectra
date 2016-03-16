@@ -276,7 +276,7 @@ class binned_framegroup(object):
 
     def __linfit(self,bottom,test):
         cv = 299792.458
-        fit   = pol.polyfit(self.group.lmbd[bottom],self.data[:,bottom].T,2)
+        fit   = pol.polyfit(self.group.lmbd[self.idx[bottom]],self.data[:,bottom].T,2)
         a,b,c = fit[2,:],fit[1,:],fit[0,:]
         lmin  = -b/(2*a)
         bot   = pol.polyval(lmin,fit,tensor=False)
