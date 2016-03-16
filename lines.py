@@ -4,6 +4,7 @@ import scipy.signal as ss
 import danframe as dan
 import interactive as intr
 import collections as col
+import astropy.stats as ast
 import numpy.polynomial.polynomial as pol
 
 def make_pkwin_from_linegroup(lines):
@@ -12,6 +13,13 @@ def make_pkwin_from_linegroup(lines):
         pkwin.append(list(itm.win))
 
     return pkwin
+
+def make_lines_from_wins(frameseries,wins):
+    lines = []
+    for item in wins:
+        lines.append(line(item,frameseries))
+
+    return lines
 
 def fit_linecores(line,xs,ys):
     guess = line.ref.argmin()
