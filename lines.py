@@ -268,7 +268,7 @@ class binned_framegroup(object):
 
     def __linfit(self,bottom,test):
         cv = 299792.458
-        fit   = pol.polyfit(self.group.lmbd[bottom],self.data[:,bottom].T,2)
+        fit   = pol.polyfit(self.group.lmbd[self.idx[bottom]],self.data[:,bottom].T,2)
         a,b,c = fit[2,:],fit[1,:],fit[0,:]
         lmin  = -b/(2*a)
         bot   = pol.polyval(lmin,fit,tensor=False)
@@ -285,7 +285,7 @@ class binned_framegroup(object):
                        ).reshape((-1,1))*np.ones(nrows)
         return ((self.data-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström          
 
-    def __moments(self):
+    def __momentss(self):
         x    = self.group.lmbd[self.idx]
         dpdf = (1-self.data/self.data.max(axis=1).reshape(-1,1))
         dpdf = dpdf/dpdf.sum(axis=1).reshape(-1,1)
@@ -295,6 +295,23 @@ class binned_framegroup(object):
         mu4  = np.sum(dpdf*(x-mu)**4,axis=1)
         mu   = mu.reshape(-1) # Undoing reshape to allow assignment
 
+
+        skew = mu3/mu2**(3/2) 
+        kurt = (mu4/mu2**2 - 3)
+        return mu,mu2,skew,kurt
+
+    
+    def __moments(self):
+        x    = self.group.lmbd[self.idx]
+        rows = 16
+        mu, mu2, mu3, mu4 = np.zeros(rows),np.zeros(rows),np.zeros(rows),np.zeros(rows)
+        for i in range(0,rows):
+            dpdf = (1-self.data[i,:]/self.data[i,:].max())
+            dpdf = dpdf/dpdf.sum()
+            mu[i] = np.sum(dpdf*x) # Reshaping enables broadcasting
+            mu2[i]= np.sum(dpdf*(x-mu[i])**2)
+            mu3[i]= np.sum(dpdf*(x-mu[i])**3)
+            mu4[i]= np.sum(dpdf*(x-mu[i])**4)
 
         skew = mu3/mu2**(3/2) 
         kurt = (mu4/mu2**2 - 3)
