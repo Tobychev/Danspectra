@@ -106,7 +106,7 @@ def show_line_and_corefit(line,frame,row,width=3,fast=True):
 
     pl.show()
 
-def plot_linemap(measure,line):
+def plot_linemap(measure,line,binned=()):
     vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8
     cuts = measure[err] < np.percentile(measure[err],89)
 
@@ -158,6 +158,29 @@ def plot_linemap(measure,line):
     pl.ylabel("variance")
     pl.xlabel("Continuum intensity")
     pl.subplots_adjust(left=0.1, bottom=0.07, right=0.95, top=0.95,wspace=0.43, hspace=0.43)
+
+
+    if len(binned):
+        (vel,bot,err,ew ,mn ,var,ske,kur) = np.arange(0,8)
+        mesbinn,cont = binned
+        pl.subplot(3,2,1)
+        pl.plot(cont,mesbinn[ew],'ko')
+
+        pl.subplot(3,2,2)
+        pl.plot(cont,mesbinn[vel],'ko')
+
+        pl.subplot(3,2,3)
+        pl.plot(cont,mesbinn[ske],'ko')
+   
+        pl.subplot(3,2,4)
+        pl.plot(cont,mesbinn[bot]/cont,'ko')
+
+        pl.subplot(3,2,5)
+        pl.plot(cont,mesbinn[kur],'ko')
+
+        pl.subplot(3,2,6)
+        pl.plot(cont,mesbinn[var],'ko')
+    
 
     pl.show()
 
