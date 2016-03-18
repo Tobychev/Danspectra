@@ -151,4 +151,5 @@ class binned_framegroup(object):
 
 
 quant = mesmyst[con].reshape(-1)
-test = binned_framegroup(myst,s6405_t5p,quant,mesmyst[err] < np.percentile(mesmyst[err],89))
+test  = binned_framegroup(myst,s6405_t5p,quant,mesmyst[err] < np.percentile(mesmyst[err],89))
+mes   = test.measure()
