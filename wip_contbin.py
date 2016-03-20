@@ -29,7 +29,8 @@ if False:
         pl.show()
 
 
-if False:
+if True:
+    quant = mesmyst[con].reshape(-1)
     try:             
         cuts, = np.where(cuts.reshape(-1))
     except AttributeError:
@@ -43,17 +44,21 @@ if False:
 
     datablock = datablock[cuts,:]
     contblock = contblock[cuts]
+    print(contblock.shape,datablock.shape)
 
     counts, bins = ast.histogram(quant[cuts],bins='blocks')
-    sorting = np.digitize(quant[cuts],bins,right=True)
-    binned  =  datablock[sorting == 0,:]#.reshape(1,-1)
-    con     =  contblock[sorting == 0]
+    sorting = np.digitize(quant[cuts],bins[:-1]) # :-1 to get the correct number of buckets from digitize
+    binned  =  np.mean(datablock[sorting == 1,:],axis=0)
+    con     =  np.zeros(len(counts))
+    con[0]  = np.mean( contblock[sorting == 1] )
 
+    print( counts.shape, np.unique(sorting).shape )
     for i in np.unique(sorting)[1:]:
-        binned = np.vstack( (binned,np.mean(datablock[sorting == i,:],axis=0) ) )
-    #                             ,axis=0)        
-        con    = np.vstack( (con,np.mean(contblock[sorting == i]) ) )
-    #                             ,axis=0)
+        print(i)
+#        print(binned.shape,con.shape)
+        print(np.mean(datablock[sorting == i,:],axis=0).shape,(contblock[sorting == i]).shape)
+        binned = np.vstack( (binned,np.mean(datablock[sorting == i,:],axis=0) ))
+        con[i-1]    = np.mean(contblock[sorting == i])
 
 
 class binned_framegroup(object):
@@ -150,6 +155,6 @@ class binned_framegroup(object):
 
 
 
-quant = mesmyst[con].reshape(-1)
-test  = binned_framegroup(myst,s6405_t5p,quant,mesmyst[err] < np.percentile(mesmyst[err],89))
-mes   = test.measure()
+#quant = mesmyst[con].reshape(-1)
+#test  = binned_framegroup(myst,s6405_t5p,quant,mesmyst[err] < np.percentile(mesmyst[err],89))
+#mes   = test.measure()
