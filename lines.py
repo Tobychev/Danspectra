@@ -4,14 +4,15 @@ import scipy.signal as ss
 import danframe as dan
 import interactive as intr
 import collections as col
+import astropy.stats as ast
 import numpy.polynomial.polynomial as pol
 
-def make_pkwin_from_linegroup(lines):
-    pkwin = [] 
-    for itm in lines:
-        pkwin.append(list(itm.win))
+def make_lines_from_wins(frameseries,wins):
+    lines = []
+    for item in wins:
+        lines.append(line(item,frameseries))
 
-    return pkwin
+    return lines
 
 def fit_linecores(line,xs,ys):
     guess = line.ref.argmin()
@@ -214,7 +215,7 @@ class binned_framegroup(object):
         self.idx   = line.idx
         self.cent  = line.cent
         self.group = group
-        self.data,self.cont = self.__bin_by_quant(bin_quant,cuts)
+        self.data,self.cont,self.bins,self.counts = self.__bin_by_quant(bin_quant,cuts)
     
     def __bin_by_quant(self,quant,cuts):
         try:             
@@ -231,13 +232,13 @@ class binned_framegroup(object):
         contblock = contblock[cuts]
 
         counts, bins = ast.histogram(quant[cuts],bins='blocks')
-        sorting = np.digitize(quant[cuts],bins,right=True)
-        binned  =  datablock[sorting == 0,:]
-        con     =  contblock[sorting == 0]
+        sorting = np.digitize(quant[cuts],bins[:-1])  # :-1 to get the correct number of buckets from digitize
+        binned  =  np.mean(datablock[sorting == 1,:],axis=0)
+        con     =  np.zeros(len(counts)); con[0] = np.mean( contblock[sorting == 1] )
         for i in np.unique(sorting)[1:]:
-            binned = np.vstack( (binned,np.mean(datablock[sorting == i,:],axis=0) ))
-            con    = np.vstack( (con,np.mean(contblock[sorting == i]) ))
-        return binned,con
+            binned   = np.vstack( (binned,np.mean(datablock[sorting == i,:],axis=0) ))
+            con[i-1] = np.mean(contblock[sorting == i])
+        return binned,con,bins,counts
 
     def measure(self):
         nfram = len(self.data)
@@ -285,7 +286,7 @@ class binned_framegroup(object):
                        ).reshape((-1,1))*np.ones(nrows)
         return ((self.data-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström          
 
-    def __momentss(self):
+    def __moments(self):
         x    = self.group.lmbd[self.idx]
         dpdf = (1-self.data/self.data.max(axis=1).reshape(-1,1))
         dpdf = dpdf/dpdf.sum(axis=1).reshape(-1,1)
@@ -301,7 +302,7 @@ class binned_framegroup(object):
         return mu,mu2,skew,kurt
 
     
-    def __moments(self):
+    def __momentss(self):
         x    = self.group.lmbd[self.idx]
         rows = 16
         mu, mu2, mu3, mu4 = np.zeros(rows),np.zeros(rows),np.zeros(rows),np.zeros(rows)
