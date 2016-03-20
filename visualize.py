@@ -127,10 +127,10 @@ def plot_linemap(measure,line,binned=()):
     pl.xlabel("Continuum intensity")
 
     pl.subplot(3,2,3)
-    regx,regy = st.kern_reg(measure[con][cuts],measure[ske][cuts],bins=73)
-    pl.plot(measure[con][cuts],measure[ske][cuts],'bo',alpha=0.2)
+    regx,regy = st.kern_reg(measure[con][cuts],measure[mn][cuts],bins=73)
+    pl.plot(measure[con][cuts],measure[mn][cuts],'bo',alpha=0.2)
     pl.plot(regx,regy,'r')
-    pl.title("Line skewness, " + str(line))
+    pl.title("Line mean, " + str(line))
     pl.ylabel("Skewness")
     pl.xlabel("Continuum intensity")
 
@@ -170,7 +170,7 @@ def plot_linemap(measure,line,binned=()):
         pl.plot(cont,mesbinn[vel],'ko')
 
         pl.subplot(3,2,3)
-        pl.plot(cont,mesbinn[ske],'ko')
+        pl.plot(cont,mesbinn[mn],'ko')
    
         pl.subplot(3,2,4)
         pl.plot(cont,mesbinn[bot]/cont,'ko')
