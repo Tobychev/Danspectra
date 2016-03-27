@@ -6,11 +6,19 @@ import interactive as intr
 import collections as col
 import astropy.stats as ast
 import numpy.polynomial.polynomial as pol
+import scipy.interpolate as si
 
 def make_lines_from_wins(frameseries,wins):
     lines = []
     for item in wins:
         lines.append(line(item,frameseries))
+
+    return lines
+
+def make_splines_from_wins(frameseries,wins):
+    lines = []
+    for item in wins:
+        lines.append(spline_line(item,frameseries))
 
     return lines
 
@@ -240,6 +248,9 @@ class binned_framegroup(object):
             con[i-1] = np.mean(contblock[sorting == i])
         return binned,con,bins,counts
 
+    def partition_data(self,data):
+        return np.digitize(data,self.bins[:-1])  # :-1 to get the correct number of buckets from digitize
+
     def measure(self):
         nfram = len(self.data)
         guess = self.group.ref[self.idx].argmin()
@@ -317,3 +328,60 @@ class binned_framegroup(object):
         skew = mu3/mu2**(3/2) 
         kurt = (mu4/mu2**2 - 3)
         return mu,mu2,skew,kurt
+
+class spline_line(line):
+
+    def __equivalent_width(self,frame,nrows):
+        dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
+                       ).reshape((-1,1))*np.ones(nrows)
+        return ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström      
+
+    def __width_assym(self,spl,lmbd,lev,cnt):
+        ilev,= np.where(spl(lmbd) <= lev)
+        wdth = lmbd[ilev[0]] - lmbd[ilev[-1]]
+        assm = cnt  - (lmbd[ilev[0]] + lmbd[ilev[-1]])/2
+        return wdth,assm
+
+    def measure(self,group):
+        nrows = group.frames[0].data.shape[0]
+        nfram = len(group.frames)
+        block = group.frames[0].data[:,self.idx]
+        con   = group.frames[0].cont.val(self.cent)
+        ew    = self.__equivalent_width(group.frames[0],nrows)
+
+        for i,frm in enumerate(group.frames[1:]):
+            block = np.vstack((block,frm.data[:,self.idx]) )
+            ew    = np.vstack((ew, self.__equivalent_width(frm,nrows)) )
+            con   = np.vstack((con,frm.cont.val(self.cent)) )
+        splmes = np.zeros(block[:,1:12].shape)
+        splmes[:,10] = con.reshape(-1)
+        splmes[:, 9] = ew.reshape(-1)
+
+        for i,row in enumerate(block):
+            mf           = self.makespline(row,group,9)
+            splmes[i,:9] = self.measure_spline(mf,group) 
+
+        return splmes
+
+    def makespline(self,spec,group,kns=6):
+        lmbd  = group.lmbd[self.idx]
+        _,kno = np.histogram(lmbd,kns+2)
+        kno   = kno[1:-2]
+        return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
+
+    def measure_spline(self,spl,group,dl=2e-5):
+        lmbd = group.lmbd[self.idx]
+        lmbd = np.linspace(lmbd[0],lmbd[-1],int( (lmbd[0]-lmbd[-1])/dl )) 
+        bot  = spl(lmbd).min()
+        icnt = spl(lmbd).argmin()
+        cnt  = lmbd[icnt]
+        bo12 = (1 +   bot)/2
+        bo13 = (1 + 2*bot)/3
+        bo23 = (2 +   bot)/3
+        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt)
+        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt)
+        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt)
+        cnt = 299792.458*(cnt-self.cent)/self.cent
+
+        return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
+
