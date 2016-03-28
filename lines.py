@@ -175,8 +175,8 @@ class line(object):
         for i,frame in enumerate(group.frames):
             con[i,:] = frame.cont.val(self.cent)
             vel[i,:],bot[i,:],err[i,:] = self.__linfit(frame,bottom,test)
-            ew[i,:] = self.__equivalent_width(frame,nrows)
-            mn[i,:],var[i,:],ske[i,:],kur[i,:] = self.__moments(frame)
+            ew[i,:] = self._equivalent_width(frame,nrows)
+            mn[i,:],var[i,:],ske[i,:],kur[i,:] = self._moments(frame)
 
         return (vel.reshape(1,-1),bot.reshape(1,-1),con.reshape(1,-1),err.reshape(1,-1),
                 ew.reshape(1,-1) ,mn.reshape(1,-1) ,var.reshape(1,-1),ske.reshape(1,-1),
@@ -196,7 +196,7 @@ class line(object):
                                          + 2*(lmin-self.cent)**2 )
         return vel,bot,err
 
-    def __equivalent_width(self,frame,nrows):
+    def _equivalent_width(self,frame,nrows):
         dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
                        ).reshape((-1,1))*np.ones(nrows)
         return ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström          
@@ -312,29 +312,12 @@ class binned_framegroup(object):
         kurt = (mu4/mu2**2 - 3)
         return mu,mu2,skew,kurt
 
-    
-    def __momentss(self):
-        x    = self.group.lmbd[self.idx]
-        rows = 16
-        mu, mu2, mu3, mu4 = np.zeros(rows),np.zeros(rows),np.zeros(rows),np.zeros(rows)
-        for i in range(0,rows):
-            dpdf = (1-self.data[i,:]/self.data[i,:].max())
-            dpdf = dpdf/dpdf.sum()
-            mu[i] = np.sum(dpdf*x) # Reshaping enables broadcasting
-            mu2[i]= np.sum(dpdf*(x-mu[i])**2)
-            mu3[i]= np.sum(dpdf*(x-mu[i])**3)
-            mu4[i]= np.sum(dpdf*(x-mu[i])**4)
-
-        skew = mu3/mu2**(3/2) 
-        kurt = (mu4/mu2**2 - 3)
-        return mu,mu2,skew,kurt
-
 class spline_line(line):
 
-    def __equivalent_width(self,frame,nrows):
-        dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
-                       ).reshape((-1,1))*np.ones(nrows)
-        return ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström      
+#    def __equivalent_width(self,frame,nrows):
+#        dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
+#                       ).reshape((-1,1))*np.ones(nrows)
+#        return ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström      
 
     def __width_assym(self,spl,lmbd,lev,cnt):
         ilev,= np.where(spl(lmbd) <= lev)
@@ -347,11 +330,11 @@ class spline_line(line):
         nfram = len(group.frames)
         block = group.frames[0].data[:,self.idx]
         con   = group.frames[0].cont.val(self.cent)
-        ew    = self.__equivalent_width(group.frames[0],nrows)
+        ew    = self._equivalent_width(group.frames[0],nrows)
 
         for i,frm in enumerate(group.frames[1:]):
             block = np.vstack((block,frm.data[:,self.idx]) )
-            ew    = np.vstack((ew, self.__equivalent_width(frm,nrows)) )
+            ew    = np.vstack((ew, self._equivalent_width(frm,nrows)) )
             con   = np.vstack((con,frm.cont.val(self.cent)) )
         splmes = np.zeros(block[:,1:12].shape)
         splmes[:,10] = con.reshape(-1)
