@@ -5,6 +5,25 @@ import kontin as con
 import lines as lin
 import numpy as np
 import astropy.io.fits as fts
+import astropy.stats as ast
+import imp
+imp.reload(lin); imp.reload(dan); imp.reload(con); imp.reload(vis)
+
+def moments(x,lines):
+    rows = len(lines)    
+    mu, mu2, mu3, mu4 = np.zeros(rows),np.zeros(rows),np.zeros(rows),np.zeros(rows)
+    for i in range(0,rows):
+        line = lines[i]
+        dpdf = (1-line/line.max())
+        dpdf = dpdf/dpdf.sum()
+        mu[i] = np.sum(dpdf*x) # Reshaping enables broadcasting
+        mu2[i]= np.sum(dpdf*(x-mu[i])**2)
+        mu3[i]= np.sum(dpdf*(x-mu[i])**3)
+        mu4[i]= np.sum(dpdf*(x-mu[i])**4)
+
+    skew = mu3/mu2**(3/2) 
+    kurt = (mu4/mu2**2 - 3)
+    return mu,mu2,skew,kurt
 
 s6405_t5p = dan.frameseries("data/6405_aS1","top 5%")
 
@@ -31,24 +50,32 @@ mesmyst = myst.measure(s6405_t5p)
 mesCN   = CN.measure(s6405_t5p)
 mesCNq  = CNq.measure(s6405_t5p)
 
-cuts   = mesFeI[err] < np.percentile(mesFeI[err],89) ; cuts = cuts.reshape(-1)
-binFeI = lin.binned_framegroup(FeI,s6405_t5p,mesFeI[con].reshape(-1),cuts)
-mesBinnFeI = binFeI.measure()
-block = block[cuts,:]
+# Set line to test on
+if False:
+    line = FeI
+    step = 6 #FeI number
+    cuts  = mesFeI[err] < np.percentile(mesFeI[err],95)    
+    quant = mesFeI[con].reshape(-1)
+    binFeI    = lin.binned_framegroup(FeI,s6405_t5p,quant,cuts)
+    mesBinFeI = binFeI.measure()
+    quant  = quant[cuts.reshape(-1)].reshape(-1)
+    sort   = binFeI.partition_data(quant)
+    binned = binFeI
+    
 
-# Magic numbers for FeI
-step = 6
-i    = 0
-ip1  = i+step
-nbin = int(len(FeI.idx)/step)
+if True:
+    line  = myst    
+    step  = 8 #myst number
+    cuts  = mesmyst[err] < np.percentile(mesmyst[err],95)
+    quant = mesmyst[con].reshape(-1)
+    binMyst     = lin.binned_framegroup(myst,s6405_t5p,quant,cuts)
+    mesBinMyst = binMyst.measure()
+    quant  = quant[cuts.reshape(-1)].reshape(-1)
+    sort   = binMyst.partition_data(quant)
+    binned = binMyst
 
-binn = []
-for j in range(0,nbin):
-    pl.hist(block[:,FeI.idx[slice(i,ip1)]].reshape(-1),115)
-    print(np.mean(s6405_t5p.lmbd[FeI.idx[slice(i,ip1)]]))
-    pl.show()
-#    co,ed = np.histogram(block[:,FeI.idx[slice(i,ip1)] ]) 
-#    binn.append((co,ed))
-    i   =  ip1
-    ip1 += step
 
+nr = 1
+lmbd  = s6405_t5p.lmbd[line.idx]
+block = block[cuts.reshape(-1),:]
+binNr = block[(sort==nr),:]
