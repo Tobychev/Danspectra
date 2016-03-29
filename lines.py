@@ -206,19 +206,24 @@ class line(object):
 
 class spline_line(line):
 
-#    def __equivalent_width(self,frame,nrows):
-#        dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
-#                       ).reshape((-1,1))*np.ones(nrows)
-#        return ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström      
+    def measure_on_block(self,group,block,con):
+        nrows = block.shape[0]
+        lmbd  = group.lmbd[self.idx]
+        dlam  = np.diff(group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]).reshape((-1,1))*np.ones(nrows)
+        ew    = ((block-1)*dlam.T).sum(axis=1)*1e3
+        splmes = np.zeros((nrows,11))
+        
+        splmes[:,10] = con.reshape(-1)
+        splmes[:, 9] = ew.reshape(-1)
+        for i,row in enumerate(block):
+            mf           = self.makespline(row,lmbd,9)
+            splmes[i,:9] = self.measure_spline(mf,group) 
 
-    def __width_assym(self,spl,lmbd,lev,cnt):
-        ilev,= np.where(spl(lmbd) <= lev)
-        wdth = lmbd[ilev[0]] - lmbd[ilev[-1]]
-        assm = cnt  - (lmbd[ilev[0]] + lmbd[ilev[-1]])/2
-        return wdth,assm
+        return splmes
 
     def measure(self,group):
         nrows = group.frames[0].data.shape[0]
+        lmbd  = group.lmbd[self.idx]
         nfram = len(group.frames)
         block = group.frames[0].data[:,self.idx]
         con   = group.frames[0].cont.val(self.cent)
@@ -233,13 +238,12 @@ class spline_line(line):
         splmes[:, 9] = ew.reshape(-1)
 
         for i,row in enumerate(block):
-            mf           = self.makespline(row,group,9)
+            mf           = self.makespline(row,lmbd,9)
             splmes[i,:9] = self.measure_spline(mf,group) 
 
         return splmes
 
-    def makespline(self,spec,group,kns=6):
-        lmbd  = group.lmbd[self.idx]
+    def makespline(self,spec,lmbd,kns=6):
         _,kno = np.histogram(lmbd,kns+2)
         kno   = kno[1:-2]
         return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
@@ -260,3 +264,15 @@ class spline_line(line):
 
         return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
 
+    def __width_assym(self,spl,lmbd,lev,cnt):
+        ilev, = np.where(spl(lmbd) <= lev)
+        
+        # Check that we only got one interval
+        spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
+        if spli.sum() > 0:
+            if   len(spli) == 1 :
+                ilev  = ilev[slice(spli+1)]
+
+        wdth  = lmbd[ilev[0]] - lmbd[ilev[-1]]
+        assm  = cnt  - (lmbd[ilev[0]] + lmbd[ilev[-1]])/2
+        return wdth,assm
