@@ -22,17 +22,6 @@ def make_splines_from_wins(frameseries,wins):
 
     return lines
 
-def fit_linecores(line,xs,ys):
-    guess = line.ref.argmin()
-    bottom = line.idx[guess-4:guess+5]
-    a,b,c = np.polyfit(xs[bottom],ys.T[bottom,:],2)
-    return get_linecore(a,b,c) 
-
-def get_linecore(a,b,c):
-    lam_min = -b/(2*a)
-    lin_bot = np.polyval((a,b,c),lam_min)
-    return lam_min,lin_bot
-
 line_core_indices = col.namedtuple("Line_core_indices",["lcen","lbot","cont","Errs","EW","EWcont"])
 lc = line_core_indices(0,1,2,3,0,1)
 
@@ -42,7 +31,6 @@ class line(object):
         self.win  = (self.idx[0], self.idx[-1])
         self.cent = self.__get_refcentre(group)
         self.name = "{:6.3f}".format(self.cent)
-        self.weak = weak
 
     def __repr__(self):
         return "Line {} [{} to {}]".format(self.name,self.idx[0],self.idx[-1])
@@ -176,7 +164,7 @@ class line(object):
             con[i,:] = frame.cont.val(self.cent)
             vel[i,:],bot[i,:],err[i,:] = self.__linfit(frame,bottom,test)
             ew[i,:] = self._equivalent_width(frame,nrows)
-            mn[i,:],var[i,:],ske[i,:],kur[i,:] = self._moments(frame)
+            mn[i,:],var[i,:],ske[i,:],kur[i,:] = self.__moments(frame)
 
         return (vel.reshape(1,-1),bot.reshape(1,-1),con.reshape(1,-1),err.reshape(1,-1),
                 ew.reshape(1,-1) ,mn.reshape(1,-1) ,var.reshape(1,-1),ske.reshape(1,-1),
