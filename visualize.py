@@ -106,6 +106,81 @@ def show_line_and_corefit(line,frame,row,width=3,fast=True):
 
     pl.show()
 
+def plot_linemap_spline(measure,line,mesbin=None):
+
+    bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
+
+    pl.subplot(3,2,1)
+    regx,regy = st.kern_reg(measure[:,con],measure[:,ew],bins=73)
+    pl.plot(measure[:,con],measure[:,ew],'bo',alpha=0.2)
+    pl.plot(regx,regy,'r')
+    pl.title("Equivalent width, " + str(line))
+    pl.ylabel("Equivalent width")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,2)
+    regx,regy = st.kern_reg(measure[:,con],measure[:,vel],bins=73)
+    pl.plot(measure[:,con],measure[:,vel],'bo',alpha=0.2)
+    pl.plot(regx,regy,'r')
+    pl.title("Line centre, " + str(line))
+    pl.ylabel("Line centre")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,3)
+    regx,regy = st.kern_reg(measure[:,con],measure[:,as12],bins=73)
+    pl.plot(measure[:,con],measure[:,as12],'bo',alpha=0.2)
+    pl.plot(regx,regy,'r')
+    pl.title("Line assymetry, " + str(line))
+    pl.ylabel("Assymetry at hw")
+    pl.xlabel("Continuum intensity")
+    pl.subplots_adjust(left=0.1, bottom=0.07, right=0.95, top=0.95,wspace=0.43, hspace=0.43)
+
+    pl.subplot(3,2,4)
+    regx,regy = st.kern_reg(measure[:,con],measure[:,bot]/measure[:,con],bins=73)
+    pl.plot(measure[:,con],measure[:,bot]/measure[:,con],'bo',alpha=0.2)
+    pl.plot(regx,regy,'r')
+    pl.title("Relative line bottom, " + str(line))
+    pl.ylabel("Relative Line min intesity")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,5)
+    regx,regy = st.kern_reg(measure[:,con],measure[:,fw23],bins=73)
+    pl.plot(measure[:,con],measure[:,fw23],'bo',alpha=0.2)
+    pl.plot(regx,regy,'r')
+    pl.title("FW at 2/3 maximum, " + str(line))
+    pl.ylabel("FW 2/3 Max")
+    pl.xlabel("Continuum intensity")
+
+    pl.subplot(3,2,6)
+    regx,regy = st.kern_reg(measure[:,con],measure[:,fwhm],bins=73)
+    pl.plot(measure[:,con],measure[:,fwhm],'bo',alpha=0.2)
+    pl.plot(regx,regy,'r')
+    pl.title("Line FWHM, " + str(line))
+    pl.ylabel("FWHM")
+    pl.xlabel("Continuum intensity")
+
+    if mesbin is not None:
+        pl.subplot(3,2,1)
+        pl.plot(mesbin[:,con],mesbin[:,ew],'ko')
+
+        pl.subplot(3,2,2)
+        pl.plot(mesbin[:,con],mesbin[:,vel],'ko')
+
+        pl.subplot(3,2,3)
+        pl.plot(mesbin[:,con],mesbin[:,as12],'ko')
+   
+        pl.subplot(3,2,4)
+        pl.plot(mesbin[:,con],mesbin[:,bot]/mesbin[:,con],'ko')
+
+        pl.subplot(3,2,5)
+        pl.plot(mesbin[:,con],mesbin[:,fw23],'ko')
+
+        pl.subplot(3,2,6)
+        pl.plot(mesbin[:,con],mesbin[:,fwhm],'ko')
+    
+
+    pl.show()
+
 def plot_linemap(measure,line,binned=()):
     vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8
     cuts = measure[err] < np.percentile(measure[err],89)
@@ -127,10 +202,10 @@ def plot_linemap(measure,line,binned=()):
     pl.xlabel("Continuum intensity")
 
     pl.subplot(3,2,3)
-    regx,regy = st.kern_reg(measure[con][cuts],measure[ske][cuts],bins=73)
-    pl.plot(measure[con][cuts],measure[ske][cuts],'bo',alpha=0.2)
+    regx,regy = st.kern_reg(measure[con][cuts],measure[mn][cuts],bins=73)
+    pl.plot(measure[con][cuts],measure[mn][cuts],'bo',alpha=0.2)
     pl.plot(regx,regy,'r')
-    pl.title("Line skewness, " + str(line))
+    pl.title("Line mean, " + str(line))
     pl.ylabel("Skewness")
     pl.xlabel("Continuum intensity")
 
@@ -170,7 +245,7 @@ def plot_linemap(measure,line,binned=()):
         pl.plot(cont,mesbinn[vel],'ko')
 
         pl.subplot(3,2,3)
-        pl.plot(cont,mesbinn[ske],'ko')
+        pl.plot(cont,mesbinn[mn],'ko')
    
         pl.subplot(3,2,4)
         pl.plot(cont,mesbinn[bot]/cont,'ko')
