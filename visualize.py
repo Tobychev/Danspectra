@@ -106,7 +106,7 @@ def show_line_and_corefit(line,frame,row,width=3,fast=True):
 
     pl.show()
 
-def plot_linemap_spline(measure,line,binned=()):
+def plot_linemap_spline(measure,line,mesbin=None):
 
     bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
 
@@ -159,26 +159,24 @@ def plot_linemap_spline(measure,line,binned=()):
     pl.ylabel("FWHM")
     pl.xlabel("Continuum intensity")
 
-    if len(binned):
-        (vel,bot,err,ew ,mn ,var,ske,kur) = np.arange(0,8)
-        mesbinn,cont = binned
+    if mesbin is not None:
         pl.subplot(3,2,1)
-        pl.plot(cont,mesbinn[ew],'ko')
+        pl.plot(mesbin[:,con],mesbin[:,ew],'ko')
 
         pl.subplot(3,2,2)
-        pl.plot(cont,mesbinn[vel],'ko')
+        pl.plot(mesbin[:,con],mesbin[:,vel],'ko')
 
         pl.subplot(3,2,3)
-        pl.plot(cont,mesbinn[mn],'ko')
+        pl.plot(mesbin[:,con],mesbin[:,as12],'ko')
    
         pl.subplot(3,2,4)
-        pl.plot(cont,mesbinn[bot]/cont,'ko')
+        pl.plot(mesbin[:,con],mesbin[:,bot]/mesbin[:,con],'ko')
 
         pl.subplot(3,2,5)
-        pl.plot(cont,mesbinn[kur],'ko')
+        pl.plot(mesbin[:,con],mesbin[:,fw23],'ko')
 
         pl.subplot(3,2,6)
-        pl.plot(cont,mesbinn[var],'ko')
+        pl.plot(mesbin[:,con],mesbin[:,fwhm],'ko')
     
 
     pl.show()
