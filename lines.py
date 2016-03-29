@@ -6,13 +6,7 @@ import interactive as intr
 import collections as col
 import astropy.stats as ast
 import numpy.polynomial.polynomial as pol
-
-def make_pkwin_from_linegroup(lines):
-    pkwin = [] 
-    for itm in lines:
-        pkwin.append(list(itm.win))
-
-    return pkwin
+import scipy.interpolate as si
 
 def make_lines_from_wins(frameseries,wins):
     lines = []
@@ -21,16 +15,12 @@ def make_lines_from_wins(frameseries,wins):
 
     return lines
 
-def fit_linecores(line,xs,ys):
-    guess = line.ref.argmin()
-    bottom = line.idx[guess-4:guess+5]
-    a,b,c = np.polyfit(xs[bottom],ys.T[bottom,:],2)
-    return get_linecore(a,b,c) 
+def make_splines_from_wins(frameseries,wins):
+    lines = []
+    for item in wins:
+        lines.append(spline_line(item,frameseries))
 
-def get_linecore(a,b,c):
-    lam_min = -b/(2*a)
-    lin_bot = np.polyval((a,b,c),lam_min)
-    return lam_min,lin_bot
+    return lines
 
 line_core_indices = col.namedtuple("Line_core_indices",["lcen","lbot","cont","Errs","EW","EWcont"])
 lc = line_core_indices(0,1,2,3,0,1)
@@ -41,7 +31,6 @@ class line(object):
         self.win  = (self.idx[0], self.idx[-1])
         self.cent = self.__get_refcentre(group)
         self.name = "{:6.3f}".format(self.cent)
-        self.weak = weak
 
     def __repr__(self):
         return "Line {} [{} to {}]".format(self.name,self.idx[0],self.idx[-1])
@@ -174,7 +163,7 @@ class line(object):
         for i,frame in enumerate(group.frames):
             con[i,:] = frame.cont.val(self.cent)
             vel[i,:],bot[i,:],err[i,:] = self.__linfit(frame,bottom,test)
-            ew[i,:] = self.__equivalent_width(frame,nrows)
+            ew[i,:] = self._equivalent_width(frame,nrows)
             mn[i,:],var[i,:],ske[i,:],kur[i,:] = self.__moments(frame)
 
         return (vel.reshape(1,-1),bot.reshape(1,-1),con.reshape(1,-1),err.reshape(1,-1),
@@ -195,7 +184,7 @@ class line(object):
                                          + 2*(lmin-self.cent)**2 )
         return vel,bot,err
 
-    def __equivalent_width(self,frame,nrows):
+    def _equivalent_width(self,frame,nrows):
         dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
                        ).reshape((-1,1))*np.ones(nrows)
         return ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström          
@@ -215,95 +204,75 @@ class line(object):
         kurt = (mu4/mu2**2 - 3)
         return mu,mu2,skew,kurt
 
+class spline_line(line):
 
-class binned_framegroup(object):
+    def measure_on_block(self,group,block,con):
+        nrows = block.shape[0]
+        lmbd  = group.lmbd[self.idx]
+        dlam  = np.diff(group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]).reshape((-1,1))*np.ones(nrows)
+        ew    = ((block-1)*dlam.T).sum(axis=1)*1e3
+        splmes = np.zeros((nrows,11))
+        
+        splmes[:,10] = con.reshape(-1)
+        splmes[:, 9] = ew.reshape(-1)
+        for i,row in enumerate(block):
+            mf           = self.makespline(row,lmbd,9)
+            splmes[i,:9] = self.measure_spline(mf,group) 
 
-    def __init__(self,line,group,bin_quant,cuts=None):
-        self.idx   = line.idx
-        self.cent  = line.cent
-        self.group = group
-        self.data,self.cont = self.__bin_by_quant(bin_quant,cuts)
-    
-    def __bin_by_quant(self,quant,cuts):
-        try:             
-            cuts, = np.where(cuts.reshape(-1))
-        except AttributeError:
-            cuts = np.ones(len(quant))
+        return splmes
 
-        datablock = self.group.frames[0].data[:,self.idx]        
-        contblock = self.group.frames[0].cont.val(self.cent)
-        for frm in self.group.frames[1:]:
-            datablock = np.concatenate((datablock,frm.data[:,self.idx]),axis=0)
-            contblock = np.concatenate((contblock,frm.cont.val(self.cent)),axis=0)
-        datablock = datablock[cuts,:]
-        contblock = contblock[cuts]
+    def measure(self,group):
+        nrows = group.frames[0].data.shape[0]
+        lmbd  = group.lmbd[self.idx]
+        nfram = len(group.frames)
+        block = group.frames[0].data[:,self.idx]
+        con   = group.frames[0].cont.val(self.cent)
+        ew    = self._equivalent_width(group.frames[0],nrows)
 
-        counts, bins = ast.histogram(quant[cuts],bins='blocks')
-        sorting = np.digitize(quant[cuts],bins,right=True)
-        binned  =  datablock[sorting == 0,:]
-        con     =  contblock[sorting == 0]
-        for i in np.unique(sorting)[1:]:
-            binned = np.vstack( (binned,np.mean(datablock[sorting == i,:],axis=0) ))
-            con    = np.vstack( (con,np.mean(contblock[sorting == i]) ))
-        return binned,con
+        for i,frm in enumerate(group.frames[1:]):
+            block = np.vstack((block,frm.data[:,self.idx]) )
+            ew    = np.vstack((ew, self._equivalent_width(frm,nrows)) )
+            con   = np.vstack((con,frm.cont.val(self.cent)) )
+        splmes = np.zeros(block[:,1:12].shape)
+        splmes[:,10] = con.reshape(-1)
+        splmes[:, 9] = ew.reshape(-1)
 
-    def measure(self):
-        nfram = len(self.data)
-        guess = self.group.ref[self.idx].argmin()
-        width = len(self.idx)*0.16 # Min fraction of points to be used in fit
+        for i,row in enumerate(block):
+            mf           = self.makespline(row,lmbd,9)
+            splmes[i,:9] = self.measure_spline(mf,group) 
 
-        vel = np.zeros(nfram)
-        bot = np.zeros(nfram)
-        err = np.zeros(nfram)
-        ew  = np.zeros(nfram)
-        mn  = np.zeros(nfram)
-        var = np.zeros(nfram)
-        ske = np.zeros(nfram)
-        kur = np.zeros(nfram)
+        return splmes
 
-        if width%2 == 0:
-            width +=1
-        dwn = int((width - 1)/2); up = dwn+1
+    def makespline(self,spec,lmbd,kns=6):
+        _,kno = np.histogram(lmbd,kns+2)
+        kno   = kno[1:-2]
+        return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
 
-        bottom  = guess + np.arange(-dwn,up) 
-        test    = guess + np.arange(-(dwn+1),(up+1))
+    def measure_spline(self,spl,group,dl=2e-5):
+        lmbd = group.lmbd[self.idx]
+        lmbd = np.linspace(lmbd[0],lmbd[-1],int( (lmbd[0]-lmbd[-1])/dl )) 
+        bot  = spl(lmbd).min()
+        icnt = spl(lmbd).argmin()
+        cnt  = lmbd[icnt]
+        bo12 = (1 +   bot)/2
+        bo13 = (1 + 2*bot)/3
+        bo23 = (2 +   bot)/3
+        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt)
+        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt)
+        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt)
+        cnt = 299792.458*(cnt-self.cent)/self.cent
 
-        vel,bot,err = self.__linfit(bottom,test)
-        ew = self.__equivalent_width(nfram)
-        mn,var,ske,kur = self.__moments()
+        return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
 
-        return (vel,bot,err,ew ,mn ,var,ske,kur)
+    def __width_assym(self,spl,lmbd,lev,cnt):
+        ilev, = np.where(spl(lmbd) <= lev)
+        
+        # Check that we only got one interval
+        spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
+        if spli.sum() > 0:
+            if   len(spli) == 1 :
+                ilev  = ilev[slice(spli+1)]
 
-    def __linfit(self,bottom,test):
-        cv = 299792.458
-        fit   = pol.polyfit(self.group.lmbd[self.idx[bottom]],self.data[:,bottom].T,2)
-        a,b,c = fit[2,:],fit[1,:],fit[0,:]
-        lmin  = -b/(2*a)
-        bot   = pol.polyval(lmin,fit,tensor=False)
-        pred  = pol.polyval(self.group.lmbd[test],fit)
-        vel   = cv*(lmin-self.cent)/self.cent
-        # Error of fit with extra error term to penalize fits 
-        # that gets wildly off center, with extra weight so it *hurts*
-        err   = np.sqrt( np.mean( (self.data[:,test]-pred)**2,axis=1) 
-                                         + 2*(lmin-self.cent)**2 )
-        return vel,bot,err
-
-    def __equivalent_width(self,nrows):
-        dlam = np.diff(self.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
-                       ).reshape((-1,1))*np.ones(nrows)
-        return ((self.data-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström          
-
-    def __moments(self):
-        x    = self.group.lmbd[self.idx]
-        dpdf = (1-self.data/self.data.max(axis=1).reshape(-1,1))
-        dpdf = dpdf/dpdf.sum(axis=1).reshape(-1,1)
-        mu   = np.sum(dpdf*x,axis=1).reshape(-1,1) # Reshaping enables broadcasting
-        mu2  = np.sum(dpdf*(x-mu)**2,axis=1)
-        mu3  = np.sum(dpdf*(x-mu)**3,axis=1)
-        mu4  = np.sum(dpdf*(x-mu)**4,axis=1)
-        mu   = mu.reshape(-1) # Undoing reshape to allow assignment
-
-
-        skew = mu3/mu2**(3/2) 
-        kurt = (mu4/mu2**2 - 3)
-        return mu,mu2,skew,kurt
+        wdth  = lmbd[ilev[0]] - lmbd[ilev[-1]]
+        assm  = cnt  - (lmbd[ilev[0]] + lmbd[ilev[-1]])/2
+        return wdth,assm
