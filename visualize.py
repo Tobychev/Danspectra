@@ -106,16 +106,23 @@ def show_line_and_corefit(line,frame,row,width=3,fast=True):
 
     pl.show()
 
-def plot_linemap_spline(measure,line,mesbin=None):
+def plot_linemap_spline(measure,line,mesbin=None,lims=None):
 
     bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
-
-    ewlim   = ( 0.3 , 1.8  )
-    vellim  = (-5.8 , 6.1  )
-    as12lim = (-0.02, 0.015)
-    rellim  = ( 0.2 , 1.3  )
-    fwhmlim = ( 0.0 , 0.05 )
-    fw23lim = ( 0.0 , 0.082)
+    if lims is None:
+        ewlim   = ( 0.3 , 1.8  )
+        vellim  = (-5.8 , 6.1  )
+        as12lim = (-0.02, 0.015)
+        rellim  = ( 0.2 , 1.3  )
+        fwhmlim = ( 0.0 , 0.05 )
+        fw23lim = ( 0.0 , 0.082)
+    else:
+        ewlim   = lims["ewlim"]
+        vellim  = lims["vellim"]
+        as12lim = lims["as12lim"]
+        rellim  = lims["rellim"]
+        fwhmlim = lims["fwhmlim"]
+        fw23lim = lims["fw23lim"]
 
     pl.subplot(3,2,1)
     mew = measure[:,ew].mean()
