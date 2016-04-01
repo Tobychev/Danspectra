@@ -106,103 +106,6 @@ def show_line_and_corefit(line,frame,row,width=3,fast=True):
 
     pl.show()
 
-def plot_linemap_spline(measure,line,mesbin=None,lims=None):
-
-    bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
-    if lims is None:
-        ewlim   = ( 0.3 , 1.8  )
-        vellim  = (-5.8 , 6.1  )
-        as12lim = (-0.02, 0.015)
-        rellim  = ( 0.2 , 1.3  )
-        fwhmlim = ( 0.0 , 0.05 )
-        fw23lim = ( 0.0 , 0.082)
-    else:
-        ewlim   = lims["ewlim"]
-        vellim  = lims["vellim"]
-        as12lim = lims["as12lim"]
-        rellim  = lims["rellim"]
-        fwhmlim = lims["fwhmlim"]
-        fw23lim = lims["fw23lim"]
-
-    pl.subplot(3,2,1)
-    mew = measure[:,ew].mean()
-    regx,regy = st.kern_reg(measure[:,con],measure[:,ew],bins=73)
-    pl.plot(measure[:,con],measure[:,ew]/mew,'bo',alpha=0.2,label="Average EW = {:.3f}".format(mew))
-    pl.plot(regx,regy/mew,'r')
-    pl.ylim(ewlim)
-    pl.title("Relative equivalent width, " + str(line))
-    pl.ylabel("Relative equivalent width")
-    pl.xlabel("Continuum intensity")
-    pl.legend()
-
-    pl.subplot(3,2,2)
-    regx,regy = st.kern_reg(measure[:,con],measure[:,vel],bins=73)
-    pl.plot(measure[:,con],measure[:,vel],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.ylim(vellim)
-    pl.title("Line centre, " + str(line))
-    pl.ylabel("Line centre")
-    pl.xlabel("Continuum intensity")
-
-    pl.subplot(3,2,3)
-    regx,regy = st.kern_reg(measure[:,con],measure[:,as12],bins=73)
-    pl.plot(measure[:,con],measure[:,as12],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.ylim(as12lim)
-    pl.title("Line assymetry, " + str(line))
-    pl.ylabel("Assymetry at hw")
-    pl.xlabel("Continuum intensity")
-    pl.subplots_adjust(left=0.1, bottom=0.07, right=0.95, top=0.95,wspace=0.43, hspace=0.43)
-
-    pl.subplot(3,2,4)
-    regx,regy = st.kern_reg(measure[:,con],measure[:,bot]/measure[:,con],bins=73)
-    pl.plot(measure[:,con],measure[:,bot]/measure[:,con],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.ylim(rellim)
-    pl.title("Relative line bottom, " + str(line))
-    pl.ylabel("Relative Line min intesity")
-    pl.xlabel("Continuum intensity")
-
-    pl.subplot(3,2,5)
-    regx,regy = st.kern_reg(measure[:,con],measure[:,fw23],bins=73)
-    pl.plot(measure[:,con],measure[:,fw23],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.ylim(fw23lim)
-    pl.title("FW at 2/3 maximum, " + str(line))
-    pl.ylabel("FW 2/3 Max")
-    pl.xlabel("Continuum intensity")
-
-    pl.subplot(3,2,6)
-    regx,regy = st.kern_reg(measure[:,con],measure[:,fwhm],bins=73)
-    pl.plot(measure[:,con],measure[:,fwhm],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.ylim(fwhmlim)
-    pl.title("Line FWHM, " + str(line))
-    pl.ylabel("FWHM")
-    pl.xlabel("Continuum intensity")
-
-    if mesbin is not None:
-        pl.subplot(3,2,1)
-        pl.plot(mesbin[:,con],mesbin[:,ew],'ko')
-
-        pl.subplot(3,2,2)
-        pl.plot(mesbin[:,con],mesbin[:,vel],'ko')
-
-        pl.subplot(3,2,3)
-        pl.plot(mesbin[:,con],mesbin[:,as12],'ko')
-   
-        pl.subplot(3,2,4)
-        pl.plot(mesbin[:,con],mesbin[:,bot]/mesbin[:,con],'ko')
-
-        pl.subplot(3,2,5)
-        pl.plot(mesbin[:,con],mesbin[:,fw23],'ko')
-
-        pl.subplot(3,2,6)
-        pl.plot(mesbin[:,con],mesbin[:,fwhm],'ko')
-    
-
-    pl.show()
-
 def plot_linemap(measure,line,binned=()):
     vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8
     cuts = measure[err] < np.percentile(measure[err],89)
@@ -281,3 +184,97 @@ def plot_linemap(measure,line,binned=()):
 
     pl.show()
 
+def spline_linemap(measure,line,mesbin=None,lims=None):
+    bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
+    if lims is None:
+        ewlim   = ( 0.3 , 1.8  )
+        vellim  = (-5.8 , 6.1  )
+        rellim  = ( 0.2 , 1.3  )
+        fw13lim = ( 0.0 , 1.0  )
+        fwhmlim = ( 0.0 , 1.0  )
+        fw23lim = ( 0.0 , 1.0  )
+        as13lim = (-0.03, 0.02 )
+        as12lim = (-0.02, 0.015)
+#        as23lim = (-0.02, 0.015)
+    else:
+        ewlim   = lims["ewlim"]
+        vellim  = lims["vellim"]
+        rellim  = lims["rellim"]
+        fw13lim = lims["fw13lim"]
+        fwhmlim = lims["fwhmlim"]
+        fw23lim = lims["fw23lim"]
+        as12lim = lims["as12lim"]
+
+    
+    fig, axs  = pl.subplots(3,3,sharex=True)
+    fig.subplots_adjust(wspace=0.3,hspace=0.3)
+
+    mew       =  measure[:,ew].mean()         
+    prop_plot(axs[0,0],measure[:,con],measure[:,ew]/mew,
+        {"label" : "Average EW = {:.3f}".format(mew),
+         "title" : "Relative equivalent width,\n " + str(line),
+         "ylabel": "Relative equivalent width",
+         "xlabel": "Continuum intensity",
+         "ylim"  : ewlim})
+
+    prop_plot(axs[0,1],measure[:,con],measure[:,vel],
+        {"title" : "Line centre,\n " + str(line),
+         "ylabel": "Line centre [km/s]",
+         "xlabel": "Continuum intensity",
+         "ylim"  : vellim})
+
+    prop_plot(axs[0,2],measure[:,con],measure[:,bot]/measure[:,con],
+        {"title" : "Relative line bottom,\n " + str(line),
+         "ylabel": "Relative Line min intesity",
+         "xlabel": "Continuum intensity",
+         "ylim"  : rellim})
+
+    prop_plot(axs[1,0],measure[:,con],measure[:,fw13]/line.width,
+        {"title" : "Full width 1/3 maximum,\n " + str(line),
+         "ylabel": "Relative line width",
+         "xlabel": "Continuum intensity",
+         "ylim"  : fw13lim})
+
+    prop_plot(axs[1,1],measure[:,con],measure[:,fwhm]/line.width,
+        {"title" : "Full width half maximum,\n " + str(line),
+         "ylabel": "Relative line width",
+         "xlabel": "Continuum intensity",
+         "ylim"  : fwhmlim})
+
+    prop_plot(axs[1,2],measure[:,con],measure[:,fw23]/line.width,
+        {"title" : "Full width 2/3 maximum,\n " + str(line),
+         "ylabel": "Relative line width",
+         "xlabel": "Continuum intensity",
+         "ylim"  : fw23lim})
+
+    prop_plot(axs[2,0],measure[:,con],measure[:,as13]/line.width,
+        {"title" : "Line assymetry 1/3 maximum,\n " + str(line),
+         "ylabel": "Line assymetry",
+         "xlabel": "Continuum intensity",
+         })
+#          "ylim" : as13lim})
+        
+    prop_plot(axs[2,1],measure[:,con],measure[:,as12]/measure[:,fwhm].mean(),
+        {"title" : "Line assymetry half maximum,\n " + str(line),
+         "ylabel": "Line width [Å]",
+         "xlabel": "Continuum intensity",
+         })
+    prop_plot(axs[2,2],measure[:,con],measure[:,as23]/measure[:,as23].mean(),
+        {"title" : "Line assymetry 2/3 maximum,\n " + str(line),
+         "ylabel": "Line assymetry",
+         "xlabel": "Continuum intensity",
+         })
+
+    if mesbin is not None:
+        axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
+        axs[0,1].plot(mesbin[:,con],mesbin[:,vel],'ko')
+        axs[0,2].plot(mesbin[:,con],mesbin[:,bot]/mesbin[:,con],'ko')
+        axs[1,0].plot(mesbin[:,con],mesbin[:,fw13]/line.width,'ko')
+        axs[1,1].plot(mesbin[:,con],mesbin[:,fwhm]/line.width,'ko')
+        axs[1,2].plot(mesbin[:,con],mesbin[:,fw23]/line.width,'ko')
+     #   axs[2,0].plot(mesbin[:,con],mesbin[:,as13]/measure[:,as13].mean(),'ko')
+     #   axs[2,1].plot(mesbin[:,con],mesbin[:,as12]/measure[:,as12].mean(),'ko')
+     #   axs[2,2].plot(mesbin[:,con],mesbin[:,as23]/measure[:,as23].mean(),'ko')
+    
+
+    pl.show()
