@@ -106,81 +106,77 @@ def show_line_and_corefit(line,frame,row,width=3,fast=True):
 
     pl.show()
 
-def plot_linemap(measure,line,binned=()):
+def prop_plot(ax,x,y,conf):
+    regx,regy = st.kern_reg(x,y,bins=73)
+    ax.plot(x,y,'bo',alpha=0.1,label=conf.get("label",""))
+    ax.plot(regx,regy,'r')
+    ax.set_title(conf["title"])
+    ax.set_ylabel(conf["ylabel"])
+    ax.set_xlabel(conf["xlabel"])
+    if "label" in conf:
+        ax.legend()
+    if "ylim" in conf:
+        ax.set_ylim(conf["ylim"])
+
+def moments_linemap(measure,line,mesbin=None,lims=None):
     vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8
-    cuts = measure[err] < np.percentile(measure[err],89)
+    cut = measure[err] < np.percentile(measure[err],98)
 
-    pl.subplot(3,2,1)
-    regx,regy = st.kern_reg(measure[con][cuts],measure[ew][cuts],bins=73)
-    pl.plot(measure[con][cuts],measure[ew][cuts],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.title("Equivalent width, " + str(line))
-    pl.ylabel("Equivalent width")
-    pl.xlabel("Continuum intensity")
+    fig, axs  = pl.subplots(3,3,sharex=True)
+    fig.subplots_adjust(wspace=0.3,hspace=0.3)
 
-    pl.subplot(3,2,2)
-    regx,regy = st.kern_reg(measure[con][cuts],measure[vel][cuts],bins=73)
-    pl.plot(measure[con][cuts],measure[vel][cuts],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.title("Line centre, " + str(line))
-    pl.ylabel("Line centre")
-    pl.xlabel("Continuum intensity")
+    mew       =  measure[ew][cut].mean()
+    prop_plot(axs[0,0],measure[con][cut],measure[ew][cut]/mew,
+        {"label" : "Average EW = {:.3f}".format(mew),
+         "title" : "Relative equivalent width,\n " + str(line),
+         "ylabel": "Relative equivalent width",
+         "xlabel": "Continuum intensity",
+         })
+#         "ylim"  : ewlim})
 
-    pl.subplot(3,2,3)
-    regx,regy = st.kern_reg(measure[con][cuts],measure[mn][cuts],bins=73)
-    pl.plot(measure[con][cuts],measure[mn][cuts],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.title("Line mean, " + str(line))
-    pl.ylabel("Skewness")
-    pl.xlabel("Continuum intensity")
+    prop_plot(axs[0,1],measure[con][cut],measure[vel][cut],
+        {"title" : "Line centre,\n " + str(line),
+         "ylabel": "Line centre [km/s]",
+         "xlabel": "Continuum intensity",
+         })
+#         "ylim"  : vellim})
 
-    pl.subplot(3,2,4)
-    regx,regy = st.kern_reg(measure[con][cuts],measure[bot][cuts]/measure[con][cuts],bins=73)
-    pl.plot(measure[con][cuts],measure[bot][cuts]/measure[con][cuts],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.title("Relative line bottom, " + str(line))
-    pl.ylabel("Relative Line min intesity")
-    pl.xlabel("Continuum intensity")
+    prop_plot(axs[0,2],measure[con][cut],measure[bot][cut]/measure[con][cut], 
+        {"title" : "Relative line bottom,\n " + str(line),
+         "ylabel": "Skewness",
+         "xlabel": "Continuum intensity",
+         })
+#         "ylim"  : vellim})
 
-    pl.subplot(3,2,5)
-    regx,regy = st.kern_reg(measure[con][cuts],measure[kur][cuts],bins=73)
-    pl.plot(measure[con][cuts],measure[kur][cuts],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.title("Line kurtosis, " + str(line))
-    pl.ylabel("Kurtosis")
-    pl.xlabel("Continuum intensity")
+    prop_plot(axs[1,0],measure[con][cut],measure[var][cut],
+        {"title" : "Line variance,\n " + str(line),
+         "ylabel": "Variance",
+         "xlabel": "Continuum intensity",
+         })
+#         "ylim"  : vellim})
 
-    pl.subplot(3,2,6)
-    regx,regy = st.kern_reg(measure[con][cuts],measure[var][cuts],bins=73)
-    pl.plot(measure[con][cuts],measure[var][cuts],'bo',alpha=0.2)
-    pl.plot(regx,regy,'r')
-    pl.title("Line variance, " + str(line))
-    pl.ylabel("variance")
-    pl.xlabel("Continuum intensity")
-    pl.subplots_adjust(left=0.1, bottom=0.07, right=0.95, top=0.95,wspace=0.43, hspace=0.43)
+    prop_plot(axs[1,1],measure[con][cut],measure[ske][cut],
+        {"title" : "Line skewness,\n " + str(line),
+         "ylabel": "Skewness",
+         "xlabel": "Continuum intensity",
+         })
+#         "ylim"  : vellim})
 
+    prop_plot(axs[1,2],measure[con][cut],measure[kur][cut],
+        {"title" : "Line kurtosis,\n " + str(line),
+         "ylabel": "Kurtosis",
+         "xlabel": "Continuum intensity",
+         })
+#         "ylim"  : vellim})
 
-    if len(binned):
+    if mesbin is not None:
         (vel,bot,err,ew ,mn ,var,ske,kur) = np.arange(0,8)
-        mesbinn,cont = binned
-        pl.subplot(3,2,1)
-        pl.plot(cont,mesbinn[ew]/men,'ko')
-
-        pl.subplot(3,2,2)
-        pl.plot(cont,mesbinn[vel],'ko')
-
-        pl.subplot(3,2,3)
-        pl.plot(cont,mesbinn[mn],'ko')
-   
-        pl.subplot(3,2,4)
-        pl.plot(cont,mesbinn[bot]/cont,'ko')
-
-        pl.subplot(3,2,5)
-        pl.plot(cont,mesbinn[kur],'ko')
-
-        pl.subplot(3,2,6)
-        pl.plot(cont,mesbinn[var],'ko')
-    
+        axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
+        axs[0,1].plot(mesbin[:,con],mesbin[:,vel],'ko')
+        axs[0,2].plot(mesbin[:,con],mesbin[:,bot]/mesbin[:,con],'ko')
+        axs[1,0].plot(mesbin[:,con],mesbin[:,var]/line.width,'ko')
+        axs[1,1].plot(mesbin[:,con],mesbin[:,ske]/line.width,'ko')
+        axs[1,2].plot(mesbin[:,con],mesbin[:,kur]/line.width,'ko')
 
     pl.show()
 
