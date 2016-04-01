@@ -18,14 +18,14 @@ class binspec(object):
             block = np.vstack((block,frm.data))
         if cond.dtype == np.dtype('bool'):
             idx,  = np.where(cond)
-            nidx, = np.where(~cond)
+            nidx, = np.where(np.logical_not(cond))
             binned = np.mean( block[idx,:],axis=0)
             con    = np.mean( cont[idx])
 
             self.binned = np.vstack( (binned, np.mean( block[nidx,:],axis=0)) )
             self.con    = np.vstack( (con   , np.mean( cont[nidx])) )
             self.bins   = np.array([0,0,1])
-            self.counts = np.array([cond.sum(),~cond.sum()])
+            self.counts = np.array([cond.sum(),np.logical_not(cond).sum()])
         else:
             if len(cond) != block.shape[0]:
                 raise IndexError("Length of cond does not match number of rows in framegroup")
