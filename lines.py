@@ -27,13 +27,14 @@ lc = line_core_indices(0,1,2,3,0,1)
 
 class line(object):
     def __init__(self,winbounds,group,weak=False):
-        self.idx  = self.__trim_line_indices(winbounds,group.ref)
-        self.win  = (self.idx[0], self.idx[-1])
-        self.cent = self.__get_refcentre(group)
-        self.name = "{:6.3f}".format(self.cent)
+        self.idx   = self.__trim_line_indices(winbounds,group.ref)
+        self.win   = (self.idx[0], self.idx[-1])
+        self.cent  = self.__get_refcentre(group)
+        self.name  = "{:6.3f}".format(self.cent)
+        self.width = group.lmbd[self.win[0]] - group.lmbd[self.win[1]] 
 
     def __repr__(self):
-        return "Line {} [{} to {}]".format(self.name,self.idx[0],self.idx[-1])
+        return "Line {} [$\Delta \lambda$ = {:.4f} Å]".format(self.name,self.width/10)
 
     def __get_refcentre(self,group):
         bot   = slice(group.ref[slice(self.win[0],self.win[1])].argmin()-3,group.ref[slice(self.win[0],self.win[1])].argmin()+4)
@@ -255,8 +256,8 @@ class spline_line(line):
         icnt = spl(lmbd).argmin()
         cnt  = lmbd[icnt]
         bo12 = (1 +   bot)/2
-        bo13 = (1 + 2*bot)/3
-        bo23 = (2 +   bot)/3
+        bo23 = (1 + 2*bot)/3
+        bo13 = (2 +   bot)/3
         fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt)
         fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt)
         fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt)
