@@ -100,7 +100,6 @@ class line(object):
             return line
     
     def measure_linecores(self,group):
-        cv = 299792.458
         nrows = group.frames[0].data.shape[0]
         out   = np.zeros((len(group.frames)*4,nrows))
         guess   = group.ref[self.idx].argmin()
@@ -118,7 +117,7 @@ class line(object):
             lin_bot = pol.polyval(lam_min,fit,tensor=False)
             pred    = pol.polyval(group.lmbd[test],fit)
 
-            out[i,:]   = cv*(lam_min-self.cent)/self.cent
+            out[i,:]   = lam_min
             out[i+1,:] = lin_bot
             out[i+2,:] = frame.cont.val(self.cent) 
             # Extra error term to penalize fits that gets wildly off center, with extra weight so it *hurts*
@@ -127,19 +126,20 @@ class line(object):
             i +=4
         return out
 
-    def measure_EW(self,group):
+    def measure_EW(self,group,vel,bot):
         nrows = group.frames[0].data.shape[0]
-        out   = np.zeros((len(group.frames)*2,nrows))        
+        out   = np.zeros((len(group.frames)*5,nrows))        
         i = 0
         for frame in group.frames:
             dlam = np.diff(group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]).reshape((-1,1))*np.ones(nrows)
-            out[i,:]   = ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
+            out[i,:]   = ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström 
             out[i+1,:] = frame.cont.val(self.cent) 
-
-            i +=2
+            i += 2
         return out
 
     def measure(self,group):
+
+        cv = 299792.458
         nrows = group.frames[0].data.shape[0]
         nfram = len(group.frames)
         guess = group.ref[self.idx].argmin()
@@ -150,6 +150,9 @@ class line(object):
         con = np.zeros((nfram,nrows))
         err = np.zeros((nfram,nrows))
         ew  = np.zeros((nfram,nrows))
+        wvar = np.zeros((nfram,nrows))
+        wske = np.zeros((nfram,nrows))
+        wkur = np.zeros((nfram,nrows))
         mn  = np.zeros((nfram,nrows))
         var = np.zeros((nfram,nrows))
         ske = np.zeros((nfram,nrows))
@@ -162,14 +165,18 @@ class line(object):
         bottom  = self.idx[guess + np.arange(-dwn,up)]   
         test    = self.idx[guess + np.arange(-(dwn+1),(up+1))]
         for i,frame in enumerate(group.frames):
+            ew[i,:]  = self._equivalent_width(frame,nrows)
             con[i,:] = frame.cont.val(self.cent)
-            vel[i,:],bot[i,:],err[i,:] = self.__linfit(frame,bottom,test)
-            ew[i,:] = self._equivalent_width(frame,nrows)
+            vel[i,:], bot[i,:], err[i,:]       = self.__linfit(frame,bottom,test)
+            wvar[i,:], wske[i,:], wkur[i,:]    = self.__ew_moments(frame,nrows,vel[i,:],bot[i,:])
             mn[i,:],var[i,:],ske[i,:],kur[i,:] = self.__moments(frame)
 
-        return (vel.reshape(1,-1),bot.reshape(1,-1),con.reshape(1,-1),err.reshape(1,-1),
+        vel = vel.reshape(1,-1)
+        vel = cv*(vel-self.cent)/self.cent
+
+        return (vel,bot.reshape(1,-1),con.reshape(1,-1),err.reshape(1,-1),
                 ew.reshape(1,-1) ,mn.reshape(1,-1) ,var.reshape(1,-1),ske.reshape(1,-1),
-                kur.reshape(1,-1))
+                kur.reshape(1,-1),wvar.reshape(1,-1),wske.reshape(1,-1),wkur.reshape(1,-1))
 
     def __linfit(self,frame,bottom,test):
         cv = 299792.458
@@ -178,12 +185,36 @@ class line(object):
         lmin  = -b/(2*a)
         bot   = pol.polyval(lmin,fit,tensor=False)
         pred  = pol.polyval(frame.group.lmbd[test],fit)
-        vel   = cv*(lmin-self.cent)/self.cent
+        vel   = lmin
         # Error of fit with extra error term to penalize fits 
         # that gets wildly off center, with extra weight so it *hurts*
         err   = np.sqrt( np.mean( (frame.data[:,test]-pred)**2,axis=1) 
                                          + 2*(lmin-self.cent)**2 )
         return vel,bot,err
+
+    def __ew_moments(self,frame,nrows,vel,bot):
+        lmbd = frame.group.lmbd[self.idx].reshape(-1,1)
+        dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]).reshape((-1,1))*np.ones(nrows)
+        ew   = ((frame.data[:,self.idx]-1)*dlam.T).sum(axis=1) 
+
+        # Variance by ratio between center and outer mass
+        lsel = (lmbd > vel-ew/2) & (lmbd < vel+ew/2); 
+        In   = ((frame.data[:,self.idx]-1)*dlam.T*lsel.T).sum(axis=1)
+        var  =  In/ew
+
+        # Skewness by ratio between left and right mass
+        lsel = (lmbd < vel)
+        lft  = ((frame.data[:,self.idx]-1)*dlam.T*lsel.T).sum(axis=1); rght = ((frame.data[:,self.idx]-1)*dlam.T*np.logical_not(lsel.T)).sum(axis=1);
+        cut, = np.where(rght == 0); lft[cut] = 0; rght[cut] = 1
+        ske  = lft/rght-1
+
+        # Kurtosis 
+        lsel = frame.data[:,self.idx] > (1 +   bot.reshape(-1,1))/2
+        up   = ((frame.data[:,self.idx]-1)*dlam.T*lsel).sum(axis=1); dwn  = ((frame.data[:,self.idx]-1)*dlam.T*np.logical_not(lsel)).sum(axis=1);
+        cut, = np.where(dwn == 0); dwn[cut] = 1; up[cut] = 0
+        kur  = up/dwn
+
+        return var, ske, kur
 
     def _equivalent_width(self,frame,nrows):
         dlam = np.diff(frame.group.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]

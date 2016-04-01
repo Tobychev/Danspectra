@@ -119,7 +119,7 @@ def prop_plot(ax,x,y,conf):
         ax.set_ylim(conf["ylim"])
 
 def moments_linemap(measure,line,mesbin=None,lims=None):
-    vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8
+    vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8; wvar = 9; wske = 10; wkur = 11;
     cut = measure[err] < np.percentile(measure[err],98)
 
     fig, axs  = pl.subplots(3,3,sharex=True)
@@ -169,6 +169,25 @@ def moments_linemap(measure,line,mesbin=None,lims=None):
          })
 #         "ylim"  : vellim})
 
+    prop_plot(axs[2,0],measure[con][cut],measure[wvar][cut],
+        {"title" : "Line variance,\n " + str(line),
+         "ylabel": "Variance",
+         "xlabel": "Continuum intensity",
+         })
+#         "ylim"  : vellim})
+
+    prop_plot(axs[2,1],measure[con][cut],measure[wske][cut],
+        {"title" : "Line skewness,\n " + str(line),
+         "ylabel": "Skewness",
+         "xlabel": "Continuum intensity",
+         })
+#         "ylim"  : vellim})
+
+    prop_plot(axs[2,2],measure[con][cut],measure[wkur][cut],
+        {"title" : "Line kurtosis,\n " + str(line),
+         "ylabel": "Kurtosis",
+         "xlabel": "Continuum intensity",
+         })
     if mesbin is not None:
         (vel,bot,err,ew ,mn ,var,ske,kur) = np.arange(0,8)
         axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
