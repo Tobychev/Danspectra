@@ -269,7 +269,7 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
 
     if errs is not None:
         axs[0,0].errorbar(mesbin[2:,con],mesbin[2:,ew]/mew,fmt='ro',yerr=[errs[:,32],errs[:,35]]) 
-        axs[0,0].errorbar(mesbin[2:,con],mesbin[2:,ew]/mew,fmt='ko',yerr=[errs[:,33],errs[:,34]],alpha=0.2) 
+        axs[0,0].errorbar(mesbin[2:,con],mesbin[2:,ew]/mew,fmt='bo',yerr=[errs[:,33],errs[:,34]],alpha=0.6) 
         # Vel
 #        axs[0,1].errorbar(mesbin[2:,con],mesbin[2:,vel],fmt='ro',yerr=[errs[:,4],errs[:,7]])
 #        axs[0,1].errorbar(mesbin[2:,con],mesbin[2:,vel],fmt='ko',yerr=[errs[:,5],errs[:,6]],alpha=0.2)
