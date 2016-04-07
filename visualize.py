@@ -184,7 +184,7 @@ def plot_linemap(measure,line,binned=()):
 
     pl.show()
 
-def spline_linemap(measure,line,mesbin=None,lims=None):
+def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
     bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
     if lims is None:
         ewlim   = ( 0.3 , 1.8  )
@@ -193,9 +193,9 @@ def spline_linemap(measure,line,mesbin=None,lims=None):
         fw13lim = ( 0.0 , 1.0  )
         fwhmlim = ( 0.0 , 1.0  )
         fw23lim = ( 0.0 , 1.0  )
-        as13lim = (-0.03, 0.02 )
-        as12lim = (-0.02, 0.015)
-#        as23lim = (-0.02, 0.015)
+        as13lim = (-0.2 , 0.2  )
+        as12lim = (-0.2 , 0.2  )
+        as23lim = (-0.1 , 0.1  )
     else:
         ewlim   = lims["ewlim"]
         vellim  = lims["vellim"]
@@ -247,23 +247,32 @@ def spline_linemap(measure,line,mesbin=None,lims=None):
          "xlabel": "Continuum intensity",
          "ylim"  : fw23lim})
 
-    prop_plot(axs[2,0],measure[:,con],measure[:,as13]/line.width,
+    prop_plot(axs[2,0],measure[:,con],(measure[:,as13]-measure[:,as13].mean())/line.width,
         {"title" : "Line assymetry 1/3 maximum,\n " + str(line),
          "ylabel": "Line assymetry",
          "xlabel": "Continuum intensity",
-         })
-#          "ylim" : as13lim})
+         "ylim"  : as13lim})
+#        })
         
-    prop_plot(axs[2,1],measure[:,con],measure[:,as12]/measure[:,fwhm].mean(),
+    prop_plot(axs[2,1],measure[:,con],(measure[:,as12]-measure[:,as12].mean())/line.width,
         {"title" : "Line assymetry half maximum,\n " + str(line),
          "ylabel": "Line width [Å]",
          "xlabel": "Continuum intensity",
-         })
-    prop_plot(axs[2,2],measure[:,con],measure[:,as23]/measure[:,as23].mean(),
+         "ylim"  : as12lim})
+#         })
+    prop_plot(axs[2,2],measure[:,con],(measure[:,as23]-measure[:,as23].mean())/line.width,
         {"title" : "Line assymetry 2/3 maximum,\n " + str(line),
          "ylabel": "Line assymetry",
          "xlabel": "Continuum intensity",
-         })
+         "ylim"  : as23lim})
+#         })
+
+    if errs is not None:
+        axs[0,0].errorbar(mesbin[2:,con],mesbin[2:,ew]/mew,fmt='ro',yerr=[errs[:,32],errs[:,35]]) 
+        axs[0,0].errorbar(mesbin[2:,con],mesbin[2:,ew]/mew,fmt='ko',yerr=[errs[:,33],errs[:,34]],alpha=0.2) 
+        # Vel
+#        axs[0,1].errorbar(mesbin[2:,con],mesbin[2:,vel],fmt='ro',yerr=[errs[:,4],errs[:,7]])
+#        axs[0,1].errorbar(mesbin[2:,con],mesbin[2:,vel],fmt='ko',yerr=[errs[:,5],errs[:,6]],alpha=0.2)
 
     if mesbin is not None:
         axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
@@ -272,10 +281,11 @@ def spline_linemap(measure,line,mesbin=None,lims=None):
         axs[1,0].plot(mesbin[:,con],mesbin[:,fw13]/line.width,'ko')
         axs[1,1].plot(mesbin[:,con],mesbin[:,fwhm]/line.width,'ko')
         axs[1,2].plot(mesbin[:,con],mesbin[:,fw23]/line.width,'ko')
-     #   axs[2,0].plot(mesbin[:,con],mesbin[:,as13]/measure[:,as13].mean(),'ko')
-     #   axs[2,1].plot(mesbin[:,con],mesbin[:,as12]/measure[:,as12].mean(),'ko')
-     #   axs[2,2].plot(mesbin[:,con],mesbin[:,as23]/measure[:,as23].mean(),'ko')
+        axs[2,0].plot(mesbin[:,con],(mesbin[:,as13]-measure[:,as13].mean())/line.width,'ko')
+        axs[2,1].plot(mesbin[:,con],(mesbin[:,as12]-measure[:,as12].mean())/line.width,'ko')
+        axs[2,2].plot(mesbin[:,con],(mesbin[:,as23]-measure[:,as23].mean())/line.width,'ko')
     
+
 
     pl.show()
 

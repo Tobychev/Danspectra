@@ -3,6 +3,40 @@ import danframe as dan
 import astropy.stats as ast
 import numpy.polynomial.polynomial as pol
 import scipy.interpolate as si
+import numpy.random as rnd
+
+def binerror(binned,cont,line,reps=10000,feats=10):
+    bincent = np.convolve(binned.bins,np.array([0.5,0.5]),mode="valid")
+    sel, = np.where(binned.counts > 30)
+    sorting = np.digitize(cont,binned.bins[:-1]) 
+    result  = np.zeros( (len(sel), 4*feats) )
+
+    var = np.zeros( (len(sel),len(line.idx)) )
+    for i,idx in enumerate(sel):
+        subs = binned.block[ sorting == (idx+1), : ]
+        subs = subs[:,line.idx]
+        for j,row in enumerate(subs.T):
+            men = row.mean()
+            var[i,j] = (row-men).std()/np.sqrt(subs.shape[0])
+
+    con = np.ones(reps)
+    for binNr,bn in enumerate(sel):
+        print(binned.binned[binNr,line.idx].shape,np.sqrt(var[binNr,:]).shape)
+        mcblock = rnd.normal( loc=binned.binned[binNr,line.idx] , scale=np.sqrt(var[binNr,:]) ,size=(reps,len(line.idx)) )
+        mes     = line.measure_on_block(binned.group,mcblock,con*bincent[binNr])
+        print("")
+        print("For bin {:.4f} with {} spectra".format(bincent[binNr],binned.counts[bn]))
+        j = 0
+        for i in range(0,feats): 
+            # The percentile ranges are one and two sigmas, calculated by hand from a probability table on wikipedia
+            result[binNr,j], result[binNr,j+1],result[binNr,j+2],result[binNr,j+3] = (np.percentile(mes[:,i],2.274),
+                                                                                      np.percentile(mes[:,i],15.87),
+                                                                                      np.percentile(mes[:,i],84.13),
+                                                                                      np.percentile(mes[:,i],97.725))
+            print("-2s: {: 8.6f}, -1s {: 8.6f}, mu {: 8.6f}, +1s {: 8.6f}, +2s {: 8.6f}".format(
+                result[binNr,j], result[binNr,j+1],mes[:,i].mean(),result[binNr,j+2],result[binNr,j+3]))
+            j+=4
+    return result
 
 class binspec(object):
     def __init__(self,group,cont,cond,method='blocks'):
@@ -16,6 +50,8 @@ class binspec(object):
         block      = group.frames[0].data
         for frm in group.frames[1:]:
             block = np.vstack((block,frm.data))
+        self.block = block
+
         if cond.dtype == np.dtype('bool'):
             idx,  = np.where(cond)
             nidx, = np.where(~cond)
@@ -53,10 +89,10 @@ class binned_framegroup(object):
         self.data,self.cont,self.bins,self.counts = self.__bin_by_quant(bin_quant,cuts)
     
     def __bin_by_quant(self,quant,cuts):
-        try:             
+        if cuts is not None:
             cuts, = np.where(cuts.reshape(-1))
-        except AttributeError:
-            cuts = np.ones(len(quant))
+        else:
+            cuts = np.ones(len(quant)).astype(bool)
 
         datablock = self.group.frames[0].data[:,self.idx]        
         contblock = self.group.frames[0].cont.val(self.cent)
