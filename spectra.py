@@ -102,7 +102,7 @@ class SpectraFactory(object):
 
         print("Keeping frames")
         print(self.files[idx])
-        print("With continuum contras")
+        print("With continuum contrast")
         print(self.contrast[idx])
 
         self.files = self.files[idx]
@@ -124,10 +124,10 @@ class SpectraFactory(object):
                 self.rows.remove(itm)
             except ValueError:
                 print("Row {} not found".format(itm))
-        if state.meta["state"] == "new":
-            self.meta["state"]   = "row cut"
+        if self.meta["state"] == "new":
+            self.meta["state"] = "row cut"
         else:
-            self.meta["state"]   = self.meta["state"] + "+row cut"
+            self.meta["state"] = self.meta["state"] + "+row cut"
 
         if "row cut" in self.meta:
             self.meta["rowtcut"] = self.meta["rowtcut"]+ "and {}".format(cutrows)
@@ -138,7 +138,7 @@ class SpectraFactory(object):
 
     def set_continua(self,method,nump=100,q=50):
         if method in ["top 20","segments"]:
-            self.meta["method"] = method
+            self.meta["cont method"] = method
             self.meta["nump"]   = nump
             self.meta["q"]      = q
             self.meta["state"]  = "Continua defined"
@@ -150,23 +150,22 @@ class SpectraFactory(object):
         lmbd = self.__load_from_fits(self.Dir+self.__lmbdname)
         ref  = self.__load_from_fits(self.Dir+self.__refname )
 
-        data = self.__load_from_fits(fil)
+        data = self.__load_from_fits(self.files[0])
         block = data[self.rows,:]
         for fil in self.files[1:]:
             data  = self.__load_from_fits(fil)
             block = np.vstack((block,data[self.rows,:]))
         
-        if "method" in self.meta:
-            con = continua(ref,lmbd,self.meta["method"],self.meta["nump"],self.meta["q"])
+        if "cont method" in self.meta:
+            con = continua(ref,lmbd,self.meta["cont method"],self.meta["nump"],self.meta["q"])
             block = block/con(lmbd,block)        
         if desc == "":
-            desc = ", ".join( ": ".join((str(k),str(v))) for k,v in self.meta.items)
+            desc = ", ".join( ": ".join((str(k),str(v))) for k,v in self.meta.items())
 
-        spec = Spectra(desc,lmbd,block)
-        
+        return Spectra(desc,lmbd,block,self.meta)
 
 class continua(object):
-    def __init__(self,refdata,lmbd,method,nump=100,q=50):
+    def __init__(self,refdata,lmbd,method,nump=30,q=80):
         self.idx      = self.__def_continua(refdata,method,nump,q)
         self.lmbd     = lmbd[self.idx]
 
@@ -175,25 +174,26 @@ class continua(object):
             k,m = np.polyfit(self.lmbd,data[self.idx],1)
             return k*lmbd+m   
         elif len(data.shape) == 2:
-            k,m = np.polyfit(self.lmbd,data[:,self.idx],1)
-            return k*lmbd+m.reshape(-1,1) 
+            k,m = np.polyfit(self.lmbd,data[:,self.idx].T,1)
+            return k.reshape(-1,1)*lmbd+m.reshape(-1,1) 
         else:
             raise ValueError("Data must be 1 or 2d")
         
     def __top_of_segments(self,data,npoint,q):
-        idx, = np.where(data > np.percentile(data,q))
-        nregion = len(idx)/npoint
-        perreg  = npoint/nregion
+        ids, = np.where(data > np.percentile(data,q))
+        nregion = int(len(ids)/npoint)
+        perreg  = int(npoint/nregion)
         regions = np.array_split(ids,nregion)
-        idx = np.array( [])
+        idx = []
         # Top perreg of data in each region
         # have global indices given by reg, 
-        # top_number returns indiced local to data[reg]
+        # selection returns indices local to data[reg]
         for reg in regions:
-             idx = np.hstack( (idx, reg[top_number(data[reg],perreg)]) )
+            idx.append( reg[ data[reg].argsort()[-perreg:] ])
+        idx = np.array(idx).reshape(-1)
         return idx.astype("int")
             
-    def __def_continua(self,method,data,nump,q):
+    def __def_continua(self,data,method,nump,q):
         if   method == "top 20":
             return data.argsort()[-20:]
         elif method == "segments":
