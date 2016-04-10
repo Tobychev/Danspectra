@@ -1,4 +1,8 @@
+import astropy.io.fits as fits
+import pickle as pic
 import numpy as np
+import glob as g
+import os
 
 class Spectra(object):
 
@@ -20,36 +24,28 @@ class Spectra(object):
     def __repr__(self):
         return "[{},{}] Datablock: ".format(self.__data.shape[0],self.__data.shape[1])+self.__description
 
-class MetaSpectra(object):
+class SpecMeta(object):
     pass
 
-class frameseries(object):
+class SpectraFactory(object):
     __lmbdname = "{}_{}__lambda.fits"
     __refname  = "{}_{}__adjustfts.fits"
-    __savename = "{}_{}__metadata"
+    __savename = "spec_{}_{}.metadata"
+    __contrast = "{}_{}__concont.fits"
 
-    def __init__(self,fileglob,method,rows=800):
+    def __init__(self,fileglob,framerows=800):
         self.__parse_fileglob(fileglob)
-        self.meta  = self.__load_meta()
-        self.ref   = self.__load_from_fits(self.Dir+self.__refname)
-        self.lmbd  = self.__load_from_fits(self.Dir+self.__lmbdname)
-        self.files = g.glob(self.glob) ; self.files.sort()
-        self.rows  = list(range(0,rows))
-        self.refcon = con.refcontinua(self,method)
-        self.ref   = self.ref/self.refcon.cont()
+        self.rows     = list(range(0,framerows))
+        self.files    = np.array( g.glob(self.glob)); self.files.sort()
+        self.contrast = self.__load_from_fits(self.Dir+self.__contrast)
+        self.__load_meta()     
+        self.meta["state"] = "new"
 
-        self.veto_rows([0,799])
-        self.normed = False
-
-        try:
-            self.pkwindows = self.meta["peakwin"] 
-        except KeyError:
-            self.pkwindows = []
-
-        self.frames = []
-        for fil in self.files:
-            self.frames.append(
-                danframe(fil,self,method))
+    def __load_from_fits(self,filename,hdu=0):
+        # Works for proper filenames too because
+        # format does noting unless 'filename' contains '{}'
+        fit = fits.open(filename.format(self.wave,self.series)) 
+        return fit[hdu].data
 
     def __parse_fileglob(self,fileglob):
         self.glob = fileglob +"_[1-9]*" 
@@ -61,74 +57,146 @@ class frameseries(object):
         self.series = filename.split("_")[1]
         self.wave   = filename.split("_")[0]
 
-    def __load_from_fits(self,filename,hdu=0):
-        fit = fits.open(filename.format(self.wave,self.series))
-        return fit[hdu].data
+    def __load_meta(self,keyword=""):
+        """
+            Tricksy function, when called with keyword it will return a value,
+            else it updates self.meta as a side effect. Maybe not a good idea?
+        """
+        try:        
+            with open(self.Dir+self.__savename.format(self.wave,self.series),"r+b") as metafile:
+                meta =  pic.load(metafile)
+                if keyword == "":
+                    self.meta = meta
+                else:
+                    return meta[keyword]
+        except EOFError:
+            self.meta = {}
+        except IOError:
+            fil  = self.Dir+self.__savename.format(self.wave,self.series)
+            print("Creating metafile {}".format(fil))
+            fil = open(fil,"w")
+            fil.close()
+            self.meta = {}
 
-    def normalize(self):
-        if not self.normed:
-            for frame in self.frames:
-                frame.data = frame.data/frame.cont.norm()
-        self.normed = True
+    def __set_meta(self,metavalue,keyword=""):
+        if keyword != "":
+            meta[keyword] = metavalue
+        with open(self.Dir+self.__savename.format(self.wave,self.series),"wb") as metafile:
+            pic.dump(self.meta,metafile,protocol=1)
+            
+    def __update_meta(self):
+        self.__set_meta(None)
+        self.__load_meta()
 
-    def veto_rows(self,rows):
-        if not isinstance(rows,list):
-            rows = [rows]
-        for itm in rows:
+    def contrast_cut(self,cutval,mode="percentile"):
+        """
+            Discard frames based on continuum contrast
+            cutval - integer or float respectively
+            mode   - one of "ordinal" or "percentile" 
+        """
+
+        if mode == "percentile":
+            idx, = np.where(self.contrast > np.percentile(self.contrast,cutval))
+        elif mode == "ordinal":
+            idx  = self.contrast.argsort()[-cutval:]
+
+        print("Keeping frames")
+        print(self.files[idx])
+        print("With continuum contras")
+        print(self.contrast[idx])
+
+        self.files = self.files[idx]
+        if self.meta["state"] == "new":
+            self.meta["state"]   = "continuum cut"
+        else:
+            self.meta["state"]   = self.meta["state"] + "+continuum cut"
+        if "contcut" in self.meta:
+            self.meta["contcut"] = self.meta["contcut"] + "and Mode:{}, cutval:{}".format(mode,cutval)
+        else:
+            self.meta["contcut"] = "Mode:{}, cutval:{}".format(mode,cutval)
+        self.__update_meta()
+
+    def frame_row_cut(self,cutrows):
+        if not isinstance(cutrows,list):
+            cutrows = list(cutrows)
+        for itm in cutrows:
             try:
                 self.rows.remove(itm)
             except ValueError:
                 print("Row {} not found".format(itm))
-
-    def veto_and_update_rows(rows):
-        if len(rows) > 0:
-            self.veto_rows(rows)
-        for frm in self.frames:
-            frm.update_veto()            
-
-    def set_bgwindows(self,bgwindows,warn=True):
-        if len(self.bgwindows) > 0 and warn :
-            print("WARNING: Old values will be erased")
-            if not input("Continue Y/N? ").lower() == "y":
-                return None
-        bgwindows.sort()
-        self.__set_meta(bgwindows,"bgwin")
-        self.__load_bgwindows()
-
-    def set_pkwindows(self,pkwindows,warn=True):
-        if len(self.pkwindows) > 0 and warn :
-            print("WARNING: Old values will be erased")
-            if not input("Continue Y/N? ").lower() == "y":
-                return None
-        pkwindows.sort()
-        self.__set_meta(pkwindows,"peakwin")
-        self.pkwindows =self.__load_meta("peakwin")
-
-    def __set_meta(self,metadata,keyword=""):
-        with open(self.Dir+self.__savename.format(self.wave,self.series),"r+b") as metafile:
-            try:
-                meta =  pic.load(metafile)
-            except EOFError:
-                meta = {}
-        if keyword != "":
-            meta[keyword] = metadata
+        if state.meta["state"] == "new":
+            self.meta["state"]   = "row cut"
         else:
-            meta = metadata
-        with open(self.Dir+self.__savename.format(self.wave,self.series),"wb") as metafile:
-            pic.dump(meta,metafile,protocol=1)
+            self.meta["state"]   = self.meta["state"] + "+row cut"
 
-    def __load_meta(self,keyword=""):
-        try:        
-            with open(self.Dir+self.__savename.format(self.wave,self.series),"r+b") as metafile:
-                meta =  pic.load(metafile)
-        except EOFError:
-            return {}
-        except IOError:
-            fil = open(self.Dir+self.__savename.format(self.wave,self.series),"w")
-            fil.close()
-            return {}
-        if keyword == "":
-            return meta
+        if "row cut" in self.meta:
+            self.meta["rowtcut"] = self.meta["rowtcut"]+ "and {}".format(cutrows)
         else:
-            return meta[keyword]
-    
+            self.meta["rowtcut"] = "{}".format(cutrows)
+        self.__update_meta()
+
+
+    def set_continua(self,method,nump=100,q=50):
+        if method in ["top 20","segments"]:
+            self.meta["method"] = method
+            self.meta["nump"]   = nump
+            self.meta["q"]      = q
+            self.meta["state"]  = "Continua defined"
+            self.__update_meta()
+        else:
+            print("Unrecognized method:", method)
+        
+    def make_block(self,desc=""):
+        lmbd = self.__load_from_fits(self.Dir+self.__lmbdname)
+        ref  = self.__load_from_fits(self.Dir+self.__refname )
+
+        data = self.__load_from_fits(fil)
+        block = data[self.rows,:]
+        for fil in self.files[1:]:
+            data  = self.__load_from_fits(fil)
+            block = np.vstack((block,data[self.rows,:]))
+        
+        if "method" in self.meta:
+            con = continua(ref,lmbd,self.meta["method"],self.meta["nump"],self.meta["q"])
+            block = block/con(lmbd,block)        
+        if desc == "":
+            desc = ", ".join( ": ".join((str(k),str(v))) for k,v in self.meta.items)
+
+        spec = Spectra(desc,lmbd,block)
+        
+
+class continua(object):
+    def __init__(self,refdata,lmbd,method,nump=100,q=50):
+        self.idx      = self.__def_continua(refdata,method,nump,q)
+        self.lmbd     = lmbd[self.idx]
+
+    def __call__(self,lmbd,data):
+        if len(data.shape) == 1:
+            k,m = np.polyfit(self.lmbd,data[self.idx],1)
+            return k*lmbd+m   
+        elif len(data.shape) == 2:
+            k,m = np.polyfit(self.lmbd,data[:,self.idx],1)
+            return k*lmbd+m.reshape(-1,1) 
+        else:
+            raise ValueError("Data must be 1 or 2d")
+        
+    def __top_of_segments(self,data,npoint,q):
+        idx, = np.where(data > np.percentile(data,q))
+        nregion = len(idx)/npoint
+        perreg  = npoint/nregion
+        regions = np.array_split(ids,nregion)
+        idx = np.array( [])
+        # Top perreg of data in each region
+        # have global indices given by reg, 
+        # top_number returns indiced local to data[reg]
+        for reg in regions:
+             idx = np.hstack( (idx, reg[top_number(data[reg],perreg)]) )
+        return idx.astype("int")
+            
+    def __def_continua(self,method,data,nump,q):
+        if   method == "top 20":
+            return data.argsort()[-20:]
+        elif method == "segments":
+            return self.__top_of_segments(data,nump,q)
+        elif   method == "top N":
+            return data.argsort()[-q:]
