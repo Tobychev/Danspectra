@@ -269,16 +269,17 @@ class statline(line):
         bottom  = self.idx[guess + np.arange(-dwn,up)]   
         test    = self.idx[guess + np.arange(-(dwn+1),(up+1))]
 
-        vel,bot,err = self.__linfit(spectra,bottom,test)
         ew = self._equivalent_width(spectra)
+        vel,bot,err    = self.__linfit(spectra,bottom,test)
         mn,var,ske,kur = self.__moments(spectra)
+        wvar,wske,wkur = self.__ew_moments(spectra,vel,bot,ew)        
         
         if spectra.meta.cont is not None:
             con = spectra.meta.cont[0].reshape(-1,1)*self.cent + spectra.meta.cont[1].reshape(-1,1)
         else:
             con = None
 
-        return vel,bot,con,err,ew,mn,var,ske,kur
+        return vel,bot,con,err,ew,mn,var,ske,kur,wvar,wske,wkur
 
     def __linfit(self,spec,bottom,test):
         cv = 299792.458
@@ -307,6 +308,30 @@ class statline(line):
         skew = mu3/mu2**(3/2) 
         kurt = (mu4/mu2**2 - 3)
         return mu,mu2,skew,kurt
+
+    def __ew_moments(self,spec,vel,bot,ew):
+        lmbd = spec.meta.lmbd[self.idx].reshape(-1,1)
+        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]).reshape((-1,1))*np.ones(spec[:,:].shape[0])
+        ew   = ew*1e-3 # Cancels scaling
+
+        # Variance by ratio between center and outer mass
+        lsel = (lmbd > vel-ew/2) & (lmbd < vel+ew/2); 
+        In   = ((spec[:,self.idx]-1)*dlam.T*lsel.T).sum(axis=1)
+        var  =  In/ew
+
+        # Skewness by ratio between left and right mass
+        lsel = (lmbd < vel)
+        lft  = ((spec[:,self.idx]-1)*dlam.T*lsel.T).sum(axis=1); rght = ((spec[:,self.idx]-1)*dlam.T*np.logical_not(lsel.T)).sum(axis=1);
+        cut, = np.where(rght == 0); lft[cut] = 0; rght[cut] = 1
+        ske  = lft/rght-1
+
+        # Kurtosis 
+        lsel = spec[:,self.idx] > (1 +   bot.reshape(-1,1))/2
+        up   = ((spec[:,self.idx]-1)*dlam.T*lsel).sum(axis=1); dwn  = ((spec[:,self.idx]-1)*dlam.T*np.logical_not(lsel)).sum(axis=1);
+        cut, = np.where(dwn == 0); dwn[cut] = 1; up[cut] = 0
+        kur  = up/dwn
+
+        return var, ske, kur
 
 class splineline(line):
 
