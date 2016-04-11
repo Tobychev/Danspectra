@@ -193,6 +193,38 @@ class SpectraFactory(SpecMeta):
         meta = SpecMeta(self.Dir+self.__savename.format(self.wave,self.series),cont,lmbd,ref)
         return Spectra(desc,lmbd,block,meta)
 
+    def make_spectra_subset(self,spectra,rowsubset=None,colsubset=None,desc=""):
+        shape = spectra[:,:].shape
+        colid = range(0,shape[1]); rowid = range(0,shape[0])
+        meta  = spectra.meta
+        subset = None
+
+        if desc == "":
+            desc = "Subset of {}".format(spectra)
+        if rowsubset is not None:
+            if rowsubset.dtype == np.dtype('bool'):
+                rowid, = np.where(rowsubset)
+            else:
+                if len(rowsubset) > shape[0]:
+                    raise IndexError("Length of rowsubset grater than number of rows in spectra")
+                rowid = rowsubset
+
+        if colsubset is not None:
+            if colsubset.dtype == np.dtype('bool'):
+                colid, = np.where(colsubset)
+            else:
+                if len(colsubset) > shape[0]:
+                    raise IndexError("Length of colsubset grater than number of cols in spectra")
+                colid = colsubset
+
+        if rowsubset is not None or colsubset is not None:
+            subset = spectra[rowid,:]
+            subset = subset[:,colid]
+            return Spectra(desc,spectra.meta.lmbd[colid],subset,meta)
+        else:
+            print("No selection given")
+
+
 class continua(object):
     def __init__(self,refdata,lmbd,method,nump=30,q=80):
         self.idx      = self.__def_continua(refdata,method,nump,q)
@@ -343,6 +375,7 @@ class splineline(line):
         splmes = np.zeros((nrows,11))
         splmes[:,10] = con.reshape(-1)
         splmes[:, 9] = ew.reshape(-1)
+        print("Making splines and measuring\n")
         for i,row in enumerate(spectra[:,self.idx]):
             mf           = self.makespline(row,lmbd,9)
             splmes[i,:9] = self.measure_spline(mf,lmbd)
