@@ -1,4 +1,6 @@
 import astropy.io.fits as fits
+import numpy.polynomial.polynomial as pol
+import scipy.interpolate as si
 import pickle as pic
 import numpy as np
 import glob as g
@@ -22,42 +24,28 @@ class Spectra(object):
         return self.__data[key]
 
     def __repr__(self):
-        return "[{},{}] Datablock: ".format(self.__data.shape[0],self.__data.shape[1])+self.__description
+        return "[{},{}] ".format(self.__data.shape[0],self.__data.shape[1])+self.__description
 
 class SpecMeta(object):
-    pass
+    __savename = "spec_{}_{}.metadata"    
+    def __init__(self,filename,cont,lmbd,ref):
+        self.__parse_filename(filename)
+        self._load_meta()
+        self.cont = cont
+        self.lmbd = lmbd
+        self.ref  = ref
 
-class SpectraFactory(object):
-    __lmbdname = "{}_{}__lambda.fits"
-    __refname  = "{}_{}__adjustfts.fits"
-    __savename = "spec_{}_{}.metadata"
-    __contrast = "{}_{}__concont.fits"
-
-    def __init__(self,fileglob,framerows=800):
-        self.__parse_fileglob(fileglob)
-        self.rows     = list(range(0,framerows))
-        self.files    = np.array( g.glob(self.glob)); self.files.sort()
-        self.contrast = self.__load_from_fits(self.Dir+self.__contrast)
-        self.__load_meta()     
-        self.meta["state"] = "new"
-
-    def __load_from_fits(self,filename,hdu=0):
-        # Works for proper filenames too because
-        # format does noting unless 'filename' contains '{}'
-        fit = fits.open(filename.format(self.wave,self.series)) 
-        return fit[hdu].data
-
-    def __parse_fileglob(self,fileglob):
-        self.glob = fileglob +"_[1-9]*" 
-        if fileglob.find("/") > 0:
-            self.Dir  = "/".join(fileglob.split("/")[:-1])+"/"  # everything before the last '/'
+    def __parse_filename(self,filename):
+        self.glob = filename +"_[1-9]*" 
+        if filename.find("/") > 0:
+            self.Dir  = "/".join(filename.split("/")[:-1])+"/"  # everything before the last '/'
         else:
             self.Dir  = ""
-        filename    = self.glob.split("/")[-1]
-        self.series = filename.split("_")[1]
-        self.wave   = filename.split("_")[0]
+        filname = filename.split("/")[-1]
+        self.wave   = filename.split("_")[1]
+        self.series = filename.split("_")[2].split(".")[0]
 
-    def __load_meta(self,keyword=""):
+    def _load_meta(self,keyword=""):
         """
             Tricksy function, when called with keyword it will return a value,
             else it updates self.meta as a side effect. Maybe not a good idea?
@@ -78,16 +66,54 @@ class SpectraFactory(object):
             fil.close()
             self.meta = {}
 
-    def __set_meta(self,metavalue,keyword=""):
+    def _set_meta(self,metavalue,keyword=""):
         if keyword != "":
             meta[keyword] = metavalue
         with open(self.Dir+self.__savename.format(self.wave,self.series),"wb") as metafile:
             pic.dump(self.meta,metafile,protocol=1)
             
-    def __update_meta(self):
-        self.__set_meta(None)
-        self.__load_meta()
+    def _update_meta(self):
+        self._set_meta(None)
+        self._load_meta()
 
+class SpectraFactory(SpecMeta):
+    __lmbdname = "{}_{}__lambda.fits"
+    __refname  = "{}_{}__adjustfts.fits"
+    __savename = "spec_{}_{}.metadata"
+    __contrast = "{}_{}__concont.fits"
+
+    def __init__(self,fileglob,framerows=800):
+        self.__parse_fileglob(fileglob)
+        self.rows     = list(range(0,framerows))
+        self.files    = np.array( g.glob(self.glob)); self.files.sort()
+        self.contrast = self.__load_from_fits(self.Dir+self.__contrast)
+        self._load_meta()
+        self.meta["state"] = "new"
+
+    def __parse_fileglob(self,fileglob):
+        self.glob = fileglob +"_[1-9]*" 
+        if fileglob.find("/") > 0:
+            self.Dir  = "/".join(fileglob.split("/")[:-1])+"/"  # everything before the last '/'
+        else:
+            self.Dir  = ""
+        filename    = self.glob.split("/")[-1]
+        self.series = filename.split("_")[1]
+        self.wave   = filename.split("_")[0]
+
+    def __load_from_fits(self,filename,hdu=0):
+        # Works for proper filenames too because
+        # format does noting unless 'filename' contains '{}'
+        fit = fits.open(filename.format(self.wave,self.series)) 
+        return fit[hdu].data
+
+    def __make_block(self):
+        data = self.__load_from_fits(self.files[0])
+        block = data[self.rows,:]
+        for fil in self.files[1:]:
+            data  = self.__load_from_fits(fil)
+            block = np.vstack((block,data[self.rows,:]))
+        return block
+    
     def contrast_cut(self,cutval,mode="percentile"):
         """
             Discard frames based on continuum contrast
@@ -110,11 +136,8 @@ class SpectraFactory(object):
             self.meta["state"]   = "continuum cut"
         else:
             self.meta["state"]   = self.meta["state"] + "+continuum cut"
-        if "contcut" in self.meta:
-            self.meta["contcut"] = self.meta["contcut"] + "and Mode:{}, cutval:{}".format(mode,cutval)
-        else:
-            self.meta["contcut"] = "Mode:{}, cutval:{}".format(mode,cutval)
-        self.__update_meta()
+        self.meta["contcut"] = "Mode:{}, cutval:{}".format(mode,cutval)
+        self._update_meta()
 
     def frame_row_cut(self,cutrows):
         if not isinstance(cutrows,list):
@@ -129,45 +152,61 @@ class SpectraFactory(object):
         else:
             self.meta["state"] = self.meta["state"] + "+row cut"
 
-        if "row cut" in self.meta:
-            self.meta["rowtcut"] = self.meta["rowtcut"]+ "and {}".format(cutrows)
-        else:
-            self.meta["rowtcut"] = "{}".format(cutrows)
-        self.__update_meta()
+        self.meta["rowtcut"] = "{}".format(cutrows)
+        self._update_meta()
 
-
-    def set_continua(self,method,nump=100,q=50):
+    def set_continua(self,method,nump=30,q=80):
         if method in ["top 20","segments"]:
             self.meta["cont method"] = method
             self.meta["nump"]   = nump
             self.meta["q"]      = q
             self.meta["state"]  = "Continua defined"
-            self.__update_meta()
+            self._update_meta()
         else:
             print("Unrecognized method:", method)
-        
-    def make_block(self,desc=""):
+
+    def set_continua(self,method,nump=30,q=80):
+        if method in ["top 20","segments"]:
+            self.meta["cont method"] = method
+            self.meta["nump"]   = nump
+            self.meta["q"]      = q
+            self.meta["state"]  = "Continua defined"
+            self._update_meta()
+        else:
+            print("Unrecognized method:", method)
+
+    def make_spectra(self,desc=""):
         lmbd = self.__load_from_fits(self.Dir+self.__lmbdname)
         ref  = self.__load_from_fits(self.Dir+self.__refname )
 
-        data = self.__load_from_fits(self.files[0])
-        block = data[self.rows,:]
-        for fil in self.files[1:]:
-            data  = self.__load_from_fits(fil)
-            block = np.vstack((block,data[self.rows,:]))
-        
+        block = self.__make_block()
+                
         if "cont method" in self.meta:
-            con = continua(ref,lmbd,self.meta["cont method"],self.meta["nump"],self.meta["q"])
-            block = block/con(lmbd,block)        
+            con   = continua(ref,lmbd,self.meta["cont method"],self.meta["nump"],self.meta["q"])
+            cont  = con.fit(block)
+            block = block/con(lmbd,block)
+        else: 
+            con = None
         if desc == "":
             desc = ", ".join( ": ".join((str(k),str(v))) for k,v in self.meta.items())
 
-        return Spectra(desc,lmbd,block,self.meta)
+        meta = SpecMeta(self.Dir+self.__savename.format(self.wave,self.series),cont,lmbd,ref)
+        return Spectra(desc,lmbd,block,meta)
 
 class continua(object):
     def __init__(self,refdata,lmbd,method,nump=30,q=80):
         self.idx      = self.__def_continua(refdata,method,nump,q)
         self.lmbd     = lmbd[self.idx]
+
+    def fit(self,data):
+        if len(data.shape) == 1:
+            k,m = np.polyfit(self.lmbd,data[self.idx],1)
+            return k,m   
+        elif len(data.shape) == 2:
+            k,m = np.polyfit(self.lmbd,data[:,self.idx].T,1)
+            return k,m 
+        else:
+            raise ValueError("Data must be 1 or 2d")
 
     def __call__(self,lmbd,data):
         if len(data.shape) == 1:
@@ -200,3 +239,121 @@ class continua(object):
             return self.__top_of_segments(data,nump,q)
         elif   method == "top N":
             return data.argsort()[-q:]
+
+class line(object):
+    def __init__(self,winbounds,cent,specmeta):
+        self.idx   = np.arange(winbounds[0],winbounds[1]+1)
+        self.cent  = cent
+        self.name  = "{:6.3f}".format(self.cent)
+        self.width = specmeta.lmbd[self.idx[0]] - specmeta.lmbd[self.idx[-1]] 
+        self.spec  = specmeta
+
+    def __repr__(self):
+        return "Line {} [$\Delta \lambda$ = {:.4f} Å]".format(self.name,self.width/10)        
+
+    def _equivalent_width(self,spec):
+        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
+                      ).reshape((-1,1))*np.ones(spec[:,0].shape)
+        return ((spec[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
+
+class statline(line):
+
+    def measure(self,spectra):
+        guess = spectra.meta.ref[self.idx].argmin()
+        width = len(self.idx)*0.16 # Min fraction of points to be used in fit
+
+        if width%2 == 0:
+            width +=1
+        dwn = int((width - 1)/2); up = dwn+1
+
+        bottom  = self.idx[guess + np.arange(-dwn,up)]   
+        test    = self.idx[guess + np.arange(-(dwn+1),(up+1))]
+
+        vel,bot,err = self.__linfit(spectra,bottom,test)
+        ew = self._equivalent_width(spectra)
+        mn,var,ske,kur = self.__moments(spectra)
+        
+        if spectra.meta.cont is not None:
+            con = spectra.meta.cont[0].reshape(-1,1)*self.cent + spectra.meta.cont[1].reshape(-1,1)
+        else:
+            con = None
+
+        return vel,bot,con,err,ew,mn,var,ske,kur
+
+    def __linfit(self,spec,bottom,test):
+        cv = 299792.458
+        fit   = pol.polyfit(spec.meta.lmbd[bottom],spec[:,bottom].T,2)
+        a,b,c = fit[2,:],fit[1,:],fit[0,:]
+        lmin  = -b/(2*a)
+        bot   = pol.polyval(lmin,fit,tensor=False)
+        pred  = pol.polyval(spec.meta.lmbd[test],fit)
+        vel   = cv*(lmin-self.cent)/self.cent
+        # Error of fit with extra error term to penalize fits 
+        # that gets wildly off center, with extra weight so it *hurts*
+        err   = np.sqrt( np.mean( (spec[:,test]-pred)**2,axis=1) 
+                                         + 2*(lmin-self.cent)**2 )
+        return vel,bot,err
+
+    def __moments(self,spec):
+        x    = spec.meta.lmbd[self.idx]
+        dpdf = (1-spec[:,self.idx]/spec[:,self.idx].max(axis=1).reshape(-1,1))
+        dpdf = dpdf/dpdf.sum(axis=1).reshape(-1,1)
+        mu   = np.sum(dpdf*x,axis=1).reshape(-1,1) # Reshaping enables broadcasting
+        mu2  = np.sum(dpdf*(x-mu)**2,axis=1)
+        mu3  = np.sum(dpdf*(x-mu)**3,axis=1)
+        mu4  = np.sum(dpdf*(x-mu)**4,axis=1)
+        mu   = mu.reshape(-1) # Undoing reshape to allow assignment
+
+        skew = mu3/mu2**(3/2) 
+        kurt = (mu4/mu2**2 - 3)
+        return mu,mu2,skew,kurt
+
+class splineline(line):
+
+    def measure(self,spectra,con):
+        nrows = spectra[:,:].shape[0]
+        lmbd  = spectra.meta.lmbd[self.idx]
+        ew = self._equivalent_width(spectra)
+
+        splmes = np.zeros((nrows,11))
+        splmes[:,10] = con.reshape(-1)
+        splmes[:, 9] = ew.reshape(-1)
+        for i,row in enumerate(spectra[:,self.idx]):
+            mf           = self.makespline(row,lmbd,9)
+            splmes[i,:9] = self.measure_spline(mf,lmbd)
+
+        return splmes
+
+    def makespline(self,spec,lmbd,kns=6):
+        _,kno = np.histogram(lmbd,kns+2)
+        kno   = kno[1:-2]
+        return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
+
+    def measure_spline(self,spl,lmbd,dl=2e-5):
+        lmbd = np.linspace(lmbd[0],lmbd[-1],int( (lmbd[0]-lmbd[-1])/dl )) 
+        bot  = spl(lmbd).min()
+        icnt = spl(lmbd).argmin()
+        cnt  = lmbd[icnt]
+        bo12 = (1 +   bot)/2        
+        bo13 = (1 + 2*bot)/3
+        bo23 = (2 +   bot)/3
+        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt)
+        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt)
+        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt)
+        cnt = 299792.458*(cnt-self.cent)/self.cent
+
+        return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
+
+    def __width_assym(self,spl,lmbd,lev,cnt):
+        ilev, = np.where(spl(lmbd) <= lev)
+        
+        # Check that we only got one interval
+        spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
+        if spli.sum() > 0:
+            if   len(spli) == 1 :
+                ilev  = ilev[slice(spli+1)]
+
+        wdth  = lmbd[ilev[0]] - lmbd[ilev[-1]]
+        assm  = cnt  - (lmbd[ilev[0]] + lmbd[ilev[-1]])/2
+        return wdth,assm
+
