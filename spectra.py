@@ -26,6 +26,14 @@ class Spectra(object):
     def __repr__(self):
         return "[{},{}] ".format(self.__data.shape[0],self.__data.shape[1])+self.__description
 
+    def modify(self,mutator):
+        data = mutator(self.__data)
+        assert(data.shape == self.__data.shape,"Data has been reshaped")
+        self.__data.flags.writeable = True
+        self.__data = data
+        self.__data.flags.writeable = False
+        print("Spectra updated")
+
 class SpecMeta(object):
     __savename = "spec_{}_{}.metadata"    
     def __init__(self,filename,cont,lmbd,ref):
