@@ -232,7 +232,6 @@ class SpectraFactory(SpecMeta):
         else:
             print("No selection given")
 
-
 class continua(object):
     def __init__(self,refdata,lmbd,method,nump=30,q=80):
         self.idx      = self.__def_continua(refdata,method,nump,q)
@@ -297,7 +296,6 @@ class line(object):
         return ((spec[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
 
 class statline(line):
-
     def measure(self,spectra):
         guess = spectra.meta.ref[self.idx].argmin()
         width = len(self.idx)*0.16 # Min fraction of points to be used in fit
@@ -374,14 +372,13 @@ class statline(line):
         return var, ske, kur
 
 class splineline(line):
-
-    def measure(self,spectra,con):
+    def measure(self,spectra):
         nrows = spectra[:,:].shape[0]
         lmbd  = spectra.meta.lmbd[self.idx]
         ew = self._equivalent_width(spectra)
 
         splmes = np.zeros((nrows,11))
-        splmes[:,10] = con.reshape(-1)
+        splmes[:,10] = (spectra.meta.cont[0]*self.cent)+ (spectra.meta.cont[1])
         splmes[:, 9] = ew.reshape(-1)
         print("Making splines and measuring\n")
         for i,row in enumerate(spectra[:,self.idx]):
@@ -412,7 +409,6 @@ class splineline(line):
 
     def __width_assym(self,spl,lmbd,lev,cnt):
         ilev, = np.where(spl(lmbd) <= lev)
-        
         # Check that we only got one interval
         spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
         if spli.sum() > 0:
