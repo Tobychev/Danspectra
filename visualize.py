@@ -267,13 +267,6 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
          "ylim"  : as23lim})
 #         })
 
-    if errs is not None:
-        axs[0,0].errorbar(mesbin[2:,con],mesbin[2:,ew]/mew,fmt='ro',yerr=[errs[:,32],errs[:,35]]) 
-        axs[0,0].errorbar(mesbin[2:,con],mesbin[2:,ew]/mew,fmt='bo',yerr=[errs[:,33],errs[:,34]],alpha=0.6) 
-        # Vel
-#        axs[0,1].errorbar(mesbin[2:,con],mesbin[2:,vel],fmt='ro',yerr=[errs[:,4],errs[:,7]])
-#        axs[0,1].errorbar(mesbin[2:,con],mesbin[2:,vel],fmt='ko',yerr=[errs[:,5],errs[:,6]],alpha=0.2)
-
     if mesbin is not None:
         axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
         axs[0,1].plot(mesbin[:,con],mesbin[:,vel],'ko')
@@ -286,9 +279,22 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
         axs[2,2].plot(mesbin[:,con],(mesbin[:,as23]-measure[:,as23].mean())/line.width,'ko')
     
 
-
     pl.show()
 
+def dan_errplot(fig,errs,xs=None,ys=None):
+    porder = np.array([9,1,0,4,2,6,5,3,7])
+    if xs is None:
+        xs = np.ones(11)*1.15
+    if ys is None:    
+        ys = [0.6,-4,0.4,0.2,0.2,0.1,-0.15,-0.15,-0.15,-0.15,0] 
+    perr = errs[porder,:]
+
+    for i in range(0,9):
+        s1err = np.array([perr[i,0],perr[i,4]]).reshape(1,-1)
+        s2err = np.array([perr[i,1],perr[i,3]]).reshape(1,-1)
+        fig.axes[i].errorbar( xs[i],ys[i],yerr=s1err,fmt='r.' )
+        fig.axes[i].errorbar( xs[i],ys[i],yerr=s2err,fmt='b.' )
+    return fig
 
 def prop_plot(ax,x,y,conf):
     regx,regy = st.kern_reg(x,y,bins=73)
