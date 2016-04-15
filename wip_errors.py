@@ -34,7 +34,7 @@ simSiFe = 1 - 0.19*norm/norm.max() # Line values eye estimated from atlas
 simMyst = 1 - 0.09*norm/norm.max() # Line values eye estimated from atlas
 
 def mystmutant(x):
-    x[:,wFlat[0]:wFlat[1]] = x[:,wFlat[0]:wFlat[1]]*simFeI
+    x[:,wFlat[0]:wFlat[1]] = x[:,wFlat[0]:wFlat[1]]*simSiFe
     return x
 
 my = copy.deepcopy(sp) 
@@ -42,15 +42,17 @@ my.modify(mystmutant)
 
 Flat = spc.splineline(wFlat,cFlat,my.meta)
 mesFlat =  Flat.measure(my)
-
-for i in range(0,10):
+sigm = np.zeros((11,5))
+for i in range(0,11):
     # The percentile ranges are one and two sigmas, calculated by hand from a probability table on wikipedia
-    print("-2s: {: 8.6f}, -1s {: 8.6f}, mu {: 8.6f}, +1s {: 8.6f}, +2s {: 8.6f}".format(
+    sigm[i,:]= (
         np.percentile(mesFlat[:,i],2.274),
         np.percentile(mesFlat[:,i],15.87),
         mesFlat[:,i].mean(),
         np.percentile(mesFlat[:,i],84.13),
-        np.percentile(mesFlat[:,i],97.725)))
+        np.percentile(mesFlat[:,i],97.725))
+    m2s,m1s,mu,p1s,p2s = sigm[i,:]
+    print("-2s: {: 8.6f}, -1s {: 8.6f}, mu {: 8.6f}, +1s {: 8.6f}, +2s {: 8.6f}".format( m2s/mu,m1s/mu,mu,p1s/mu,p2s/mu ))
 
 def kde(idx):
     rt =  st.gaussian_kde(mesFlat[:,idx])
