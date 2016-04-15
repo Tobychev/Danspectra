@@ -5,7 +5,7 @@ import numpy.polynomial.polynomial as pol
 import scipy.interpolate as si
 import numpy.random as rnd
 
-def binerror(binned,cont,line,reps=10000,feats=10):
+def binerror(binned,cont,line,reps=1000,feats=10):
     bincent = np.convolve(binned.bins,np.array([0.5,0.5]),mode="valid")
     sel, = np.where(binned.counts > 30)
     sorting = np.digitize(cont,binned.bins[:-1]) 
@@ -21,20 +21,20 @@ def binerror(binned,cont,line,reps=10000,feats=10):
 
     con = np.ones(reps)
     for binNr,bn in enumerate(sel):
-        print(binned.binned[binNr,line.idx].shape,np.sqrt(var[binNr,:]).shape)
-        mcblock = rnd.normal( loc=binned.binned[binNr,line.idx] , scale=np.sqrt(var[binNr,:]) ,size=(reps,len(line.idx)) )
+#        print(binned.binned[binNr,line.idx].shape,np.sqrt(var[binNr,:]).shape)
+        mcblock = rnd.normal( loc=binned.binned[binNr,line.idx] , scale=np.sqrt(var[binNr,:]/binned.counts[bn]) ,size=(reps,len(line.idx)) )
         mes     = line.measure_on_block(binned.group,mcblock,con*bincent[binNr])
         print("")
         print("For bin {:.4f} with {} spectra".format(bincent[binNr],binned.counts[bn]))
         j = 0
         for i in range(0,feats): 
             # The percentile ranges are one and two sigmas, calculated by hand from a probability table on wikipedia
-            result[binNr,j], result[binNr,j+1],result[binNr,j+2],result[binNr,j+3] = (np.percentile(mes[:,i],2.274),
+            result[binNr,j], result[binNr,j+1],result[binNr,j+2],result[binNr,j+3] = (np.percentile(mes[:,i],2.28),
                                                                                       np.percentile(mes[:,i],15.87),
                                                                                       np.percentile(mes[:,i],84.13),
-                                                                                      np.percentile(mes[:,i],97.725))
-            print("-2s: {: 8.6f}, -1s {: 8.6f}, mu {: 8.6f}, +1s {: 8.6f}, +2s {: 8.6f}".format(
-                result[binNr,j], result[binNr,j+1],mes[:,i].mean(),result[binNr,j+2],result[binNr,j+3]))
+                                                                                      np.percentile(mes[:,i],97.72))
+#            print("-2s: {: 8.6f}, -1s {: 8.6f}, mu {: 8.6f}, +1s {: 8.6f}, +2s {: 8.6f}".format(
+#                result[binNr,j], result[binNr,j+1],mes[:,i].mean(),result[binNr,j+2],result[binNr,j+3]))
             j+=4
     return result
 
