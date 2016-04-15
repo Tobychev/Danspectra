@@ -1,5 +1,6 @@
 import astropy.io.fits as fits
 import numpy.polynomial.polynomial as pol
+import scipy.integrate as st
 import scipy.interpolate as si
 import pickle as pic
 import numpy as np
@@ -291,9 +292,10 @@ class line(object):
         return "Line {} [$\Delta \lambda$ = {:.4f} Å]".format(self.name,self.width/10)        
 
     def _equivalent_width(self,spec):
-        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
-                      ).reshape((-1,1))*np.ones(spec[:,0].shape)
-        return ((spec[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
+#        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
+#                      ).reshape((-1,1))*np.ones(spec[:,0].shape)
+#        return ((spec[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
+        return st.simps(spec[:,self.idx]-1,x=spec.meta.lmbd[self.idx],even="avg")*1e3 ## Converts to miliÅngström
 
 class statline(line):
     def measure(self,spectra):
@@ -372,7 +374,7 @@ class statline(line):
         return var, ske, kur
 
 class splineline(line):
-    def measure(self,spectra):
+    def measure(self,spectra,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
         nrows = spectra[:,:].shape[0]
         lmbd  = spectra.meta.lmbd[self.idx]
         ew = self._equivalent_width(spectra)
@@ -383,7 +385,7 @@ class splineline(line):
         print("Making splines and measuring\n")
         for i,row in enumerate(spectra[:,self.idx]):
             mf           = self.makespline(row,lmbd,9)
-            splmes[i,:9] = self.measure_spline(mf,lmbd)
+            splmes[i,:9] = self.measure_spline(mf,lmbd,dl,smallstep,numsmallstep)
 
         return splmes
 
@@ -392,22 +394,24 @@ class splineline(line):
         kno   = kno[1:-2]
         return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
 
-    def measure_spline(self,spl,lmbd,dl=2e-5):
+    def measure_spline(self,spl,lmbd,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
         lmbd = np.linspace(lmbd[0],lmbd[-1],int( (lmbd[0]-lmbd[-1])/dl )) 
-        bot  = spl(lmbd).min()
-        icnt = spl(lmbd).argmin()
-        cnt  = lmbd[icnt]
+        #Do tow rounds to get better acc
+        icnt = lmbd[spl(lmbd).argmin()]
+        botl = np.linspace(icnt*(1-smallstep),icnt*(1+smallstep),int(numsmallstep))
+        bot  = spl(botl).min()        
+        cnt  = botl[spl(botl).argmin()]
         bo12 = (1 +   bot)/2        
         bo13 = (1 + 2*bot)/3
         bo23 = (2 +   bot)/3
-        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt)
-        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt)
-        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt)
+        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt,smallstep,numsmallstep)
+        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt,smallstep,numsmallstep)
+        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt,smallstep,numsmallstep)
         cnt = 299792.458*(cnt-self.cent)/self.cent
-
+             #   0   1    2    3    4    5    6    7    8
         return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
 
-    def __width_assym(self,spl,lmbd,lev,cnt):
+    def __width_assym(self,spl,lmbd,lev,cnt,smallstep,numsmallstep):
         ilev, = np.where(spl(lmbd) <= lev)
         # Check that we only got one interval
         spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
@@ -415,7 +419,11 @@ class splineline(line):
             if   len(spli) == 1 :
                 ilev  = ilev[slice(spli+1)]
 
-        wdth  = lmbd[ilev[0]] - lmbd[ilev[-1]]
-        assm  = cnt  - (lmbd[ilev[0]] + lmbd[ilev[-1]])/2
+        # Do one level of refinment at the intercepts for better accuracy
+        l1 =  lmbd[ilev[0]]; l2 = lmbd[ilev[-1]]
+        ll1 = np.linspace(l1,l1*(1+smallstep),numsmallstep); ll2 = np.linspace(l2*(1-smallstep),l2,numsmallstep)
+        lmbd1 = ll1[np.where(spl(ll1) <= lev)][0]; lmbd2 =  ll2[np.where(spl(ll2) <= lev)][-1]
+        wdth  = lmbd1 - lmbd2
+        assm  = cnt  - (lmbd1 + lmbd2)/2
         return wdth,assm
 
