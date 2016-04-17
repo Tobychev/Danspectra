@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 import matplotlib.cm as cm
+import scipy.stats as sta
 import lines as lin
 import stats as st
 
@@ -184,6 +185,12 @@ def plot_linemap(measure,line,binned=()):
 
     pl.show()
 
+def kde(measure):
+    rt = sta.gaussian_kde(measure)
+    x  = np.linspace(measure.min(),measure.max(),121)
+    pl.plot(x,rt(x))
+    pl.show()
+
 def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
     bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
     if lims is None:
@@ -209,7 +216,7 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
     fig, axs  = pl.subplots(3,3,sharex=True)
     fig.subplots_adjust(wspace=0.3,hspace=0.3)
 
-    mew       =  measure[:,ew].mean()         
+    mew       =  measure[:,ew].mean()
     prop_plot(axs[0,0],measure[:,con],measure[:,ew]/mew,
         {"label" : "Average EW = {:.3f}".format(mew),
          "title" : "Relative equivalent width,\n " + str(line),
@@ -279,21 +286,21 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
         axs[2,2].plot(mesbin[:,con],(mesbin[:,as23]-measure[:,as23].mean())/line.width,'ko')
     
 
-    pl.show()
+    return fig
 
 def dan_errplot(fig,errs,xs=None,ys=None):
     porder = np.array([9,1,0,4,2,6,5,3,7])
     if xs is None:
         xs = np.ones(11)*1.15
     if ys is None:    
-        ys = [0.6,-4,0.4,0.2,0.2,0.1,-0.15,-0.15,-0.15,-0.15,0] 
-    perr = errs[porder,:]
+        ys = [0.6,-4,1.0,0.2,0.2,0.1,-0.15,-0.15,-0.08,-0.08,0] 
+    perr = np.abs(errs[porder,:])
 
     for i in range(0,9):
-        s1err = np.array([perr[i,0],perr[i,4]]).reshape(1,-1)
-        s2err = np.array([perr[i,1],perr[i,3]]).reshape(1,-1)
-        fig.axes[i].errorbar( xs[i],ys[i],yerr=s1err,fmt='r.' )
-        fig.axes[i].errorbar( xs[i],ys[i],yerr=s2err,fmt='b.' )
+        s2err = np.array([perr[i,4],perr[i,0]]).reshape(2,1)
+        s1err = np.array([perr[i,3],perr[i,1]]).reshape(2,1)
+        fig.axes[i].errorbar( xs[i],ys[i],yerr=s1err,fmt='b.' )
+        fig.axes[i].errorbar( xs[i],ys[i],yerr=s2err,fmt='r.' )
     return fig
 
 def prop_plot(ax,x,y,conf):
