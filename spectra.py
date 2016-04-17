@@ -91,9 +91,10 @@ class SpectraFactory(SpecMeta):
     __savename = "spec_{}_{}.metadata"
     __contrast = "{}_{}__concont.fits"
 
-    def __init__(self,fileglob,framerows=800):
+    def __init__(self,fileglob,framerows=800,framecols=1472):
         self.__parse_fileglob(fileglob)
         self.rows     = list(range(0,framerows))
+        self.cols     = list(range(0,framecols))
         self.files    = np.array( g.glob(self.glob)); self.files.sort()
         self.contrast = self.__load_from_fits(self.Dir+self.__contrast)
         self._load_meta()
@@ -121,7 +122,7 @@ class SpectraFactory(SpecMeta):
         for fil in self.files[1:]:
             data  = self.__load_from_fits(fil)
             block = np.vstack((block,data[self.rows,:]))
-        return block
+        return block[:,self.cols]
     
     def contrast_cut(self,cutval,mode="percentile"):
         """
@@ -164,6 +165,22 @@ class SpectraFactory(SpecMeta):
         self.meta["rowtcut"] = "{}".format(cutrows)
         self._update_meta()
 
+    def frame_col_cut(self,cutcols):
+        if not isinstance(cutcols,list):
+            cutrows = list(cutcols)
+        for itm in cutcols:
+            try:
+                self.cols.remove(itm)
+            except ValueError:
+                print("Col {} not found".format(itm))
+        if self.meta["state"] == "new":
+            self.meta["state"] = "col cut"
+        else:
+            self.meta["state"] = self.meta["state"] + "+col cut"
+
+        self.meta["coltcut"] = "{}".format(cutcols)
+        self._update_meta()
+
     def set_continua(self,method,nump=30,q=80):
         if method in ["top 20","segments"]:
             self.meta["cont method"] = method
@@ -185,8 +202,8 @@ class SpectraFactory(SpecMeta):
             print("Unrecognized method:", method)
 
     def make_spectra(self,desc=""):
-        lmbd = self.__load_from_fits(self.Dir+self.__lmbdname)
-        ref  = self.__load_from_fits(self.Dir+self.__refname )
+        lmbd = self.__load_from_fits(self.Dir+self.__lmbdname)[self.cols]
+        ref  = self.__load_from_fits(self.Dir+self.__refname )[self.cols]
 
         block = self.__make_block()
                 
@@ -195,7 +212,7 @@ class SpectraFactory(SpecMeta):
             cont  = con.fit(block)
             block = block/con(lmbd,block)
         else: 
-            con = None
+            cont = None
         if desc == "":
             desc = ", ".join( ": ".join((str(k),str(v))) for k,v in self.meta.items())
 
@@ -382,7 +399,7 @@ class splineline(line):
         splmes = np.zeros((nrows,11))
         splmes[:,10] = (spectra.meta.cont[0]*self.cent)+ (spectra.meta.cont[1])
         splmes[:, 9] = ew.reshape(-1)
-        print("Making splines and measuring\n")
+        print("Making splines and measuring")
         for i,row in enumerate(spectra[:,self.idx]):
             mf           = self.makespline(row,lmbd,9)
             splmes[i,:9] = self.measure_spline(mf,lmbd,dl,smallstep,numsmallstep)
@@ -404,9 +421,9 @@ class splineline(line):
         bo12 = (1 +   bot)/2        
         bo13 = (1 + 2*bot)/3
         bo23 = (2 +   bot)/3
-        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt,smallstep,numsmallstep)
-        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt,smallstep,numsmallstep)
-        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt,smallstep,numsmallstep)
+        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt,smallstep,numsmallstep*10)
+        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt,smallstep,numsmallstep*10)
+        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt,smallstep,numsmallstep*10)
         cnt = 299792.458*(cnt-self.cent)/self.cent
              #   0   1    2    3    4    5    6    7    8
         return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
