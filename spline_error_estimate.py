@@ -3,6 +3,7 @@ import scipy.integrate as si
 import scipy.stats as st
 import spectra as spc
 import numpy as np
+import errors as er
 import copy 
 
 from imp import reload
@@ -43,6 +44,10 @@ def kde(idx):
     pl.plot(x,rt(x))
     pl.show()
 
+def printerr(err):
+    for row in err:
+        print("-2s: {: 8.6f}, -1s: {: 8.6f}, mu: {: 8.6f}, +1s: {: 8.6f}, +2s: {: 8.6f}".format(row[0],row[1],row[2],row[3],row[4]))
+
 lineerror = "SiFe"
 
 sf = spc.SpectraFactory("data/6405_aS1")
@@ -68,10 +73,10 @@ if lineerror == "SiFe":
 
     Flat = spc.splineline(wFlat,cFlat,my.meta)
     mesFlat =  Flat.measure(my)
-    err = make_err_range(mesFlat)
-    errSiFe = relative_errors(err)
-
-    np.save("Estimate_errSiFe",errSiFe)
+    err = er.err_spline_mes(mesFlat)
+    print("Raw intervals")
+    printerr(err)
+    np.save("Estimate_errSiFe",err)
 
 if lineerror == "Myst":
     my = copy.deepcopy(sp) 
@@ -81,7 +86,8 @@ if lineerror == "Myst":
     Flat = spc.splineline(wFlat,cFlat,my.meta)
     mesFlat =  Flat.measure(my)
     err = make_err_range(mesFlat)
-    errMyst = relative_errors(err)
+    errMyst = er.err_spline_mes(mesFlat)
+
     np.save("Estimate_errMyst",errMyst)
 
 if lineerror == "FeI":
@@ -92,5 +98,6 @@ if lineerror == "FeI":
     Flat = spc.splineline(wFlat,cFlat,my.meta)
     mesFlat =  Flat.measure(my,smallstep=2e-9,numsmallstep=1e4)
     err = make_err_range(mesFlat)
-    errFeI = relative_errors(err)
+    errFeI = er.err_spline_mes(mesFlat)
+
     np.save("Estimate_errFeI",errFeI)
