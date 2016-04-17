@@ -13,10 +13,7 @@ def err_spline_mes(measure):
 
     sigm = np.zeros((11,5))
 
-    sigm[bot,:]  = percentiles(measure[:,bot]); 
-    print(sigm[bot,[0,1,3,4]])
-    print(sigm[bot,[0,1,3,4]]-sigm[bot,2])
-    sigm[bot,[0,1,3,4]] = (sigm[bot,[0,1,3,4]]-sigm[bot,2])/sigm[bot,2] # Relativa fel 
+    sigm[bot,:]  = percentiles(measure[:,bot]);  sigm[bot,[0,1,3,4]]  = (sigm[bot,[0,1,3,4]]-sigm[bot,2])/sigm[bot,2] # Relativa fel 
     sigm[ew,:]   = percentiles(measure[:,ew]);   sigm[ew, [0,1,3,4]]  = (sigm[ew, [0,1,3,4]]-sigm[ew,2] )/sigm[ew,2]  # Relativa fel 
     sigm[cnt,:]  = percentiles(measure[:,cnt]);  sigm[cnt,[0,1,3,4]]  = (sigm[cnt,[0,1,3,4]]-sigm[cnt,2])/sigm[cnt,2] # Relativa fel 
     sigm[fwhm,:] = percentiles(measure[:,fwhm]); sigm[fwhm,[0,1,3,4]] = sigm[fwhm,[0,1,3,4]] - sigm[fwhm,2] #Absolut fel
@@ -36,6 +33,11 @@ def scale_spline_err(line,measure,errs):
 
     errs[bot,2] = measure[:,bot].mean()
     errs[bot,[0,1,3,4]] = errs[bot,2]*errs[bot,[0,1,3,4]]/measure[:,cont].mean()    
+    errs[cnt,2] = measure[:,cnt].mean()
+    errs[cnt,[0,1,3,4]] = errs[cnt,2]*errs[cnt,[0,1,3,4]]
+    errs[ew,2] = measure[:,ew].mean()
+    errs[ew,[0,1,3,4]] = errs[ew,2]*errs[ew,[0,1,3,4]]
+
     return errs
 
     
