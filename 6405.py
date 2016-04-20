@@ -3,6 +3,7 @@ import visualize as vis
 import astropy.io.fits as fts
 import binner as bn
 import spectra as spc
+import pickle as pic
 import numpy as np
 import errors as er
 
@@ -64,8 +65,12 @@ if True:
     print("Measuring Si + Fe line")
     mesSiFe = SiFe.measure(as1)
     linmap = vis.spline_linemap(mesSiFe,SiFe)
-    err = np.load("Estimate_errSiFe.npy")
-    errSiFe = er.scale_spline_err(SiFe,mesSiFe,err)
+    npz = np.load("SplineError.estimate.npz")
+    errs,vals = npz["arr_0"],npz["arr_1"]
+    intrErr = er.make_intr_errs(errs,vals) 
+    errSiFe = er.scale_intr_spline_err(mesSiFe,intrErr)
     vis.dan_errplot(linmap,errSiFe).show()
 #    pl.plot(mesMyst[:,cont],mesMyst[:,bot],'o')
+#    err = np.load("Estimate_errSiFe.npy")
+#    errSiFe = er.scale_spline_err(SiFe,mesSiFe,err)
     
