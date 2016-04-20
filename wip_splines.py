@@ -3,28 +3,13 @@ import visualize as vis
 import danframe as dan
 import kontin as con
 import lines as lin
+import binner as bn
 import numpy as np
 import astropy.io.fits as fts
 import astropy.stats as ast
 import scipy.interpolate as si
 import imp
 imp.reload(lin); imp.reload(dan); imp.reload(con); imp.reload(vis)
-
-def moments(x,lines):
-    rows = len(lines)    
-    mu, mu2, mu3, mu4 = np.zeros(rows),np.zeros(rows),np.zeros(rows),np.zeros(rows)
-    for i in range(0,rows):
-        line = lines[i]
-        dpdf = (1-line/line.max())
-        dpdf = dpdf/dpdf.sum()
-        mu[i] = np.sum(dpdf*x) # Reshaping enables broadcasting
-        mu2[i]= np.sum(dpdf*(x-mu[i])**2)
-        mu3[i]= np.sum(dpdf*(x-mu[i])**3)
-        mu4[i]= np.sum(dpdf*(x-mu[i])**4)
-
-    skew = mu3/mu2**(3/2) 
-    kurt = (mu4/mu2**2 - 3)
-    return mu,mu2,skew,kurt
 
 s6405_t5p = dan.frameseries("data/6405_aS1","top 5%")
 
@@ -35,6 +20,7 @@ cont, =  fts.open("data/6405_aS1__concont.fits")
 qual = [(x,i) for i,x in enumerate(cont.data)] ; qual.sort(key=lambda x: x[0],reverse=True)
 s6405_t5p.frames = [s6405_t5p.frames[x[1]] for x in qual[:12]]
 s6405_t5p.normalize()
+lmbd = s6405_t5p.lmbd
 
 block = s6405_t5p.frames[0].data
 
@@ -43,65 +29,54 @@ for frm in s6405_t5p.frames[1:]:
 
 CN, FeI, SiFe, myst, CNq = lin.make_lines_from_wins(s6405_t5p,s6405_t5p.pkwindows)
 
+Mys, = lin.make_lines_from_wins(s6405_t5p,[ [646, 722]])
+
 #Helpful constants
 vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8
-mesFeI  = FeI.measure(s6405_t5p)
-mesSiFe = SiFe.measure(s6405_t5p)
-mesmyst = myst.measure(s6405_t5p)
-mesCN   = CN.measure(s6405_t5p)
-mesCNq  = CNq.measure(s6405_t5p)
+#mesFeI  = FeI.measure(s6405_t5p)
+#mesSiFe = SiFe.measure(s6405_t5p)
+#mesmyst = myst.measure(s6405_t5p)
+#mesCN   = CN.measure(s6405_t5p)
+#mesCNq  = CNq.measure(s6405_t5p)
 
-
-def makespline(spec,line,group,kns=6):
-    lmbd  = group.lmbd[line.idx]
-    _,kno = np.histogram(lmbd,kns+2)
-    kno   = kno[1:-2]
-    return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
-
-def measure_spline(spl,line,group,dl=2e-5):
-    lmbd = group.lmbd[line.idx]
-    lmbd = np.linspace(lmbd[0],lmbd[-1],int( (lmbd[0]-lmbd[-1])/dl )) 
-    bot  = spl(lmbd).min()
-    icnt = spl(lmbd).argmin()
-    cnt  = lmbd[icnt]
+def measure(x,tck,dl=1e-7):
+    smallstep = 1e-7
+    numsmallstep = 1e3
+    lmbd = np.linspace(x[0],x[-1],int( (x[-1]-x[0])/dl ))
+    #Do tow rounds to get better acc
+    icnt = lmbd[si.splev(lmbd,tck).argmin()]
+    botl = np.linspace(icnt*(1-smallstep),icnt*(1+smallstep),int(numsmallstep))
+    bot  = si.splev(botl,tck).min()
+    cnt  = botl[si.splev(botl,tck).argmin()]
     bo12 = (1 +   bot)/2
     bo13 = (1 + 2*bot)/3
     bo23 = (2 +   bot)/3
-    fwhm,as12 = __width_assym(spl,lmbd,bo12,cnt)
-    fw13,as13 = __width_assym(spl,lmbd,bo13,cnt)
-    fw23,as23 = __width_assym(spl,lmbd,bo23,cnt)
-    cnt = 299792.458*(cnt-line.cent)/line.cent
+    tck13 = (tck[0],tck[1]-bo13,tck[2])
+    tck12 = (tck[0],tck[1]-bo12,tck[2])
+    tck23 = (tck[0],tck[1]-bo23,tck[2])
+    dl13 = si.sproot(tck13)
+    dl12 = si.sproot(tck12)
+    dl23 = si.sproot(tck23)
+    wd13  = dl13[1] - dl13[0]
+    wd12  = dl12[1] - dl12[0]
+    wd23  = dl23[1] - dl23[0]
+    print(wd13,wd12,wd23)
+#    assm  = cnt  - (lmbd1 + lmbd2)/2
 
-    return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
-
-def __width_assym(spl,lmbd,lev,cnt):
-    ilev,= np.where(spl(lmbd) <= lev)
-    wdth = lmbd[ilev[0]] - lmbd[ilev[-1]]
-    assm = cnt  - (lmbd[ilev[0]] + lmbd[ilev[-1]])/2
-    return wdth,assm
 
 
-if True:
-    line  = myst    
-    step  = 8 #myst number
-    cuts  = mesmyst[err] < np.percentile(mesmyst[err],95)
-    quant = mesmyst[con].reshape(-1)
-    binMyst     = lin.binned_framegroup(myst,s6405_t5p,quant,cuts)
-    mesBinMyst = binMyst.measure()
-    quant  = quant[cuts.reshape(-1)].reshape(-1)
-    sort   = binMyst.partition_data(quant)
-    binned = binMyst
+for i in range(1,2):
+    row = np.random.randint(0,len(block))
+    x = lmbd[Mys.idx][::-1]
+    y = block[row,Mys.idx][::-1]
+    d =  1-y/y.max()
+    w = d/d.sum()
+    #Spl = si.UnivariateSpline(x,y,w=w,s=8e-3)
+    tck  = si.splrep(x,y,s=8e-3)
+    measure(x,tck)
+#   Spl  = lambda x: si.splev(x,tck)
 
-nr = 1
-lmbd  = s6405_t5p.lmbd[line.idx]
-#block = block[cuts.reshape(-1),:]
-binNr = block[(sort==nr),:]
-
-splmes = np.zeros(block[:,1:10].shape)
-
-for i,row in enumerate(block):
-    mf = makespline(row[line.idx],line,s6405_t5p,9)
-    splmes[i,:] = measure_spline(mf,line,s6405_t5p) 
-
-pl.plot(mesmyst[con].reshape(-1),splmes[:,1],'o')
-pl.show()
+#   pl.step(lmbd[Mys.idx],block[row,Mys.idx],'.',where="mid")#,label="Residual: {:.4e}".format( () ))
+#   pl.plot(x,Spl(x))
+#   pl.legend()
+#   pl.show()
