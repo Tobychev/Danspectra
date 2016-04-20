@@ -306,7 +306,7 @@ class line(object):
         self.spec  = specmeta
 
     def __repr__(self):
-        return "Line {} [$\Delta \lambda$ = {:.4f} Å]".format(self.name,self.width/10)        
+        return "Line {} [$\Delta \lambda$ = {:.4f} nm]".format(self.name,self.width)
 
     def _equivalent_width(self,spec):
 #        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
