@@ -27,7 +27,7 @@ sp = sf.make_spectra()
 
 # Hand picked flat area
 wFlat = [1179,1239]; cFlat = sp.lmbd[wFlat[0]:wFlat[1]].mean()
-botrange = np.linspace(0.04,0.9,22)
+botrange = np.linspace(0.04,0.9,3)
 errors = []
 
 #Chosen as it makes errors large
@@ -40,9 +40,9 @@ for bot in botrange:
     my.modify(lambda x: mutant(x,line))
     print("Estimating errors for {}".format(bot))
     Flat = spc.splineline(wFlat,cFlat,my.meta)
-    mesFlat =  Flat.measure(my)
+    mesFlat =  Flat.measure2(my)
     errors.append( er.err_spline_mes(mesFlat) )
 
 errors = np.array(errors)
 
-np.savez("SplineError.estimate",errors,botrange)
+np.savez("SplineError2.estimate",errors,botrange)
