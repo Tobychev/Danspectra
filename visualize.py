@@ -255,21 +255,21 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
          "ylim"  : fw23lim})
 
     prop_plot(axs[2,0],measure[:,con],(measure[:,as13]-measure[:,as13].mean())/line.width,
-        {"title" : "Line assymetry 1/3 maximum,\n " + str(line),
-         "ylabel": "Line assymetry",
+        {"title" : "Line asymmetry 1/3 maximum,\n " + str(line),
+         "ylabel": "Line asymmetry",
          "xlabel": "Continuum intensity",
          "ylim"  : as13lim})
 #        })
         
     prop_plot(axs[2,1],measure[:,con],(measure[:,as12]-measure[:,as12].mean())/line.width,
-        {"title" : "Line assymetry half maximum,\n " + str(line),
+        {"title" : "Line asymmetry half maximum,\n " + str(line),
          "ylabel": "Line width [Å]",
          "xlabel": "Continuum intensity",
          "ylim"  : as12lim})
 #         })
     prop_plot(axs[2,2],measure[:,con],(measure[:,as23]-measure[:,as23].mean())/line.width,
-        {"title" : "Line assymetry 2/3 maximum,\n " + str(line),
-         "ylabel": "Line assymetry",
+        {"title" : "Line asymmetry 2/3 maximum,\n " + str(line),
+         "ylabel": "Line asymmetry",
          "xlabel": "Continuum intensity",
          "ylim"  : as23lim})
 #         })
