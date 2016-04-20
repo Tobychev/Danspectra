@@ -68,7 +68,7 @@ def make_intr_errs(errors,botrange):
     return intrErrs
 
 
-def scale_intr_spline_err(measure,intr_err):
+def scale_intr_spline_err(measure,line,intr_err):
     errs = np.zeros((10,4))
     bot = measure[:,s_bot ].mean()
     cnt = measure[:,s_cnt ].mean()
@@ -91,31 +91,37 @@ def scale_intr_spline_err(measure,intr_err):
                                intr_err["fwhm"][1](bot),
                                intr_err["fwhm"][2](bot),
                                intr_err["fwhm"][3](bot)])
+    errs[s_fwhm,:] = errs[s_fwhm,:]/line.width
 
     errs[s_as12,:] = np.array([ intr_err["as12"][0](bot),
                                intr_err["as12"][1](bot),
                                intr_err["as12"][2](bot),
                                intr_err["as12"][3](bot)])
+    errs[s_as12,:] = errs[s_as12,:]/line.width
 
     errs[s_fw13,:] = np.array([ intr_err["fw13"][0](bot),
                                intr_err["fw13"][1](bot),
                                intr_err["fw13"][2](bot),
                                intr_err["fw13"][3](bot)])
+    errs[s_fw13,:] = errs[s_fw13,:]/line.width
 
     errs[s_as13,:] = np.array([ intr_err["as13"][0](bot),
                                intr_err["as13"][1](bot),
                                intr_err["as13"][2](bot),
                                intr_err["as13"][3](bot)])
+    errs[s_as13,:] = errs[s_as13,:]/line.width
 
     errs[s_fw23,:] = np.array([ intr_err["fw23"][0](bot),
                                intr_err["fw23"][1](bot),
                                intr_err["fw23"][2](bot),
                                intr_err["fw23"][3](bot)])
+    errs[s_fw23,:] = errs[s_fw23,:]/line.width
 
     errs[s_as23,:] = np.array([ intr_err["as23"][0](bot),
                                intr_err["as23"][1](bot),
                                intr_err["as23"][2](bot),
                                intr_err["as23"][3](bot)])
+    errs[s_as23,:] = errs[s_as23,:]/line.width
 
 #   errs[s_err,:] = np.array([ intr_err["err"][0](bot),
 #                              intr_err["err"][1](bot),
