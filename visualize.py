@@ -297,10 +297,10 @@ def dan_errplot(fig,errs,xs=None,ys=None):
     perr = np.abs(errs[porder,:])
 
     for i in range(0,9):
-        s2err = np.array([perr[i,4],perr[i,0]]).reshape(2,1)
-        s1err = np.array([perr[i,3],perr[i,1]]).reshape(2,1)
-        fig.axes[i].errorbar( xs[i],ys[i],yerr=s1err,fmt='b.' )
-        fig.axes[i].errorbar( xs[i],ys[i],yerr=s2err,fmt='r.' )
+        s2err = np.array([perr[i,3],perr[i,0]]).reshape(2,1)
+        s1err = np.array([perr[i,2],perr[i,1]]).reshape(2,1)
+        fig.axes[i].errorbar( xs[i],ys[i],yerr=s1err,fmt='b' )
+        fig.axes[i].errorbar( xs[i],ys[i],yerr=s2err,fmt='r' )
     return fig
 
 def prop_plot(ax,x,y,conf):
