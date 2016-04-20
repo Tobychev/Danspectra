@@ -444,3 +444,46 @@ class splineline(line):
         assm  = cnt  - (lmbd1 + lmbd2)/2
         return wdth,assm
 
+    def measure2(self,spectra,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
+        nrows = spectra[:,:].shape[0]
+        lmbd  = spectra.meta.lmbd[self.idx]
+        x = lmbd[::-1]
+        ew = self._equivalent_width(spectra)
+
+        splmes = np.zeros((nrows,11))
+        splmes[:,10] = (spectra.meta.cont[0]*self.cent)+ (spectra.meta.cont[1])
+        splmes[:, 9] = ew.reshape(-1)
+        for i,row in enumerate(spectra[:,self.idx]):
+            y   = row[::-1]
+            tck = si.splrep(x,y,s=8e3)
+            splmes[i,:8] = self.tck_mod_mes(x,tck,dl=1e-7)
+            splmes[i,8] = np.sum( (y - si.splev(x,tck))**2 )
+        return splmes
+
+
+    def tck_mod_mes(self,x,tck,dl=1e-7):
+        smallstep = 1e-7
+        numsmallstep = 1e3
+        lmbd = np.linspace(x[0],x[-1],int( (x[-1]-x[0])/dl ))
+        #Do two rounds to get better acc
+        icnt = lmbd[si.splev(lmbd,tck).argmin()]
+        botl = np.linspace(icnt*(1-smallstep),icnt*(1+smallstep),int(numsmallstep))
+        bot  = si.splev(botl,tck).min()
+        cnt  = botl[si.splev(botl,tck).argmin()]
+        bo12 = (1 +   bot)/2
+        bo13 = (1 + 2*bot)/3
+        bo23 = (2 +   bot)/3
+        tck13 = (tck[0],tck[1]-bo13,tck[2])
+        tck12 = (tck[0],tck[1]-bo12,tck[2])
+        tck23 = (tck[0],tck[1]-bo23,tck[2])
+        dl13  = si.sproot(tck13)
+        dl12  = si.sproot(tck12)
+        dl23  = si.sproot(tck23)
+        wd13 = dl13[1] - dl13[0]
+        wd12 = dl12[1] - dl12[0]
+        wd23 = 0# dl23[1] - dl23[0]
+        as13 = self.cent - (dl13[1] + dl13[0])/2
+        as12 = self.cent - (dl12[1] + dl12[0])/2
+        as23 = 0#self.cent - (dl23[1] + dl23[0])/2
+        
+        return bot,cnt, wd12,as12,wd13,as13,wd23,as23
