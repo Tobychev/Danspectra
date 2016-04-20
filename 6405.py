@@ -57,18 +57,18 @@ if True:
     H2O  = spc.splineline(wH2O ,cH2O ,as1.meta)
 
     print("Measuring unknown line")
-    mesMyst = Myst.measure(as1)
+#    mesMyst = Myst.measure(as1)
     print("Measuring Atmo H2O line")
-    mesH2O  = H2O.measure(as1) # Seems to depend on continuua, so probably not atmo line?
+#    mesH2O  = H2O.measure(as1) # Seems to depend on continuua, so probably not atmo line?
     print("Measuring Iron line")
-    mesFeI  = FeI.measure(as1)
+#    mesFeI  = FeI.measure(as1)
     print("Measuring Si + Fe line")
     mesSiFe = SiFe.measure(as1)
     linmap = vis.spline_linemap(mesSiFe,SiFe)
     npz = np.load("SplineError.estimate.npz")
     errs,vals = npz["arr_0"],npz["arr_1"]
     intrErr = er.make_intr_errs(errs,vals) 
-    errSiFe = er.scale_intr_spline_err(mesSiFe,intrErr)
+    errSiFe = er.scale_intr_spline_err(mesSiFe,SiFe,intrErr)
     vis.dan_errplot(linmap,errSiFe).show()
 #    pl.plot(mesMyst[:,cont],mesMyst[:,bot],'o')
 #    err = np.load("Estimate_errSiFe.npy")
