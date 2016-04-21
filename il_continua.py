@@ -1,6 +1,7 @@
 import matplotlib.pyplot as pl
 import spectra as spc
 import visualize as vis
+import copy
 
 sf64_as1 = spc.SpectraFactory("data/6405_aS1")
 sf64_as1.frame_row_cut([0,799])
@@ -55,4 +56,38 @@ def selected(cont,spec):
     pl.plot(cont.lmbd,mnspec[cont.idx],'ro')
     pl.show()
 
-spc
+def normalize(block,lmnd,continua):
+    return block/continua(lmbd,block)
+
+# Defining
+as1_const   = copy.deepcopy(as1)
+as1_manual  = copy.deepcopy(as1); con_as1_const   = spc.continua(np.array(as1flat),as1.lmbd,"manual")
+as1_top20   = copy.deepcopy(as1); con_as1_top20   = spc.continua(as1[:,:].mean(axis=0),as1.lmbd,"top 20")
+as1_segment = copy.deepcopy(as1); con_as1_segment = spc.continua(as1[:,:].mean(axis=0),as1.lmbd,"segments")
+
+# Normalize
+as1_const.modify(lambda x: x/cont_as1)
+as1_manual.modify(lambda x:  normalize(x,as1.lmbd,con_as1_const))
+as1_top20.modify(lambda x:   normalize(x,as1.lmbd,con_as1_top20))
+as1_segment.modify(lambda x: normalize(x,as1.lmbd,con_as1_segment))
+
+cas1_const = as1_const[:,as1flat].mean(axis=1)
+cas1_manua = as1_manual[:,as1flat].mean(axis=1)
+cas1_top20 = as1_top20[:,as1flat].mean(axis=1)
+cas1_segme = as1_segment[:,as1flat].mean(axis=1)
+
+if True:
+    ax = pl.subplot(111)
+    ax = vis.kde(cas1_const,ax)
+    ax = vis.kde(cas1_manua,ax)
+    ax = vis.kde(cas1_top20,ax)
+    ax = vis.kde(cas1_segme,ax)
+    ax.lines[0].set_label("Constant continua")
+    ax.lines[1].set_label("Manual fit windows")
+    ax.lines[2].set_label("Top 20 method")
+    ax.lines[3].set_label("Segment method")
+    ax.legend(loc="upper left")
+    ax.set_xlabel("Continuum value")
+    ax.set_ylabel("Number of spectra")
+    ax.set_title("Distribution of continuum value")
+    ax.figure.show()

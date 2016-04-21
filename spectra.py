@@ -252,8 +252,8 @@ class SpectraFactory(SpecMeta):
 
 class continua(object):
     def __init__(self,refdata,lmbd,method,nump=30,q=80):
-        self.idx      = self.__def_continua(refdata,method,nump,q)
-        self.lmbd     = lmbd[self.idx]
+        self.idx  = self.__def_continua(refdata,method,nump,q)
+        self.lmbd = lmbd[self.idx]
 
     def fit(self,data):
         if len(data.shape) == 1:
@@ -294,8 +294,10 @@ class continua(object):
             return data.argsort()[-20:]
         elif method == "segments":
             return self.__top_of_segments(data,nump,q)
-        elif   method == "top N":
+        elif method == "top N":            
             return data.argsort()[-q:]
+        elif method == "manual":
+            return data
 
 class line(object):
     def __init__(self,winbounds,cent,specmeta):
