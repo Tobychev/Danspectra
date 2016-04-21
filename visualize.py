@@ -185,19 +185,19 @@ def plot_linemap(measure,line,binned=()):
 
     pl.show()
 
-def kde(measure,retur=False,norm=False):
-    ax = pl.subplot(111)
+def kde(measure,axis=None,norm=False):
     rt = sta.gaussian_kde(measure)
     x  = np.linspace(measure.min(),measure.max(),121)
     if norm:
         norm = rt(x).sum()
     else:
         norm = 1
-    ax.plot(x,rt(x)/norm)
-    if retur:
-        return ax
+    if axis is not None:
+        axis.plot(x,rt(x)/norm)
+        return axis
     else:
-        ax.figure.show()
+        pl.plot(x,rt(x)/norm)
+        pl.show()
 
 def spline_linemap(measure,line,mesbin=None,lims=None,errs=None):
     bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
