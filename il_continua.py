@@ -1,4 +1,5 @@
 import matplotlib.pyplot as pl
+import numpy as np
 import spectra as spc
 import visualize as vis
 import copy
@@ -56,7 +57,7 @@ def selected(cont,spec):
     pl.plot(cont.lmbd,mnspec[cont.idx],'ro')
     pl.show()
 
-def normalize(block,lmnd,continua):
+def normalize(block,lmbd,continua):
     return block/continua(lmbd,block)
 
 # Defining
@@ -66,28 +67,69 @@ as1_top20   = copy.deepcopy(as1); con_as1_top20   = spc.continua(as1[:,:].mean(a
 as1_segment = copy.deepcopy(as1); con_as1_segment = spc.continua(as1[:,:].mean(axis=0),as1.lmbd,"segments")
 
 # Normalize
-as1_const.modify(lambda x: x/cont_as1)
+as1_const.modify(lambda x: x/cont_as1.reshape(-1,1))
 as1_manual.modify(lambda x:  normalize(x,as1.lmbd,con_as1_const))
 as1_top20.modify(lambda x:   normalize(x,as1.lmbd,con_as1_top20))
 as1_segment.modify(lambda x: normalize(x,as1.lmbd,con_as1_segment))
 
-cas1_const = as1_const[:,as1flat].mean(axis=1)
-cas1_manua = as1_manual[:,as1flat].mean(axis=1)
-cas1_top20 = as1_top20[:,as1flat].mean(axis=1)
-cas1_segme = as1_segment[:,as1flat].mean(axis=1)
+# Evaluate, special windows to not evaluate on training set
+cas1_const = as1_const[:,list(range(584,622))].mean(axis=1)
+cas1_manua = as1_manual[:,list(range(584,622))].mean(axis=1)
+cas1_top20 = as1_top20[:,list(range(584,622))].mean(axis=1)
+cas1_segme = as1_segment[:,list(range(584,622))].mean(axis=1)
+cas1_orig  = as1[:,list(range(584,622))].mean(axis=1)
 
 if True:
-    ax = pl.subplot(111)
+    fig,ax = pl.subplots(1)
     ax = vis.kde(cas1_const,ax)
     ax = vis.kde(cas1_manua,ax)
     ax = vis.kde(cas1_top20,ax)
     ax = vis.kde(cas1_segme,ax)
-    ax.lines[0].set_label("Constant continua")
-    ax.lines[1].set_label("Manual fit windows")
-    ax.lines[2].set_label("Top 20 method")
-    ax.lines[3].set_label("Segment method")
+    ax = vis.kde(cas1_orig,ax)
+    ax.lines[0].set_label("Constant")
+    ax.lines[1].set_label("Manual")
+    ax.lines[2].set_label("Top 20")
+    ax.lines[3].set_label("Segment")
+    ax.lines[4].set_label("Original")
+    ax.legend(loc="upper right")
+    ax.set_xlabel("Continuum value")
+    ax.set_ylabel("Number of spectra")
+    ax.set_title("Distribution of continuum value")
+    fig.show()
+
+# Defining
+as2_const   = copy.deepcopy(as2)
+as2_manual  = copy.deepcopy(as2); con_as2_const   = spc.continua(np.array(as2flat),as2.lmbd,"manual")
+as2_top20   = copy.deepcopy(as2); con_as2_top20   = spc.continua(as2[:,:].mean(axis=0),as2.lmbd,"top 20")
+as2_segment = copy.deepcopy(as2); con_as2_segment = spc.continua(as2[:,:].mean(axis=0),as2.lmbd,"segments")
+
+# Normalize
+as2_const.modify(lambda x: x/cont_as2.reshape(-1,1))
+as2_manual.modify(lambda x:  normalize(x,as2.lmbd,con_as2_const))
+as2_top20.modify(lambda x:   normalize(x,as2.lmbd,con_as2_top20))
+as2_segment.modify(lambda x: normalize(x,as2.lmbd,con_as2_segment))
+
+# Evaluate, special windows to not evaluate on training set
+cas2_const = as2_const[:,list(range(738,758))].mean(axis=1)
+cas2_manua = as2_manual[:,list(range(738,758))].mean(axis=1)
+cas2_top20 = as2_top20[:,list(range(738,758))].mean(axis=1)
+cas2_segme = as2_segment[:,list(range(738,758))].mean(axis=1)
+cas2_orig  = as2[:,list(range(738,758))].mean(axis=1)
+
+if True:
+    fig,ax = pl.subplots(1)
+    ax = vis.kde(cas2_const,ax)
+    ax = vis.kde(cas2_manua,ax)
+    ax = vis.kde(cas2_top20,ax)
+    ax = vis.kde(cas2_segme,ax)
+    ax = vis.kde(cas2_orig,ax)
+    ax.lines[0].set_label("Constant")
+    ax.lines[1].set_label("Manual")
+    ax.lines[2].set_label("Top 20")
+    ax.lines[3].set_label("Segment")
+    ax.lines[4].set_label("Original")
     ax.legend(loc="upper left")
     ax.set_xlabel("Continuum value")
     ax.set_ylabel("Number of spectra")
     ax.set_title("Distribution of continuum value")
-    ax.figure.show()
+    fig.show()
