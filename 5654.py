@@ -19,7 +19,6 @@ sf56_bs2.set_continua("segments")
 
 bs2 = sf56_bs2.make_spectra()
 
-
 sf56_cs2 = spc.SpectraFactory("data/5654_cS2",framerows=756,framecols=1480)
 sf56_cs2.frame_row_cut([0,755])
 sf56_cs2.frame_col_cut([0])
