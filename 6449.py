@@ -19,6 +19,18 @@ sf64_as1.contrast_cut(50)
 sf64_as1.set_continua("segments")
 
 as1 = sf64_as1.make_spectra()
+as1con = as1.meta.cont[0]*as1.lmbd.mean() + as1.meta.cont[1] # Define continua for as1 series
+
+as1Myst = spc.splineline(wMyst, cMyst, as1.meta,"Myst ") # Define lines for as1 series...
+as1Ca = spc.splineline(wCa, cCa, as1.meta,"Ca ")
+as1CoBl  = spc.splineline(wCoBl , cCoBl , as1.meta,"CoBl " )
+as1Unk2   = spc.splineline(wUnk2  , cUnk2  , as1.meta,"Unk2 "  )
+as1H2O = spc.splineline(wH2O, cH2O, as1.meta,"H2O ")
+as1Co  = spc.splineline(wCo, cCo , as1.meta,"Co " )
+as1Ca2 = spc.splineline(wCa2, cCa2, as1.meta,"Ca2 ")
+as1H2O2  = spc.splineline(wH2O2, cH2O2 , as1.meta,"H2O2 " )
+
+as1lines = [as1Myst,as1Ca,as1CoBl,as1Unk2,as1H2O,as1Co,as1Ca2,asH2O2]
 
 sf64_bs1 = spc.SpectraFactory("data/6449_bS1",framerows=802,framecols=1514)
 sf64_bs1.frame_row_cut([0,779])
@@ -27,6 +39,18 @@ sf64_bs1.contrast_cut(50)
 sf64_bs1.set_continua("segments")
 
 bs1 = sf64_bs1.make_spectra()
+bs1con = bs1.meta.cont[0]*bs1.lmbd.mean() + bs1.meta.cont[1] # Define continua for bs1 series
+
+bs1Myst = spc.splineline(wMyst, cMyst, bs1.meta,"Myst ") # Define lines for bs1 series...
+bs1Ca = spc.splineline(wCa, cCa, bs1.meta,"Ca ")
+bs1CoBl  = spc.splineline(wCoBl , cCoBl , bs1.meta,"CoBl " )
+bs1Unk2   = spc.splineline(wUnk2  , cUnk2  , bs1.meta,"Unk2 "  )
+bs1H2O = spc.splineline(wH2O, cH2O, bs1.meta,"H2O ")
+bs1Co  = spc.splineline(wCo, cCo , bs1.meta,"Co " )
+bs1Ca2 = spc.splineline(wCa2, cCa2, bs1.meta,"Ca2 ")
+bs1H2O2  = spc.splineline(wH2O2, cH2O2 , bs1.meta,"H2O2 " )
+
+bs1lines = [bs1Myst,bs1Ca,bs1CoBl,bs1Unk2,bs1H2O,bs1Co,bs1Ca2,asH2O2]
 
 wMyst = [831,938]; cMyst = 644.9127
 wCa   = [764,830]; cCa   = 644.9820
@@ -43,4 +67,15 @@ sf64_as2.contrast_cut(50)
 sf64_as2.set_continua("segments")
 
 as2 = sf64_as2.make_spectra()
+as2con = as2.meta.cont[0]*as2.lmbd.mean() + as2.meta.cont[1] # Define continua for as2 series
+
+as2Myst = spc.splineline(wMyst, cMyst, as2.meta,"Myst ") # Define lines for as2 series...
+as2Ca = spc.splineline(wCa, cCa, as2.meta,"Ca ")
+as2CoBl  = spc.splineline(wCoBl , cCoBl , as2.meta,"CoBl " )
+as2Unk2   = spc.splineline(wUnk2  , cUnk2  , as2.meta,"Unk2 "  )
+as2H2O = spc.splineline(wH2O, cH2O, as2.meta,"H2O ")
+as2Co  = spc.splineline(wCo, cCo , as2.meta,"Co " )
+as2Ca2 = spc.splineline(wCa2, cCa2, as2.meta,"Ca2 ")
+
+as2lines = [as2Myst,as2Ca,as2CoBl,as2Unk2,as2H2O,as2Co,as2Ca2]
 

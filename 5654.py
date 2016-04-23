@@ -24,7 +24,7 @@ as2Myst = spc.splineline(wMyst, cMyst, as2.meta,"Myst ")
 as2SiI  = spc.splineline(wSiI , cSiI , as2.meta,"SiI " )
 as2VI   = spc.splineline(wVI  , cVI  , as2.meta,"VI "  )
 as2ScII = spc.splineline(wScII, cScII, as2.meta,"ScII ")
-as2FeI  = spc.splineline(wFeIp, cFeI , as2.meta,"FeI " )
+as2FeI  = spc.splineline(wFeI, cFeI , as2.meta,"FeI " )
 
 as2lines = [as2FeIp,as2Myst,as2SiI,as2VI,as2ScII,as2FeI] # ... and save in this list for as2
 
@@ -64,7 +64,6 @@ bs2 = sf56_bs2.make_spectra()
 bs2con = bs2.meta.cont[0]*bs2.lmbd.mean() + bs2.meta.cont[1] # Define continua for bs2 series
 
 bs2FeIp = spc.splineline(wFeIp, cFeIp, bs2.meta,"FeIp ") # Define lines for bs2 series...
-
 bs2Myst = spc.splineline(wMyst, cMyst, bs2.meta,"Myst ")
 bs2SiI  = spc.splineline(wSiI , cSiI , bs2.meta,"SiI " )
 bs2VI   = spc.splineline(wVI  , cVI  , bs2.meta,"VI "  )
@@ -78,8 +77,3 @@ umbra    = 0.28
 wall     = (0.28,0.60)
 penumbra = (0.60,0.89)
 quiet    = (0.89)
-as2um    = s2.make_spectra_subset(as2,rowsubset=(as2con < umbra),desc="Umbra subset")
-as2wl    = s2.make_spectra_subset(as2,rowsubset=((as2con >= wall[0]) & (as2con <= wall[1])),desc="Umbra/penumbra wall")
-as2pn    = s2.make_spectra_subset(as2,rowsubset=((as2con > penumbra[0]) & (as2con < penumbra[1])),desc="Penumbra")
-as2qu    = s2.make_spectra_subset(as2,rowsubset=(as2con >= quiet),desc="Quiet sun")
-

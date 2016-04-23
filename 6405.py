@@ -7,6 +7,13 @@ import pickle as pic
 import numpy as np
 import errors as er
 
+wH2O  = [289, 342];   cH2O  = 640.86681253796701
+wFeI  = [376, 441];   cFeI  = 640.80263785584464
+wSiFe = [467, 519];   cSiFe = 640.72889305314993
+wMyst = [646, 722];   cMyst = 640.57558287431198 #Hand placed limits from mean(axis=0)
+wCNq  = [1006,1047];  cCNq  = 640.31162454661717 #Hand placed limits from mean(axis=0)
+
+
 s1 = spc.SpectraFactory("data/6405_aS1")
 s1.frame_row_cut([0,799])
 s1.contrast_cut(50)
@@ -14,6 +21,13 @@ s1.set_continua("segments")
 as1 = s1.make_spectra()
 as1con = as1.meta.cont[0]*as1.lmbd.mean() + as1.meta.cont[1]
 
+as1H2O = spc.splineline(wH2O, cH2O, as1.meta,"H2O ") # Define lines for as1 series...
+as1FeI = spc.splineline(wFeI, cFeI, as1.meta,"FeI ")
+as1SiFe  = spc.splineline(wSiFe , cSiFe , as1.meta,"SiFe " )
+as1Myst   = spc.splineline(wMyst  , cMyst  , as1.meta,"Myst "  )
+as1CNq = spc.splineline(wCNq, cCNq, as1.meta,"CNq ")
+
+as1lines = [as1H2O,as1FeI,as1SiFe,as1Myst,as1CNq] # ... and save in this list for as2
 s2 = spc.SpectraFactory("data/6405_aS2",framerows=774,framecols=1446)
 s2.frame_row_cut([0,743])
 s2.frame_col_cut([0])
@@ -22,11 +36,30 @@ s2.set_continua("segments")
 as2 = s2.make_spectra()
 as2con = as2.meta.cont[0]*as2.lmbd.mean() + as2.meta.cont[1]
 
+as2H2O = spc.splineline(wH2O, cH2O, as2.meta,"H2O ") # Define lines for as2 series...
+as2FeI = spc.splineline(wFeI, cFeI, as2.meta,"FeI ")
+as2SiFe  = spc.splineline(wSiFe , cSiFe , as2.meta,"SiFe " )
+as2Myst   = spc.splineline(wMyst  , cMyst  , as2.meta,"Myst "  )
+as2CNq = spc.splineline(wCNq, cCNq, as2.meta,"CNq ")
+
+as2lines = [as2H2O,as2FeI,as2SiFe,as2Myst,as2CNq] # ... and save in this list for as2
+
 b1 = spc.SpectraFactory("data/6405_bS1")
 b1.frame_row_cut([0,799])
 b1.contrast_cut(50)
 b1.set_continua("segments")
-bS1 = b1.make_spectra()
+bs1 = b1.make_spectra()
+
+bs1con = bs1.meta.cont[0]*bs1.lmbd.mean() + bs1.meta.cont[1]
+
+bs1H2O = spc.splineline(wH2O, cH2O, bs1.meta,"H2O ") # Define lines for bs1 series...
+bs1FeI = spc.splineline(wFeI, cFeI, bs1.meta,"FeI ")
+bs1SiFe  = spc.splineline(wSiFe , cSiFe , bs1.meta,"SiFe " )
+bs1Myst   = spc.splineline(wMyst  , cMyst  , bs1.meta,"Myst "  )
+bs1CNq = spc.splineline(wCNq, cCNq, bs1.meta,"CNq ")
+
+bs1lines = [bs1H2O,bs1FeI,bs1SiFe,bs1Myst,bs1CNq] # ... and save in this list for as2
+
 
 # Sunspot measurement
 if False:
