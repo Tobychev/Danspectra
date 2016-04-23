@@ -12,6 +12,7 @@ s1.frame_row_cut([0,799])
 s1.contrast_cut(50)
 s1.set_continua("segments")
 as1 = s1.make_spectra()
+as1con = as1.meta.cont[0]*as1.lmbd.mean() + as1.meta.cont[1]
 
 s2 = spc.SpectraFactory("data/6405_aS2",framerows=774,framecols=1446)
 s2.frame_row_cut([0,743])
@@ -28,7 +29,6 @@ b1.set_continua("segments")
 bS1 = b1.make_spectra()
 
 # Sunspot measurement
-# Need to cut first column, its trash
 if False:
     umbra    = 0.35
     wall     = (0.35,0.75)
@@ -45,6 +45,7 @@ if True:
     # For spline measurement
     bot,cnt,fwhm,as12,fw13,as13,fw23,as23,err,ew,cont = np.arange(0,11)
 
+    wFlat = [1179,1239];
     wH2O  = [289, 342];   cH2O  = 640.86681253796701
     wFeI  = [376, 441];   cFeI  = 640.80263785584464
     wSiFe = [467, 519];   cSiFe = 640.72889305314993
