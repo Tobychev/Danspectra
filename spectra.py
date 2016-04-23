@@ -300,10 +300,14 @@ class continua(object):
             return data
 
 class line(object):
-    def __init__(self,winbounds,cent,specmeta):
+    def __init__(self,winbounds,cent,specmeta,name=""):
         self.idx   = np.arange(winbounds[0],winbounds[1]+1)
         self.cent  = cent
-        self.name  = "{:6.3f}".format(self.cent)
+        if name != "":
+            self.name  = "{:<5} {:6.3f}".format(name,self.cent)
+        else:
+            self.name  = "{:6.3f}".format(self.cent)
+
         self.width = specmeta.lmbd[self.idx[0]] - specmeta.lmbd[self.idx[-1]] 
         self.spec  = specmeta
 
