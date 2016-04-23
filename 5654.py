@@ -80,7 +80,7 @@ bs2Myst = spc.splineline(wMyst, cMyst, bs2.meta,"Myst ")
 bs2SiI  = spc.splineline(wSiI , cSiI , bs2.meta,"SiI " )
 bs2VI   = spc.splineline(wVI  , cVI  , bs2.meta,"VI "  )
 bs2ScII = spc.splineline(wScII, cScII, bs2.meta,"ScII ")
-bs2FeI  = spc.splineline(wFeIp, cFeI , bs2.meta,"FeI " )
+bs2FeI  = spc.splineline(wFeI, cFeI , bs2.meta,"FeI " )
 
 bs2lines = [bs2FeIp,bs2Myst,bs2SiI,bs2VI,bs2ScII,bs2FeI] # ... and save in this list for bs2
 
