@@ -11,6 +11,18 @@ wVI   = [567,595];   cVI   = 565.7456
 wScII = [512,548];   cScII = 565.7880
 wFeI  = [131,168];   cFeI  = 566.1354
 
+lims = {}
+lims["ewlim"]   = ( 0.3 , 1.8  )
+lims["vellim"]  = (-5.8 , 6.1  )
+lims["rellim"]  = ( 0.2 , 1.3  )
+lims["fw13lim"] = ( -0.1 , 1.0  )
+lims["fwhmlim"] = ( -0.1 , 1.0  )
+lims["fw23lim"] = (-0.2 , 1.5  )
+lims["as13lim"] = (-0.2 , 0.2  )
+lims["as12lim"] = (-0.3 , 0.2  )
+lims["as23lim"] = (-0.7 , 0.5  )
+as2lims = lims
+
 sf56_as2 = spc.SpectraFactory("data/5654_aS2",framerows=756,framecols=1480)
 sf56_as2.frame_row_cut([0,755])
 sf56_as2.frame_col_cut([0])
@@ -42,7 +54,7 @@ cs2Myst = spc.splineline(wMyst, cMyst, cs2.meta,"Myst ")
 cs2SiI  = spc.splineline(wSiI , cSiI , cs2.meta,"SiI " )
 cs2VI   = spc.splineline(wVI  , cVI  , cs2.meta,"VI "  )
 cs2ScII = spc.splineline(wScII, cScII, cs2.meta,"ScII ")
-cs2FeI  = spc.splineline(wFeIp, cFeI , cs2.meta,"FeI " )
+cs2FeI  = spc.splineline(wFeI, cFeI , cs2.meta,"FeI " )
 
 cs2lines = [cs2FeIp,cs2Myst,cs2SiI,cs2VI,cs2ScII,cs2FeI] # ... and save in this list for cs2
 
@@ -77,3 +89,5 @@ umbra    = 0.28
 wall     = (0.28,0.60)
 penumbra = (0.60,0.89)
 quiet    = (0.89)
+
+
