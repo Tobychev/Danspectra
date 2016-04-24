@@ -12,6 +12,18 @@ wMyst = [580,620];   cMyst = 505.3577
 wFeMg = [252,280];   cFeMg = 505.6846
 wFeI  = [87,117];    cFeI  = 505.8495
 
+lims = {}
+lims["ewlim"]   = ( 0.5 , 1.5  )
+lims["vellim"]  = (-6 , 7  )
+lims["rellim"]  = ( 0.2 , 1.3  )
+lims["fw13lim"] = ( -0.1 , 1.1  )
+lims["fwhmlim"] = ( -0.1 , 1.1  )
+lims["fw23lim"] = (-0.2 , 1.5  )
+lims["as13lim"] = (-0.8 , 0.8  )
+lims["as12lim"] = (-0.7 , 0.8  )
+lims["as23lim"] = (-0.9 , 0.6  )
+as1lims = lims
+
 sf53_as1 = spc.SpectraFactory("data/5053_aS1",framerows=792,framecols=1466)
 sf53_as1.frame_row_cut([0,791])
 sf53_as1.frame_col_cut([0])
@@ -58,6 +70,17 @@ wMyst = [754,787];   cMyst = 505.3577
 wFeMg = [421,451];   cFeMg = 505.6846
 wFeI  = [258,283];    cFeI  = 505.8495
 
+lims["ewlim"]   = ( 0.5 , 1.5  )
+lims["vellim"]  = (-6 , 7  )
+lims["rellim"]  = ( 0.2 , 1.3  )
+lims["fw13lim"] = ( -0.1 , 0.9  )
+lims["fwhmlim"] = ( -0.1 , 1.3  )
+lims["fw23lim"] = (-0.2 , 1.6  )
+lims["as13lim"] = (-0.6 , 0.4  )
+lims["as12lim"] = (-0.7 , 0.6  )
+lims["as23lim"] = (-0.9 , 0.6  )
+as2lims = lims
+
 sf53_as2 = spc.SpectraFactory("data/5053_aS2",framerows=780,framecols=1486)
 sf53_as2.frame_row_cut([0,791])
 sf53_as2.frame_col_cut([0])
@@ -75,4 +98,5 @@ as2Myst = spc.splineline(wMyst, cMyst, as2.meta,"Myst ")
 as2FeMg  = spc.splineline(wFeMg, cFeMg , as2.meta,"FeMg " )
 as2FeI  = spc.splineline(wFeI, cFeI , as2.meta,"FeI " )
 
-as2lines = [as2VI,as2NiI,as2C2,as2CI,as2Myst,as2FeMg,as2FeI]
+as2lines = [as2VI,as2NiI,as2CI,as2Myst,as2FeI] #C2 and FeMg cause a crash
+#as2lines = [as2VI,as2NiI,as2C2,as2CI,as2Myst,as2FeMg,as2FeI]

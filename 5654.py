@@ -14,7 +14,7 @@ wFeI  = [131,168];   cFeI  = 566.1354
 lims = {}
 lims["ewlim"]   = ( 0.3 , 1.8  )
 lims["vellim"]  = (-5.8 , 6.1  )
-lims["rellim"]  = ( 0.2 , 1.3  )
+lims["rellim"]  = ( 0.2 , 1.5  )
 lims["fw13lim"] = ( -0.1 , 1.0  )
 lims["fwhmlim"] = ( -0.1 , 1.0  )
 lims["fw23lim"] = (-0.2 , 1.5  )
@@ -40,6 +40,7 @@ as2FeI  = spc.splineline(wFeI, cFeI , as2.meta,"FeI " )
 
 as2lines = [as2FeIp,as2Myst,as2SiI,as2VI,as2ScII,as2FeI] # ... and save in this list for as2
 
+cs2lims=lims
 sf56_cs2 = spc.SpectraFactory("data/5654_cS2",framerows=756,framecols=1480)
 sf56_cs2.frame_row_cut([0,755])
 sf56_cs2.frame_col_cut([0])
@@ -66,6 +67,17 @@ wSiI  = [844,871];   cSiI  = 565.4937
 wVI   = [564,596];   cVI   = 565.7456
 wScII = [512,555];   cScII = 565.7880
 wFeI  = [139,167];   cFeI  = 566.1354
+
+lims["ewlim"]   = ( 0 , 5  )
+lims["vellim"]  = (-5.8 , 7  )
+lims["rellim"]  = ( 0 , 6  )
+lims["fw13lim"] = ( -0.1 , 1.0  )
+lims["fwhmlim"] = ( -0.1 , 1.1  )
+lims["fw23lim"] = (-0.2 , 1.5  )
+lims["as13lim"] = (-0.4 , 0.3  )
+lims["as12lim"] = (-0.5 , 0.4  )
+lims["as23lim"] = (-0.9 , 0.5  )
+bs2lims = lims
 
 sf56_bs2 = spc.SpectraFactory("data/5654_bS2",framerows=756,framecols=1480)
 sf56_bs2.frame_row_cut([0,755])
