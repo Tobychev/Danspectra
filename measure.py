@@ -1,35 +1,25 @@
-#encoding: utf8
 import matplotlib.pyplot as pl
-import interactive as intr
 import visualize as vis
-import danframe as dan
-import kontin as con
-import lines as lin
-import numpy as np
+region = __import__("5053")
 
-s6405_t5p = dan.frameseries("data/6405_aS1","top 5%")
-s6405_seg = dan.frameseries("data/6405_aS1","segments")
+lims = {}
+lims["ewlim"]   = ( 0.5 , 1.5  )
+lims["vellim"]  = (-6 , 7  )
+lims["rellim"]  = ( 0.2 , 1.3  )
+lims["fw13lim"] = ( -0.1 , 0.9  )
+lims["fwhmlim"] = ( -0.1 , 1.3  )
+lims["fw23lim"] = (-0.2 , 1.6  )
+lims["as13lim"] = (-0.6 , 0.4  )
+lims["as12lim"] = (-0.7 , 0.6  )
+lims["as23lim"] = (-0.9 , 0.6  )
 
-lins = lin.make_lines_from_wins(s6405_t5p,s6405_t5p.pkwindows)
-
-FeI  = lins[1]
-SiFe = lins[2]
-myst = lins[3]
-
-mes = {}
-mes["FeI top 5%"]  = FeI.measure_linecores(s6405_t5p)
-mes["FeI segm"  ]  = FeI.measure_linecores(s6405_seg)
-mes["Myst top 5%"] = myst.measure_linecores(s6405_t5p)
-mes["Myst segm"  ] = myst.measure_linecores(s6405_seg)
+as2res = {} 
+for line in region.as2lines:
+    name = line.name.split(" ")[0]
+    print(name)
+    as2res[name] = line.measure(region.as2)
 
 
-#Konstiga mätningar
-# Första bilden
-# Myst segm   : 10,406,693, (695)
-# Myst top 5% : 10,406,693, (695)
-# FeI  segm   : 313,314,315,316,317,799
 
-# 799 - helt klart skräp
-# 406,693,695 - ett extremvärde vid randen
 
 
