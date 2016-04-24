@@ -5,6 +5,7 @@ import scipy.interpolate as si
 import pickle as pic
 import numpy as np
 import glob as g
+import copy
 import os
 
 class Spectra(object):
@@ -222,7 +223,7 @@ class SpectraFactory(SpecMeta):
     def make_spectra_subset(self,spectra,rowsubset=None,colsubset=None,desc=""):
         shape = spectra[:,:].shape
         colid = range(0,shape[1]); rowid = range(0,shape[0])
-        meta  = spectra.meta
+        meta  = copy.deepcopy(spectra.meta)
         subset = None
 
         if desc == "":
@@ -244,6 +245,8 @@ class SpectraFactory(SpecMeta):
                 colid = colsubset
 
         if rowsubset is not None or colsubset is not None:
+            meta.lmbd = meta.lmbd[colid]
+            meta.cont = (meta.cont[0][rowid],meta.cont[1][rowid])
             subset = spectra[rowid,:]
             subset = subset[:,colid]
             return Spectra(desc,spectra.meta.lmbd[colid],subset,meta)
