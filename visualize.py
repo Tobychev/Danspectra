@@ -58,7 +58,7 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
          "xlabel": "Continuum intensity",
          "ylim"  : vellim},regbins)
 
-    prop_plot(axs[0,2],measure[:,con],measure[:,bot]/measure[:,con],
+    prop_plot(axs[0,2],measure[:,con],measure[:,bot],
         {"title" : "Relative line bottom,\n " + str(line),
          "ylabel": "Relative Line min intesity",
          "xlabel": "Continuum intensity",
@@ -105,7 +105,7 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
     if mesbin is not None:
         axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
         axs[0,1].plot(mesbin[:,con],mesbin[:,vel],'ko')
-        axs[0,2].plot(mesbin[:,con],mesbin[:,bot]/mesbin[:,con],'ko')
+        axs[0,2].plot(mesbin[:,con],mesbin[:,bot],'ko')
         axs[1,0].plot(mesbin[:,con],mesbin[:,fw13]/line.width,'ko')
         axs[1,1].plot(mesbin[:,con],mesbin[:,fwhm]/line.width,'ko')
         axs[1,2].plot(mesbin[:,con],mesbin[:,fw23]/line.width,'ko')
@@ -151,7 +151,7 @@ def addreg(fig,measure,line,bins=73,colour="r",label=""):
     ys =[
             measure[:,ew]/measure[:,ew].mean(),
             measure[:,vel],
-            measure[:,bot]/measure[:,con],
+            measure[:,bot],
             measure[:,fw13]/line.width,
             measure[:,fwhm]/line.width,
             measure[:,fw23]/line.width,
