@@ -280,8 +280,8 @@ class continua(object):
         
     def __top_of_segments(self,data,npoint,q):
         ids, = np.where(data > np.percentile(data,q))
-        nregion = int(len(ids)/npoint)
-        perreg  = int(npoint/nregion)
+        perreg  = 3
+        nregion = int(npoint/perreg)
         regions = np.array_split(ids,nregion)
         idx = []
         # Top perreg of data in each region
