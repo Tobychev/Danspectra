@@ -10,6 +10,20 @@ wMyst = [591,623];   cMyst = 521.5571
 wCuI  = [321,352];   cCuI  = 521.8209
 wTiI  = [170,199];   cTiI  = 521.9706
 
+lims = {}
+lims["ewlim"]   = ( 0 , 2  )
+lims["vellim"]  = (-4 , 4  )
+lims["rellim"]  = ( -0.4 , 1.3  )
+
+lims["fw13lim"] = ( 0 , 0.8  )
+lims["fwhmlim"] = ( -0.1 , 1  )
+lims["fw23lim"] = (-0.2 , 1.2  )
+
+lims["as13lim"] = (-0.4 , 0.4  )
+lims["as12lim"] = (-0.5 , 0.3  )
+lims["as23lim"] = (-0.9 , 0.6  )
+as1lims = lims
+
 sf52_as1 = spc.SpectraFactory("data/5215_aS1",framerows=802,framecols=1476)
 sf52_as1.frame_row_cut([0,801])
 sf52_as1.frame_col_cut([0])
@@ -52,6 +66,19 @@ wCoI  = [956,996];   cCoI  = 521.2691
 wMyst = [659,691];   cMyst = 521.5571
 wCuI  = [385,424];   cCuI  = 521.8209
 wTiI  = [234,278];   cTiI  = 521.9706
+
+lims["ewlim"]   = ( 0 , 3.5  )
+lims["vellim"]  = (-6 , 9  )
+lims["rellim"]  = ( 0 , 6  )
+
+lims["fw13lim"] = ( -0.2 , 1  )
+lims["fwhmlim"] = ( -0.1 , 1.2  )
+lims["fw23lim"] = (-0.2 , 1.2  )
+
+lims["as13lim"] = (-0.6 , 0.3  )
+lims["as12lim"] = (-1 , 0.3  )
+lims["as23lim"] = (-1.1 , 0.6  )
+as2lims=lims
 
 sf52_as2 = spc.SpectraFactory("data/5215_aS2",framerows=774,framecols=1458)
 sf52_as2.frame_row_cut([0,773])
