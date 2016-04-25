@@ -307,7 +307,7 @@ class line(object):
         self.idx   = np.arange(winbounds[0],winbounds[1]+1)
         self.cent  = cent
         if name != "":
-            self.name  = "{:<5} {:6.3f}".format(name,self.cent)
+            self.name  = "{:<7} {:6.3f}".format(name,self.cent)
         else:
             self.name  = "{:6.3f}".format(self.cent)
 
@@ -315,7 +315,7 @@ class line(object):
         self.spec  = specmeta
 
     def __repr__(self):
-        return "Line {} [$\Delta \lambda$ = {:.4f} nm]".format(self.name,self.width)
+        return "{} nm".format(self.name)
 
     def _equivalent_width(self,spec):
 #        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
