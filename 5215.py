@@ -10,37 +10,34 @@ wMyst = [591,623];   cMyst = 521.5571
 wCuI  = [321,352];   cCuI  = 521.8209
 wTiI  = [170,199];   cTiI  = 521.9706
 
-lims = {}
-lims["ewlim"]   = ( 0 , 2  )
-lims["vellim"]  = (-4 , 4  )
-lims["rellim"]  = ( -0.4 , 1.3  )
-
-lims["fw13lim"] = ( 0 , 0.8  )
-lims["fwhmlim"] = ( -0.1 , 1  )
-lims["fw23lim"] = (-0.2 , 1.2  )
-
-lims["as13lim"] = (-0.4 , 0.4  )
-lims["as12lim"] = (-0.5 , 0.3  )
-lims["as23lim"] = (-0.9 , 0.6  )
-as1lims = lims
-
 sf52_as1 = spc.SpectraFactory("data/5215_aS1",framerows=802,framecols=1476)
 sf52_as1.frame_row_cut([0,801])
 sf52_as1.frame_col_cut([0])
 sf52_as1.contrast_cut(70)
 sf52_as1.set_continua("segments")
 
-as1 = sf52_as1.make_spectra()
-as1con = as1.meta.cont[0]*as1.lmbd.mean() + as1.meta.cont[1] # Define continua for as1 series
+qu1 = sf52_as1.make_spectra()
+qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
-as1FeI = spc.splineline(wFeI, cFeI, as1.meta,"FeI ") # Define lines for as1 series...
-as1FeTi = spc.splineline(wFeTi, cFeTi, as1.meta,"FeTi ")
-as1CoI  = spc.splineline(wCoI , cCoI , as1.meta,"CoI " )
-as1Myst   = spc.splineline(wMyst  , cMyst  , as1.meta,"Myst "  )
-as1CuI = spc.splineline(wCuI, cCuI, as1.meta,"CuI ")
-as1TiI  = spc.splineline(wTiI, cTiI , as1.meta,"TiI " )
+qu1FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI " ) # Define lines for qu1 series...
+qu1FeTi = spc.splineline(wFeTi, cFeTi, qu1.meta,"FeTi ")
+qu1CoI  = spc.splineline(wCoI,  cCoI,  qu1.meta,"CoI " )
+qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst ")
+qu1CuI  = spc.splineline(wCuI,  cCuI,  qu1.meta,"CuI " )
+qu1TiI  = spc.splineline(wTiI,  cTiI,  qu1.meta,"TiI " )
+qu1lines = [qu1FeI,qu1FeTi,qu1CoI,qu1Myst,qu1CuI,qu1TiI]
 
-as1lines = [as1FeI,as1FeTi,as1CoI,as1Myst,as1CuI,as1TiI]
+lims = {}
+lims["ewlim"]   = ( 0.5 , 1.6 )
+lims["vellim"]  = (-2   , 4   )
+lims["rellim"]  = ( 0.4 , 1.3 )
+lims["fw13lim"] = ( 0.05, 0.5 )
+lims["fwhmlim"] = ( 0.10, 0.60)
+lims["fw23lim"] = ( 0.10, 0.75)
+lims["as13lim"] = (-0.04, 0.06)
+lims["as12lim"] = (-0.06, 0.06)
+lims["as23lim"] = (-0.06, 0.08)
+qu1lims = lims
 
 sf52_bs1 = spc.SpectraFactory("data/5215_bS1",framerows=802,framecols=1476)
 sf52_bs1.frame_row_cut([0,801])
@@ -48,17 +45,27 @@ sf52_bs1.frame_col_cut([0])
 sf52_bs1.contrast_cut(50)
 sf52_bs1.set_continua("segments")
 
-bs1 = sf52_bs1.make_spectra()
-bs1con = bs1.meta.cont[0]*bs1.lmbd.mean() + bs1.meta.cont[1] # Define continua for bs1 series
+qu2 = sf52_bs1.make_spectra()
+qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1] # Define continua for qu2 series
 
-bs1FeI = spc.splineline(wFeI, cFeI, bs1.meta,"FeI ") # Define lines for bs1 series...
-bs1FeTi = spc.splineline(wFeTi, cFeTi, bs1.meta,"FeTi ")
-bs1CoI  = spc.splineline(wCoI , cCoI , bs1.meta,"CoI " )
-bs1Myst   = spc.splineline(wMyst  , cMyst  , bs1.meta,"Myst "  )
-bs1CuI = spc.splineline(wCuI, cCuI, bs1.meta,"CuI ")
-bs1TiI  = spc.splineline(wTiI, cTiI , bs1.meta,"TiI " )
+qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI " ) # Define lines for qu2 series...
+qu2FeTi = spc.splineline(wFeTi, cFeTi, qu2.meta,"FeTi ")
+qu2CoI  = spc.splineline(wCoI,  cCoI,  qu2.meta,"CoI " )
+qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
+qu2CuI  = spc.splineline(wCuI,  cCuI,  qu2.meta,"CuI " )
+qu2TiI  = spc.splineline(wTiI,  cTiI,  qu2.meta,"TiI " )
+qu2lines = [qu2FeI,qu2FeTi,qu2CoI,qu2Myst,qu2CuI,qu2TiI]
 
-bs1lines = [bs1FeI,bs1FeTi,bs1CoI,bs1Myst,bs1CuI,bs1TiI]
+lims["ewlim"]   = ( 0.5 , 1.6 )
+lims["vellim"]  = (-2   , 3   )
+lims["rellim"]  = ( 0.4 , 1.01)
+lims["fw13lim"] = ( 0.10, 0.35)
+lims["fwhmlim"] = ( 0.15, 0.45)
+lims["fw23lim"] = ( 0.15, 0.55)
+lims["as13lim"] = (-0.03, 0.04)
+lims["as12lim"] = (-0.04, 0.04)
+lims["as23lim"] = (-0.04, 0.05)
+qu2lims = lims
 
 wFeI  = [1253,1272]; cFeI  = 520.9892
 wFeTi = [1077,1110]; cFeTi = 521.1535
@@ -67,33 +74,31 @@ wMyst = [659,691];   cMyst = 521.5571
 wCuI  = [385,424];   cCuI  = 521.8209
 wTiI  = [234,278];   cTiI  = 521.9706
 
-lims["ewlim"]   = ( 0 , 3.5  )
-lims["vellim"]  = (-6 , 9  )
-lims["rellim"]  = ( 0 , 6  )
-
-lims["fw13lim"] = ( -0.2 , 1  )
-lims["fwhmlim"] = ( -0.1 , 1.2  )
-lims["fw23lim"] = (-0.2 , 1.2  )
-
-lims["as13lim"] = (-0.6 , 0.3  )
-lims["as12lim"] = (-1 , 0.3  )
-lims["as23lim"] = (-1.1 , 0.6  )
-as2lims=lims
-
 sf52_as2 = spc.SpectraFactory("data/5215_aS2",framerows=774,framecols=1458)
 sf52_as2.frame_row_cut([0,773])
 sf52_as2.frame_col_cut([0])
 sf52_as2.contrast_cut(70)
 sf52_as2.set_continua("segments")
 
-as2 = sf52_as2.make_spectra()
-as2con = as2.meta.cont[0]*as2.lmbd.mean() + as2.meta.cont[1] # Define continua for as2 series
+spt = sf52_as2.make_spectra()
+sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
 
-as2FeI = spc.splineline(wFeI, cFeI, as2.meta,"FeI ") # Define lines for as2 series...
-as2FeTi = spc.splineline(wFeTi, cFeTi, as2.meta,"FeTi ")
-as2CoI  = spc.splineline(wCoI , cCoI , as2.meta,"CoI " )
-as2Myst   = spc.splineline(wMyst  , cMyst  , as2.meta,"Myst "  )
-as2CuI = spc.splineline(wCuI, cCuI, as2.meta,"CuI ")
-as2TiI  = spc.splineline(wTiI, cTiI , as2.meta,"TiI " )
+sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI " ) # Define lines for spt series...
+sptFeTi = spc.splineline(wFeTi, cFeTi, spt.meta,"FeTi ")
+sptCoI  = spc.splineline(wCoI,  cCoI,  spt.meta,"CoI " )
+sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
+sptCuI  = spc.splineline(wCuI,  cCuI,  spt.meta,"CuI " )
+sptTiI  = spc.splineline(wTiI,  cTiI,  spt.meta,"TiI " )
+sptlines = [sptFeI,sptFeTi,sptCoI,sptMyst,sptCuI,sptTiI]
 
-as2lines = [as2FeI,as2FeTi,as2CoI,as2Myst,as2CuI,as2TiI]
+lims["ewlim"]   = ( 0  , 3.3 )
+lims["vellim"]  = (-6  , 9   )
+lims["rellim"]  = ( 0.2, 1.  )
+lims["fw13lim"] = ( 0.0, 1.0 )
+lims["fwhmlim"] = ( 0.0, 1.0 )
+lims["fw23lim"] = ( 0.0, 1.2 )
+lims["as13lim"] = (-0.3, 0.2 )
+lims["as12lim"] = (-0.3, 0.2 )
+lims["as23lim"] = (-0.3, 0.2 )
+
+sptlims=lims
