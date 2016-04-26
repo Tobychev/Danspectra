@@ -14,53 +14,63 @@ wSiFe = [479, 519];   cSiFe = 640.7291
 wMyst = [646, 722];   cMyst = 640.5763
 wCN  = [1006,1047];   cCN   = 640.3127 
 
-lims = {}
-lims["ewlim"]   = ( -0.5 , 2.5  )
-lims["vellim"]  = (-10 , 10  )
-lims["rellim"]  = ( 0.1 , 1.3  )
-
-lims["fw13lim"] = ( -0.2 , 1.2  )
-lims["fwhmlim"] = ( -0.1 , 1.2  )
-lims["fw23lim"] = (-0.2 , 1.2  )
-
-lims["as13lim"] = (-0.7 , 0.7  )
-lims["as12lim"] = (-0.8 , 0.7  )
-lims["as23lim"] = (-1.1 , 0.6  )
-as1lims = lims
-
 s1 = spc.SpectraFactory("data/6405_aS1")
 s1.frame_row_cut([0,799])
 s1.contrast_cut(50)
 s1.set_continua("segments")
-as1 = s1.make_spectra()
-as1con = as1.meta.cont[0]*as1.lmbd.mean() + as1.meta.cont[1]
+qu1 = s1.make_spectra()
+qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1]
 
-as1H2O  = spc.splineline(wH2O,  cH2O,  as1.meta,"H2O ") # Define lines for as1 series...
-as1FeI  = spc.splineline(wFeI,  cFeI,  as1.meta,"FeI ")
-as1SiFe = spc.splineline(wSiFe, cSiFe, as1.meta,"SiFe ")
-as1Myst = spc.splineline(wMyst, cMyst, as1.meta,"Myst ")
-as1CN   = spc.splineline(wCN,   cCNq,  as1.meta,"CN ")
-as1lines = [as1H2O,as1FeI,as1SiFe,as1Myst,as1CN] # ... and save in this list for as2
+qu1H2O  = spc.splineline(wH2O,  cH2O,  qu1.meta,"H2O ") # Define lines for qu1 series...
+qu1FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI ")
+qu1SiFe = spc.splineline(wSiFe, cSiFe, qu1.meta,"SiFe ")
+qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst ")
+qu1CN   = spc.splineline(wCN,   cCN,   qu1.meta,"CN ")
+qu1lines = [qu1H2O,qu1FeI,qu1SiFe,qu1Myst,qu1CN] # ... and save in this list for qu1 
+
+lims = {}
+lims["ewlim"]   = (-0.5 , 2.5 )
+lims["vellim"]  = (-10  , 10  )
+lims["rellim"]  = ( 0.95, 1.01)
+lims["fw13lim"] = (-0.1 , 1.4 )
+lims["fwhmlim"] = (-0.1 , 1.4 )
+lims["fw23lim"] = (-0.1 , 1.4 )
+lims["as13lim"] = (-0.7 , 0.7 )
+lims["as12lim"] = (-0.8 , 0.7 )
+lims["as23lim"] = (-1.1 , 0.6 )
+qu1lims = lims
 
 b1 = spc.SpectraFactory("data/6405_bS1")
 b1.frame_row_cut([0,799])
 b1.contrast_cut(50)
 b1.set_continua("segments")
-bs1 = b1.make_spectra()
-bs1con = bs1.meta.cont[0]*bs1.lmbd.mean() + bs1.meta.cont[1]
+qu2 = b1.make_spectra()
+qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1]
 
-bs1H2O  = spc.splineline(wH2O,  cH2O,  bs1.meta,"H2O ") # Define lines for bs1 series...
-bs1FeI  = spc.splineline(wFeI,  cFeI,  bs1.meta,"FeI ")
-bs1SiFe = spc.splineline(wSiFe, cSiFe, bs1.meta,"SiFe ")
-bs1Myst = spc.splineline(wMyst, cMyst, bs1.meta,"Myst ")
-bs1CN  = spc.splineline(wCN,  cCN,  bs1.meta,"CN ")
-bs1lines = [bs1H2O,bs1FeI,bs1SiFe,bs1Myst,bs1CN] # ... and save in this list for as2
+qu2H2O  = spc.splineline(wH2O,  cH2O,  qu2.meta,"H2O ") # Define lines for qu2 series...
+qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI ")
+qu2SiFe = spc.splineline(wSiFe, cSiFe, qu2.meta,"SiFe ")
+qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
+qu2CN   = spc.splineline(wCN,   cCN,   qu2.meta,"CN ")
+qu2lines = [qu2H2O,qu2FeI,qu2SiFe,qu2Myst,qu2CN] # ... and save in this list for as2
+
+lims = {}
+lims["ewlim"]   = (-0.5 , 2.5 )
+lims["vellim"]  = (-10  , 10  )
+lims["rellim"]  = ( 0.1 , 1.3 )
+lims["fw13lim"] = (-0.2 , 1.2 )
+lims["fwhmlim"] = (-0.1 , 1.2 )
+lims["fw23lim"] = (-0.2 , 1.2 )
+lims["as13lim"] = (-0.7 , 0.7 )
+lims["as12lim"] = (-0.8 , 0.7 )
+lims["as23lim"] = (-1.1 , 0.6 )
+qu2lims = lims
 
 #Hand placed limits from mean(axis=0)
-wH2O  = [442, 470];   cH2O  = 640.8682
+wH2O  = [444, 465];   cH2O  = 640.8682
 wFeI  = [505, 571];   cFeI  = 640.8026
-wSiFe = [611, 651];   cSiFe = 640.7291
-wMyst = [798, 852];   cMyst = 640.5763
+wSiFe = [614, 647];   cSiFe = 640.7291
+wMyst = [797, 853];   cMyst = 640.5763
 wCN   = [1139,1178];   cCN  = 640.3127 
 
 s2 = spc.SpectraFactory("data/6405_aS2",framerows=774,framecols=1446)
@@ -68,19 +78,27 @@ s2.frame_row_cut([0,743])
 s2.frame_col_cut([0])
 s2.contrast_cut(85)
 s2.set_continua("segments")
-as2 = s2.make_spectra()
-as2con = as2.meta.cont[0]*as2.lmbd.mean() + as2.meta.cont[1]
+spt = s2.make_spectra()
+sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1]
 
-as2H2O  = spc.splineline(wH2O,  cH2O,  as2.meta,"H2O ") # Define lines for as2 series...
-as2FeI  = spc.splineline(wFeI,  cFeI,  as2.meta,"FeI ")
-as2SiFe = spc.splineline(wSiFe, cSiFe, as2.meta,"SiFe ")
-as2Myst = spc.splineline(wMyst, cMyst, as2.meta,"Myst ")
-as2CN  = spc.splineline(wCN,    cCN,   as2.meta,"CN ")
-
+sptH2O  = spc.splineline(wH2O,  cH2O,  spt.meta,"H2O ") # Define lines for spt series...
+sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI ")
+sptSiFe = spc.splineline(wSiFe, cSiFe, spt.meta,"SiFe ")
+sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
+sptlines = [sptH2O,sptFeI,sptSiFe,sptMyst] # ... and save in this list for spt
 #OBS! H2O and CNq cause crash, removed
-#as2lines = [as2H2O,as2FeI,as2SiFe,as2Myst,as2CN] # ... and save in this list for as2
-as2lines = [as2FeI,as2SiFe,as2Myst] # ... and save in this list for as2
 
+lims = {}
+lims["ewlim"]   = ( 0.3 , 2.1 )
+lims["vellim"]  = (-8   , 8   )
+lims["rellim"]  = ( 0.80, 1.01)
+lims["fw13lim"] = (-0.2 , 2   )
+lims["fwhmlim"] = (-0.3 , 3   )
+lims["fw23lim"] = (-0.4 , 3   )
+lims["as13lim"] = (-1.5 , 0.74)
+lims["as12lim"] = (-2.0 , 0.74)
+lims["as23lim"] = (-2.0 , 0.84)
+sptlims = lims
 
 # Sunspot measurement
 if False:
@@ -128,4 +146,3 @@ if False:
 #    pl.plot(mesMyst[:,cont],mesMyst[:,bot],'o')
 #    err = np.load("Estimate_errSiFe.npy")
 #    errSiFe = er.scale_spline_err(SiFe,mesSiFe,err)
-    
