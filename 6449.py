@@ -48,14 +48,14 @@ qu1lims=lims
 wMyst = [1210,1302]; cMyst = 644.9127
 wCa   = [1144,1190]; cCa   = 644.9820
 wCoBl = [1080,1144]; cCoBl = 645.0179
-wUnk2 = [831,874];   cUnk2 = 645.2315
+wUnk2 = [832,874];   cUnk2 = 645.2315
 wH2O  = [608,628];   cH2O  = 645.4139
 wCo   = [492,530];   cCo   = 645.5001
 wCa2  = [412,452];   cCa2  = 645.5602
 wH2O2 = [3,30];      cH2O2 = 645.8892
 
 sf64_bs1 = spc.SpectraFactory("data/6449_bS1",framerows=802,framecols=1514)
-sf64_bs1.frame_row_cut([0,779])
+sf64_bs1.frame_row_cut([0,1,2,799,800,801])
 sf64_bs1.frame_col_cut([0])
 sf64_bs1.contrast_cut(50)
 sf64_bs1.set_continua("segments")
@@ -67,23 +67,22 @@ qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Unkn"   )   # Define lines for 
 qu2Ca   = spc.splineline(wCa,   cCa,   qu2.meta,"CaI"    )
 qu2CoBl = spc.splineline(wCoBl, cCoBl, qu2.meta,"CoI+Bl" )
 qu2Unk2 = spc.splineline(wUnk2, cUnk2, qu2.meta,"SiI/VI" )
-qu2H2O  = spc.splineline(wH2O,  cH2O,  qu2.meta,"tel H2O")
+qu2H2O  = spc.splineline(wH2O,  cH2O,  qu2.meta,"tel-H2O")
 qu2Co   = spc.splineline(wCo,   cCo,   qu2.meta,"CoI"    )
 qu2Ca2  = spc.splineline(wCa2,  cCa2,  qu2.meta,"CaI"    )
-qu2H2O2 = spc.splineline(wH2O2, cH2O2, qu2.meta,"tel H2O")
+qu2H2O2 = spc.splineline(wH2O2, cH2O2, qu2.meta,"tel_H2O")
 qu2lines = [qu2Myst,qu2Ca,qu2CoBl,qu2Unk2,qu2H2O,qu2Co,qu2Ca2,qu2H2O2]
 
 lims["ewlim"]   = (-0.8, 5.1 )
 lims["vellim"]  = (-6  , 4.8 )
-lims["rellim"]  = ( 0.8, 1.1 )
+lims["rellim"]  = ( 0.90,1.02)
 lims["fw13lim"] = (-0.1, 1.1 )
-lims["fwhmlim"] = (-0.1, 1.1 )
-lims["fw23lim"] = (-0.1, 1.1 )
-lims["as13lim"] = (-0.6, 0.4 )
-lims["as12lim"] = (-0.6, 0.4 )
-lims["as23lim"] = (-0.6, 0.4 )
+lims["fwhmlim"] = (-0.08,1.4 )
+lims["fw23lim"] = (-0.08,1.43)
+lims["as13lim"] = (-0.7, 0.4 )
+lims["as12lim"] = (-0.9, 0.5 )
+lims["as23lim"] = (-0.9, 0.5 )
 qu2lims = lims
-
 
 ###
 # Spot section
@@ -92,7 +91,7 @@ wMyst = [831,938]; cMyst = 644.9127
 wCa   = [764,830]; cCa   = 644.9820
 wCoBl = [695,763]; cCoBl = 645.0179
 wUnk2 = [444,492]; cUnk2 = 645.2315
-wH2O  = [227,252]; cH2O  = 645.4139
+wH2O  = [229,249]; cH2O  = 645.4139
 wCo   = [102,152]; cCo   = 645.5001
 wCa2  = [18,89];   cCa2  = 645.5602
 
@@ -109,10 +108,11 @@ sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Unkn"   ) # Define lines for sp
 sptCa   = spc.splineline(wCa,   cCa,   spt.meta,"CaI"    )
 sptCoBl = spc.splineline(wCoBl, cCoBl, spt.meta,"CoI+Bl" )
 sptUnk2 = spc.splineline(wUnk2, cUnk2, spt.meta,"SiI/VI" )
-sptH2O  = spc.splineline(wH2O,  cH2O,  spt.meta,"tel H2O")
+sptH2O  = spc.splineline(wH2O,  cH2O,  spt.meta,"tel-H2O")
 sptCo   = spc.splineline(wCo,   cCo,   spt.meta,"CoI"    )
-sptCa2  = spc.splineline(wCa2,  cCa2,  spt.meta,"CaI"    )
-sptlines = [sptMyst,sptCa,sptCoBl,sptUnk2,sptH2O,sptCo,sptCa2]
+sptCa2  = spc.splineline(wCa2,  cCa2,  spt.meta,"CaI."    )
+#sptlines = [sptMyst,sptCa,sptCoBl,sptUnk2,sptH2O,sptCo,sptCa2]
+sptlines = [sptMyst,sptCa,sptCoBl,sptUnk2,sptCo,sptCa2]
 
 lims["ewlim"]   = ( 0.0 , 2.1 )
 lims["vellim"]  = (-1.1 , 4.8 )
@@ -123,5 +123,4 @@ lims["fw23lim"] = ( 0.10, 0.7 )
 lims["as13lim"] = (-0.1 , 0.11)
 lims["as12lim"] = (-0.1 , 0.11)
 lims["as23lim"] = (-0.1 , 0.11)
-
 sptlims = lims
