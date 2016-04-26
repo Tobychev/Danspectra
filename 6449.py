@@ -24,7 +24,7 @@ qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua f
 qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Unkn"   ) # Define lines for qu1 series...
 qu1Ca   = spc.splineline(wCa,   cCa,   qu1.meta,"CaI"    )
 qu1CoBl = spc.splineline(wCoBl, cCoBl, qu1.meta,"CoI+Bl" )
-qu1Unk2 = spc.splineline(wUnk2, cUnk2, qu1.meta,"SiI/VI" )
+qu1Unk2 = spc.splineline(wUnk2, cUnk2, qu1.meta,"SiI?VI" )
 qu1H2O  = spc.splineline(wH2O,  cH2O,  qu1.meta,"tel H2O")
 qu1Co   = spc.splineline(wCo,   cCo,   qu1.meta,"CoI"    )
 qu1Ca2  = spc.splineline(wCa2,  cCa2,  qu1.meta,"CaI"    )
@@ -32,18 +32,16 @@ qu1H2O2 = spc.splineline(wH2O2, cH2O2, qu1.meta,"tel H2O")
 
 qu1lines = [qu1Myst,qu1Ca,qu1CoBl,qu1Unk2,qu1H2O,qu1Co,qu1Ca2,qu1H2O2]
 
-lims = {}
-lims["ewlim"]   = ( 0   , 2  )
-lims["vellim"]  = (-3   , 2  )
-lims["rellim"]  = ( 0.9 , 1.0)
-lims["fw13lim"] = (-0.1 , 0.5)
-lims["fwhmlim"] = (-0.1 , 1.0)
-lims["fw23lim"] = (-0.1 , 1.2)
-lims["as13lim"] = (-0.3 , 0.2)
-lims["as12lim"] = (-0.8 , 0.4)
-lims["as23lim"] = (-0.8 , 0.4)
-###OBS! Co is crazy, not included in the interval
-qu1lims=lims
+qu1lims = {}
+qu1lims["ewlim"]   = ( 0   , 2  )
+qu1lims["vellim"]  = (-3   , 2  )
+qu1lims["rellim"]  = ( 0.9 , 1.0)
+qu1lims["fw13lim"] = (-0.1 , 0.5)
+qu1lims["fwhmlim"] = (-0.1 , 1.0)
+qu1lims["fw23lim"] = (-0.1 , 1.2)
+qu1lims["as13lim"] = (-0.3 , 0.2)
+qu1lims["as12lim"] = (-0.8 , 0.4)
+qu1lims["as23lim"] = (-0.8 , 0.4)
 
 wMyst = [1210,1302]; cMyst = 644.9127
 wCa   = [1144,1190]; cCa   = 644.9820
@@ -73,16 +71,16 @@ qu2Ca2  = spc.splineline(wCa2,  cCa2,  qu2.meta,"CaI"    )
 qu2H2O2 = spc.splineline(wH2O2, cH2O2, qu2.meta,"tel_H2O")
 qu2lines = [qu2Myst,qu2Ca,qu2CoBl,qu2Unk2,qu2H2O,qu2Co,qu2Ca2,qu2H2O2]
 
-lims["ewlim"]   = (-0.8, 5.1 )
-lims["vellim"]  = (-6  , 4.8 )
-lims["rellim"]  = ( 0.90,1.02)
-lims["fw13lim"] = (-0.1, 1.1 )
-lims["fwhmlim"] = (-0.08,1.4 )
-lims["fw23lim"] = (-0.08,1.43)
-lims["as13lim"] = (-0.7, 0.4 )
-lims["as12lim"] = (-0.9, 0.5 )
-lims["as23lim"] = (-0.9, 0.5 )
-qu2lims = lims
+qu2lims = {}
+qu2lims["ewlim"]   = (-0.8, 5.1 )
+qu2lims["vellim"]  = (-6  , 4.8 )
+qu2lims["rellim"]  = ( 0.90,1.02)
+qu2lims["fw13lim"] = (-0.1, 1.1 )
+qu2lims["fwhmlim"] = (-0.08,1.4 )
+qu2lims["fw23lim"] = (-0.08,1.43)
+qu2lims["as13lim"] = (-0.7, 0.4 )
+qu2lims["as12lim"] = (-0.9, 0.5 )
+qu2lims["as23lim"] = (-0.9, 0.5 )
 
 ###
 # Spot section
@@ -110,17 +108,16 @@ sptCoBl = spc.splineline(wCoBl, cCoBl, spt.meta,"CoI+Bl" )
 sptUnk2 = spc.splineline(wUnk2, cUnk2, spt.meta,"SiI/VI" )
 sptH2O  = spc.splineline(wH2O,  cH2O,  spt.meta,"tel-H2O")
 sptCo   = spc.splineline(wCo,   cCo,   spt.meta,"CoI"    )
-sptCa2  = spc.splineline(wCa2,  cCa2,  spt.meta,"CaI."    )
-#sptlines = [sptMyst,sptCa,sptCoBl,sptUnk2,sptH2O,sptCo,sptCa2]
+sptCa2  = spc.splineline(wCa2,  cCa2,  spt.meta,"CaI."   )
 sptlines = [sptMyst,sptCa,sptCoBl,sptUnk2,sptCo,sptCa2]
 
-lims["ewlim"]   = ( 0.0 , 2.1 )
-lims["vellim"]  = (-1.1 , 4.8 )
-lims["rellim"]  = ( 0.2 , 0.8 )
-lims["fw13lim"] = ( 0.05, 0.5 )
-lims["fwhmlim"] = ( 0.05, 0.6 )
-lims["fw23lim"] = ( 0.10, 0.7 )
-lims["as13lim"] = (-0.1 , 0.11)
-lims["as12lim"] = (-0.1 , 0.11)
-lims["as23lim"] = (-0.1 , 0.11)
-sptlims = lims
+sptlims = {}
+sptlims["ewlim"]   = ( 0.0 , 2.1 )
+sptlims["vellim"]  = (-1.1 , 4.8 )
+sptlims["rellim"]  = ( 0.2 , 0.8 )
+sptlims["fw13lim"] = ( 0.05, 0.5 )
+sptlims["fwhmlim"] = ( 0.05, 0.6 )
+sptlims["fw23lim"] = ( 0.10, 0.7 )
+sptlims["as13lim"] = (-0.1 , 0.11)
+sptlims["as12lim"] = (-0.1 , 0.11)
+sptlims["as23lim"] = (-0.1 , 0.11)

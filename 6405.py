@@ -28,17 +28,16 @@ qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst ")
 qu1CN   = spc.splineline(wCN,   cCN,   qu1.meta,"CN ")
 qu1lines = [qu1H2O,qu1FeI,qu1SiFe,qu1Myst,qu1CN] # ... and save in this list for qu1 
 
-lims = {}
-lims["ewlim"]   = (-0.5 , 2.5 )
-lims["vellim"]  = (-10  , 10  )
-lims["rellim"]  = ( 0.95, 1.01)
-lims["fw13lim"] = (-0.1 , 1.4 )
-lims["fwhmlim"] = (-0.1 , 1.4 )
-lims["fw23lim"] = (-0.1 , 1.4 )
-lims["as13lim"] = (-0.7 , 0.7 )
-lims["as12lim"] = (-0.8 , 0.7 )
-lims["as23lim"] = (-1.1 , 0.6 )
-qu1lims = lims
+qu1lims = {}
+qu1lims["ewlim"]   = (-0.5 , 2.5 )
+qu1lims["vellim"]  = (-10  , 10  )
+qu1lims["rellim"]  = ( 0.95, 1.01)
+qu1lims["fw13lim"] = (-0.1 , 1.4 )
+qu1lims["fwhmlim"] = (-0.1 , 1.4 )
+qu1lims["fw23lim"] = (-0.1 , 1.4 )
+qu1lims["as13lim"] = (-0.7 , 0.7 )
+qu1lims["as12lim"] = (-0.8 , 0.7 )
+qu1lims["as23lim"] = (-1.1 , 0.6 )
 
 b1 = spc.SpectraFactory("data/6405_bS1")
 b1.frame_row_cut([0,799])
@@ -54,17 +53,16 @@ qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
 qu2CN   = spc.splineline(wCN,   cCN,   qu2.meta,"CN ")
 qu2lines = [qu2H2O,qu2FeI,qu2SiFe,qu2Myst,qu2CN] # ... and save in this list for as2
 
-lims = {}
-lims["ewlim"]   = (-0.5 , 2.5 )
-lims["vellim"]  = (-10  , 10  )
-lims["rellim"]  = ( 0.1 , 1.3 )
-lims["fw13lim"] = (-0.2 , 1.2 )
-lims["fwhmlim"] = (-0.1 , 1.2 )
-lims["fw23lim"] = (-0.2 , 1.2 )
-lims["as13lim"] = (-0.7 , 0.7 )
-lims["as12lim"] = (-0.8 , 0.7 )
-lims["as23lim"] = (-1.1 , 0.6 )
-qu2lims = lims
+qu2lims = {}
+qu2lims["ewlim"]   = (-0.5 , 2.5 )
+qu2lims["vellim"]  = (-10  , 10  )
+qu2lims["rellim"]  = ( 0.1 , 1.3 )
+qu2lims["fw13lim"] = (-0.2 , 1.2 )
+qu2lims["fwhmlim"] = (-0.1 , 1.2 )
+qu2lims["fw23lim"] = (-0.2 , 1.2 )
+qu2lims["as13lim"] = (-0.7 , 0.7 )
+qu2lims["as12lim"] = (-0.8 , 0.7 )
+qu2lims["as23lim"] = (-1.1 , 0.6 )
 
 #Hand placed limits from mean(axis=0)
 wH2O  = [444, 465];   cH2O  = 640.8682
@@ -88,17 +86,16 @@ sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
 sptlines = [sptH2O,sptFeI,sptSiFe,sptMyst] # ... and save in this list for spt
 #OBS! H2O and CNq cause crash, removed
 
-lims = {}
-lims["ewlim"]   = ( 0.3 , 2.1 )
-lims["vellim"]  = (-8   , 8   )
-lims["rellim"]  = ( 0.80, 1.01)
-lims["fw13lim"] = (-0.2 , 2   )
-lims["fwhmlim"] = (-0.3 , 3   )
-lims["fw23lim"] = (-0.4 , 3   )
-lims["as13lim"] = (-1.5 , 0.74)
-lims["as12lim"] = (-2.0 , 0.74)
-lims["as23lim"] = (-2.0 , 0.84)
-sptlims = lims
+sptlims = {}
+sptlims["ewlim"]   = ( 0.3 , 2.1 )
+sptlims["vellim"]  = (-8   , 8   )
+sptlims["rellim"]  = ( 0.80, 1.01)
+sptlims["fw13lim"] = (-0.2 , 2   )
+sptlims["fwhmlim"] = (-0.3 , 3   )
+sptlims["fw23lim"] = (-0.4 , 3   )
+sptlims["as13lim"] = (-1.5 , 0.74)
+sptlims["as12lim"] = (-2.0 , 0.74)
+sptlims["as23lim"] = (-2.0 , 0.84)
 
 # Sunspot measurement
 if False:

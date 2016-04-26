@@ -27,17 +27,16 @@ qu1CuI  = spc.splineline(wCuI,  cCuI,  qu1.meta,"CuI " )
 qu1TiI  = spc.splineline(wTiI,  cTiI,  qu1.meta,"TiI " )
 qu1lines = [qu1FeI,qu1FeTi,qu1CoI,qu1Myst,qu1CuI,qu1TiI]
 
-lims = {}
-lims["ewlim"]   = ( 0.5 , 1.6 )
-lims["vellim"]  = (-2   , 4   )
-lims["rellim"]  = ( 0.4 , 1.3 )
-lims["fw13lim"] = ( 0.05, 0.5 )
-lims["fwhmlim"] = ( 0.10, 0.60)
-lims["fw23lim"] = ( 0.10, 0.75)
-lims["as13lim"] = (-0.04, 0.06)
-lims["as12lim"] = (-0.06, 0.06)
-lims["as23lim"] = (-0.06, 0.08)
-qu1lims = lims
+qu1lims = {}
+qu1lims["ewlim"]   = ( 0.5 , 1.6 )
+qu1lims["vellim"]  = (-2   , 4   )
+qu1lims["rellim"]  = ( 0.4 , 1.3 )
+qu1lims["fw13lim"] = ( 0.05, 0.5 )
+qu1lims["fwhmlim"] = ( 0.10, 0.60)
+qu1lims["fw23lim"] = ( 0.10, 0.75)
+qu1lims["as13lim"] = (-0.04, 0.06)
+qu1lims["as12lim"] = (-0.06, 0.06)
+qu1lims["as23lim"] = (-0.06, 0.08)
 
 sf52_bs1 = spc.SpectraFactory("data/5215_bS1",framerows=802,framecols=1476)
 sf52_bs1.frame_row_cut([0,801])
@@ -56,16 +55,16 @@ qu2CuI  = spc.splineline(wCuI,  cCuI,  qu2.meta,"CuI " )
 qu2TiI  = spc.splineline(wTiI,  cTiI,  qu2.meta,"TiI " )
 qu2lines = [qu2FeI,qu2FeTi,qu2CoI,qu2Myst,qu2CuI,qu2TiI]
 
-lims["ewlim"]   = ( 0.5 , 1.6 )
-lims["vellim"]  = (-2   , 3   )
-lims["rellim"]  = ( 0.4 , 1.01)
-lims["fw13lim"] = ( 0.10, 0.35)
-lims["fwhmlim"] = ( 0.15, 0.45)
-lims["fw23lim"] = ( 0.15, 0.55)
-lims["as13lim"] = (-0.03, 0.04)
-lims["as12lim"] = (-0.04, 0.04)
-lims["as23lim"] = (-0.04, 0.05)
-qu2lims = lims
+qu2lims = {}
+qu2lims["ewlim"]   = ( 0.5 , 1.6 )
+qu2lims["vellim"]  = (-2   , 3   )
+qu2lims["rellim"]  = ( 0.4 , 1.01)
+qu2lims["fw13lim"] = ( 0.10, 0.35)
+qu2lims["fwhmlim"] = ( 0.15, 0.45)
+qu2lims["fw23lim"] = ( 0.15, 0.55)
+qu2lims["as13lim"] = (-0.03, 0.04)
+qu2lims["as12lim"] = (-0.04, 0.04)
+qu2lims["as23lim"] = (-0.04, 0.05)
 
 wFeI  = [1253,1272]; cFeI  = 520.9892
 wFeTi = [1077,1110]; cFeTi = 521.1535
@@ -91,14 +90,13 @@ sptCuI  = spc.splineline(wCuI,  cCuI,  spt.meta,"CuI " )
 sptTiI  = spc.splineline(wTiI,  cTiI,  spt.meta,"TiI " )
 sptlines = [sptFeI,sptFeTi,sptCoI,sptMyst,sptCuI,sptTiI]
 
-lims["ewlim"]   = ( 0  , 3.3 )
-lims["vellim"]  = (-6  , 9   )
-lims["rellim"]  = ( 0.2, 1.  )
-lims["fw13lim"] = ( 0.0, 1.0 )
-lims["fwhmlim"] = ( 0.0, 1.0 )
-lims["fw23lim"] = ( 0.0, 1.2 )
-lims["as13lim"] = (-0.3, 0.2 )
-lims["as12lim"] = (-0.3, 0.2 )
-lims["as23lim"] = (-0.3, 0.2 )
-
-sptlims=lims
+sptlims = {}
+sptlims["ewlim"]   = ( 0  , 3.3 )
+sptlims["vellim"]  = (-6  , 9   )
+sptlims["rellim"]  = ( 0.2, 1.  )
+sptlims["fw13lim"] = ( 0.0, 1.0 )
+sptlims["fwhmlim"] = ( 0.0, 1.0 )
+sptlims["fw23lim"] = ( 0.0, 1.2 )
+sptlims["as13lim"] = (-0.3, 0.2 )
+sptlims["as12lim"] = (-0.3, 0.2 )
+sptlims["as23lim"] = (-0.3, 0.2 )
