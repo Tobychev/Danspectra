@@ -34,9 +34,9 @@ qu1lines = [qu1Myst,qu1Ca,qu1CoBl,qu1Unk2,qu1H2O,qu1Co,qu1Ca2,qu1H2O2]
 
 qu1lims = {}
 qu1lims["ewlim"]   = ( 0   , 2  )
-qu1lims["vellim"]  = (-3   , 2  )
-qu1lims["rellim"]  = ( 0.9 , 1.0)
-qu1lims["fw13lim"] = (-0.1 , 0.5)
+qu1lims["vellim"]  = (-3   , 8  )
+qu1lims["rellim"]  = ( 0.4 , 1.0)
+qu1lims["fw13lim"] = (-0.1 , 0.7)
 qu1lims["fwhmlim"] = (-0.1 , 1.0)
 qu1lims["fw23lim"] = (-0.1 , 1.2)
 qu1lims["as13lim"] = (-0.3 , 0.2)
@@ -121,3 +121,11 @@ sptlims["fw23lim"] = ( 0.10, 0.7 )
 sptlims["as13lim"] = (-0.1 , 0.11)
 sptlims["as12lim"] = (-0.1 , 0.11)
 sptlims["as23lim"] = (-0.1 , 0.11)
+
+um = 0.38834
+wl = 0.67615
+pn = 0.84928
+
+xspotlims = (644.71474436201663, 645.12763836853765)
+yspotlims = (0.67393994279930325, 1.0507659350912264)
+

@@ -31,13 +31,13 @@ qu1lines = [qu1FeIp,qu1Myst,qu1SiI,qu1VI,qu1ScII,qu1FeI] # ... and save in this 
 qu1lims = {}
 qu1lims["ewlim"]   = ( 0.6 , 1.4 )
 qu1lims["vellim"]  = (-4.0 , 4.1 )
-qu1lims["rellim"]  = ( 0.5 , 1.01)
-qu1lims["fw13lim"] = ( 0.0 , 0.45)
-qu1lims["fwhmlim"] = ( 0.0 , 0.6)
-qu1lims["fw23lim"] = ( 0.1 , 0.75)
+qu1lims["rellim"]  = ( 0.3 , 1.01)
+qu1lims["fw13lim"] = ( 0.0 , 0.6)
+qu1lims["fwhmlim"] = ( 0.0 , 0.7 )
+qu1lims["fw23lim"] = ( -0.2 , 1.1)
 qu1lims["as13lim"] = (-0.08, 0.1 )
 qu1lims["as12lim"] = (-0.08, 0.1 )
-qu1lims["as23lim"] = (-0.08, 0.1 )
+qu1lims["as23lim"] = (-0.7, 0.2 )
 
 sf56_cs2 = spc.SpectraFactory("data/5654_cS2",framerows=756,framecols=1480)
 sf56_cs2.frame_row_cut([0,755])
@@ -59,13 +59,13 @@ qu2lines = [qu2FeIp,qu2Myst,qu2SiI,qu2VI,qu2ScII,qu2FeI] # ... and save in this 
 qu2lims = {}
 qu2lims["ewlim"]   = ( 0.6 , 1.4 )
 qu2lims["vellim"]  = (-4.0 , 4.1 )
-qu2lims["rellim"]  = ( 0.5 , 1.01)
-qu2lims["fw13lim"] = ( 0.0 , 0.45)
-qu2lims["fwhmlim"] = ( 0.0 , 0.6)
-qu2lims["fw23lim"] = ( 0.1 , 0.75)
+qu2lims["rellim"]  = ( 0.3 , 1.01)
+qu2lims["fw13lim"] = ( -0.1 , 0.6)
+qu2lims["fwhmlim"] = ( -0.1 , 0.8)
+qu2lims["fw23lim"] = (- 0.1 , 1.1)
 qu2lims["as13lim"] = (-0.08, 0.1 )
 qu2lims["as12lim"] = (-0.08, 0.1 )
-qu2lims["as23lim"] = (-0.08, 0.1 )
+qu2lims["as23lim"] = (-0.2, 0.25 )
 
 # Updating the limits to better match the meanspectra of this series
 wFeIp = [1217,1253]; cFeIp = 565.1477
@@ -92,19 +92,21 @@ sptFeI  = spc.splineline(wFeI, cFeI  , spt.meta,"FeI " )
 sptlines = [sptFeIp,sptMyst,sptSiI,sptVI,sptScII,sptFeI] # ... and save in this list for spt
 
 sptlims = {}
-sptlims["ewlim"]   = ( 0.6 , 1.4 )
-sptlims["vellim"]  = (-4.0 , 4.1 )
-sptlims["rellim"]  = ( 0.5 , 1.01)
-sptlims["fw13lim"] = ( 0.0 , 0.45)
-sptlims["fwhmlim"] = ( 0.0 , 0.6 )
-sptlims["fw23lim"] = ( 0.1 , 0.75)
-sptlims["as13lim"] = (-0.08, 0.1 )
-sptlims["as12lim"] = (-0.08, 0.1 )
-sptlims["as23lim"] = (-0.08, 0.1 )
+sptlims["ewlim"]   = ( -0.5 , 4.2 )
+sptlims["vellim"]  = (-4.0 , 5 )
+sptlims["rellim"]  = ( 0.3 , 1.01)
+sptlims["fw13lim"] = ( -0.1 , 1)
+sptlims["fwhmlim"] = ( -0.1 , 1.1 )
+sptlims["fw23lim"] = ( -0.2 , 1.1)
+sptlims["as13lim"] = (-0.3, 0.2 )
+sptlims["as12lim"] = (-0.7, 0.25 )
+sptlims["as23lim"] = (-0.8, 0.3 )
 
-umbra    = 0.28
-wall     = (0.28,0.60)
-penumbra = (0.60,0.89)
-quiet    = (0.89)
+um = 0.37468
+wl = 0.60141
+pn = 0.85094
+
+xspotlims = (565.21287720331078, 565.7816432702152)
+yspotlims = (0.75923171274393061, 1.0552637808945176) 
 
 

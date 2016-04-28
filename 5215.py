@@ -29,14 +29,14 @@ qu1lines = [qu1FeI,qu1FeTi,qu1CoI,qu1Myst,qu1CuI,qu1TiI]
 
 qu1lims = {}
 qu1lims["ewlim"]   = ( 0.5 , 1.6 )
-qu1lims["vellim"]  = (-2   , 4   )
-qu1lims["rellim"]  = ( 0.4 , 1.3 )
-qu1lims["fw13lim"] = ( 0.05, 0.5 )
-qu1lims["fwhmlim"] = ( 0.10, 0.60)
-qu1lims["fw23lim"] = ( 0.10, 0.75)
-qu1lims["as13lim"] = (-0.04, 0.06)
-qu1lims["as12lim"] = (-0.06, 0.06)
-qu1lims["as23lim"] = (-0.06, 0.08)
+qu1lims["vellim"]  = (-2.75, 4   )
+qu1lims["rellim"]  = ( 0.32, 1.3 )
+qu1lims["fw13lim"] = ( 0.05, 0.7 )
+qu1lims["fwhmlim"] = ( 0.10, 0.90)
+qu1lims["fw23lim"] = ( 0.10, 1.05)
+qu1lims["as13lim"] = (-0.16, 0.16)
+qu1lims["as12lim"] = (-0.16, 0.16)
+qu1lims["as23lim"] = (-0.16, 0.16)
 
 sf52_bs1 = spc.SpectraFactory("data/5215_bS1",framerows=802,framecols=1476)
 sf52_bs1.frame_row_cut([0,801])
@@ -100,3 +100,9 @@ sptlims["fw23lim"] = ( 0.0, 1.2 )
 sptlims["as13lim"] = (-0.3, 0.2 )
 sptlims["as12lim"] = (-0.3, 0.2 )
 sptlims["as23lim"] = (-0.3, 0.2 )
+
+um = 0.33427
+wl = 0.55930
+pn = 0.82905
+xspotlims = (521.41521357925342, 521.68125806858586)
+yspotlims = (0.63457553733797023, 1.1250485137224484)

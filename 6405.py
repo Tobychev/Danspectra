@@ -31,7 +31,7 @@ qu1lines = [qu1H2O,qu1FeI,qu1SiFe,qu1Myst,qu1CN] # ... and save in this list for
 qu1lims = {}
 qu1lims["ewlim"]   = (-0.5 , 2.5 )
 qu1lims["vellim"]  = (-10  , 10  )
-qu1lims["rellim"]  = ( 0.95, 1.01)
+qu1lims["rellim"]  = ( 0.2, 1.1)
 qu1lims["fw13lim"] = (-0.1 , 1.4 )
 qu1lims["fwhmlim"] = (-0.1 , 1.4 )
 qu1lims["fw23lim"] = (-0.1 , 1.4 )
@@ -89,13 +89,21 @@ sptlines = [sptH2O,sptFeI,sptSiFe,sptMyst] # ... and save in this list for spt
 sptlims = {}
 sptlims["ewlim"]   = ( 0.3 , 2.1 )
 sptlims["vellim"]  = (-8   , 8   )
-sptlims["rellim"]  = ( 0.80, 1.01)
+sptlims["rellim"]  = ( 0.2, 1.01)
 sptlims["fw13lim"] = (-0.2 , 2   )
 sptlims["fwhmlim"] = (-0.3 , 3   )
 sptlims["fw23lim"] = (-0.4 , 3   )
 sptlims["as13lim"] = (-1.5 , 0.74)
 sptlims["as12lim"] = (-2.0 , 0.74)
 sptlims["as23lim"] = (-2.0 , 0.84)
+
+um = 0.38978
+wl = 0.64927
+pn = 0.83791
+
+xspotlims = (640.38104838709671, 640.69435483870961)
+yspotlims = (0.86458333333333337, 1.0437500000000002)
+
 
 # Sunspot measurement
 if False:
