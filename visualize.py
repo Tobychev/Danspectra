@@ -1,113 +1,138 @@
-import numpy as np
 import matplotlib.pyplot as pl
-import matplotlib.cm as cm
-import lines as lin
+import scipy.stats as sta
 import stats as st
+import numpy as np
 
-def get_colours(num,colour_name="Oranges"):
-    return iter(cm.__dict__[colour_name](np.linspace(0,1,num)))
-
-def show_linegroup_on_curve(lines,xs,ys):
-    pl.step(xs,ys)
-    for line in lines:
-        pl.plot(line.lmbd,line.ref,'ro-')
-
-    pl.show()
-
-def show_autoline_on_curve(autoline,xs,ys):
-    line = list(autoline)
-    pl.step(xs,ys)
-    pl.plot(xs[line],ys[line],'ro-')
-    pl.show()
-
-def make_line_on_curve(line,xs,ys,ax,colour=""):
-    ax.plot(xs[line.idx],ys[line.idx],'o',c=colour)
-    return ax
-
-def show_spec_lines(spec,lines):
-    fig = pl.figure()
-    ax  = fig.add_subplot(1,1,1)
-    colour = get_colours(len(lines))
-
-    ax.step(spec.lmbd,spec.ref)
-    for i,line in enumerate(lines):
-        ax = make_line_on_curve(line,spec.lmbd,spec.ref,ax,colour=next(colour))
-
-    pl.show()
-
-def show_dict_wins_on_curve(wins,xs,ys):
-    colour = get_colours(len(wins))
-    pl.step(xs,ys)
-    for i,name in enumerate(wins):
-        idx = wins[name]
-        pl.plot(xs[idx],ys[idx],'o',c=next(colour))
-
-    pl.show()
-
-def show_fit_with_points(spec,idx,fit,line="mean"):
-    if line == "mean":
-        data = spec.mean
+def kde(measure,axis=None,norm=False):
+    rt = sta.gaussian_kde(measure)
+    x  = np.linspace(measure.min(),measure.max(),121)
+    if norm:
+        norm = rt(x).sum()
     else:
-        data = spec.spec(line)
-    pl.step(spec.lmbd,spec.mean)
-    pl.plot(spec.lmbd[idx],spec.mean[idx],'ro')
-    pl.plot(spec.lmbd[idx], fit[1]+ fit[0]*spec.lmbd[idx])
-    pl.show()
+        norm = 1
+    if axis is not None:
+        axis.plot(x,rt(x)/norm)
+        return axis
+    else:
+        pl.plot(x,rt(x)/norm)
+        pl.show()
 
-def show_fit_on_curve(fit,xs,curve):
-    pl.plot(xs,fit[0]*xs+fit[1],'r')
-    pl.step(xs,curve,'b')
-    pl.show()
+def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
+    bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
+    if lims is None:
+        ewlim   = ( 0.3 , 1.8  )
+        vellim  = (-5.8 , 6.1  )
+        rellim  = ( 0.2 , 1.3  )
+        fw13lim = ( 0.0 , 1.0  )
+        fwhmlim = ( 0.0 , 1.0  )
+        fw23lim = ( 0.0 , 1.0  )
+        as13lim = (-0.2 , 0.2  )
+        as12lim = (-0.2 , 0.2  )
+        as23lim = (-0.1 , 0.1  )
+    else:
+        ewlim   = lims["ewlim"]
+        vellim  = lims["vellim"]
+        rellim  = lims["rellim"]
+        fw13lim = lims["fw13lim"]
+        fwhmlim = lims["fwhmlim"]
+        fw23lim = lims["fw23lim"]
+        as13lim = lims["as13lim"]
+        as12lim = lims["as12lim"]
+        as23lim = lims["as23lim"]
 
-def plot_fits_stats(data,ref,names,title="",bins=43,cols=2,yscale="linear",cutoff=0):
-    fig = pl.figure()
-    pl.suptitle(title,fontsize=14)
-    rows = len(names)/cols
-    if len(names)%cols > 0:
-        rows+=1
+    
+    fig, axs  = pl.subplots(3,3,sharex=True)
+    fig.subplots_adjust(wspace=0.3,hspace=0.3)
 
-    for i,key in enumerate(names):
-        if cutoff > 0:
-            idx = np.where(data[key] > np.percentile(data[key],q=cutoff))
-        else:
-            idx = list(range(0,len(data[key])))
-        ax = fig.add_subplot(rows,cols,i+1)
-        ax.hist(data[key][idx],bins=bins)
-        ax.axvline(ref[key],linestyle="dashed",color="r")
-        ax.set_yscale(yscale)
-        ax.set_title(key)
+    mew       =  measure[:,ew].mean()
+    prop_plot(axs[0,0],measure[:,con],measure[:,ew]/mew,
+        {"label" : "Average EW = {:.3f}".format(mew),
+         "title" : "Relative equivalent width,\n " + str(line),
+         "ylabel": "Relative equivalent width",
+         "xlabel": "Continuum intensity",
+         "ylim"  : ewlim},regbins)
+
+    prop_plot(axs[0,1],measure[:,con],measure[:,vel],
+        {"title" : "Line centre,\n " + str(line),
+         "ylabel": "Line centre [km/s]",
+         "xlabel": "Continuum intensity",
+         "ylim"  : vellim},regbins)
+
+    prop_plot(axs[0,2],measure[:,con],measure[:,bot],
+        {"title" : "Relative line bottom,\n " + str(line),
+         "ylabel": "Relative Line min intesity",
+         "xlabel": "Continuum intensity",
+         "ylim"  : rellim},regbins)
+
+    prop_plot(axs[1,0],measure[:,con],measure[:,fw13]/line.width,
+        {"title" : "Full width 1/3 maximum,\n " + str(line),
+         "ylabel": "Relative line width",
+         "xlabel": "Continuum intensity",
+         "ylim"  : fw13lim},regbins)
+
+    prop_plot(axs[1,1],measure[:,con],measure[:,fwhm]/line.width,
+        {"title" : "Full width half maximum,\n " + str(line),
+         "ylabel": "Relative line width",
+         "xlabel": "Continuum intensity",
+         "ylim"  : fwhmlim},regbins)
+
+    prop_plot(axs[1,2],measure[:,con],measure[:,fw23]/line.width,
+        {"title" : "Full width 2/3 maximum,\n " + str(line),
+         "ylabel": "Relative line width",
+         "xlabel": "Continuum intensity",
+         "ylim"  : fw23lim},regbins)
+
+    prop_plot(axs[2,0],measure[:,con],(measure[:,as13]-measure[:,as13].mean())/line.width,
+        {"title" : "Line asymmetry 1/3 maximum,\n " + str(line),
+         "ylabel": "Line asymmetry",
+         "xlabel": "Continuum intensity",
+         "ylim"  : as13lim},regbins)
+#        })
         
-    pl.tight_layout()
-    pl.show()
+    prop_plot(axs[2,1],measure[:,con],(measure[:,as12]-measure[:,as12].mean())/line.width,
+        {"title" : "Line asymmetry half maximum,\n " + str(line),
+         "ylabel": "Line width [Å]",
+         "xlabel": "Continuum intensity",
+         "ylim"  : as12lim},regbins)
+#         })
+    prop_plot(axs[2,2],measure[:,con],(measure[:,as23]-measure[:,as23].mean())/line.width,
+        {"title" : "Line asymmetry 2/3 maximum,\n " + str(line),
+         "ylabel": "Line asymmetry",
+         "xlabel": "Continuum intensity",
+         "ylim"  : as23lim},regbins)
+#         })
 
-def show_contfit(frame,line):
-    xs  = frame.group.lmbd
-    ys  = frame.spec(line)
-    fit = (frame.cont.fit["k"][line],frame.cont.fit["m"][line])
-    show_fit_on_curve(fit,xs,ys)
+    if mesbin is not None:
+        axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
+        axs[0,1].plot(mesbin[:,con],mesbin[:,vel],'ko')
+        axs[0,2].plot(mesbin[:,con],mesbin[:,bot],'ko')
+        axs[1,0].plot(mesbin[:,con],mesbin[:,fw13]/line.width,'ko')
+        axs[1,1].plot(mesbin[:,con],mesbin[:,fwhm]/line.width,'ko')
+        axs[1,2].plot(mesbin[:,con],mesbin[:,fw23]/line.width,'ko')
+        axs[2,0].plot(mesbin[:,con],(mesbin[:,as13]-measure[:,as13].mean())/line.width,'ko')
+        axs[2,1].plot(mesbin[:,con],(mesbin[:,as12]-measure[:,as12].mean())/line.width,'ko')
+        axs[2,2].plot(mesbin[:,con],(mesbin[:,as23]-measure[:,as23].mean())/line.width,'ko')
+    
 
-def show_line_and_corefit(line,frame,row,width=3,fast=True):
-    spe     = frame.data[row,:]
-    ref,lmd = frame.group.ref,frame.group.lmbd
-    if fast:
-        guess   = frame.group.ref[line.idx].argmin()
-        bottom  = line.idx[slice(guess-4,guess+5)]
-    else:
-        guess   = spe[line.idx].argmin()
-        bottom  = line.idx[guess+np.arange(-width,width+1)]
-    a,b,c   = np.polyfit(lmd[bottom],spe[bottom],2)
-    fit     = np.polyval((a,b,c),lmd[line.idx]); 
-    idfit = line.idx[fit < 1.05]
-    fit   = fit[fit < 1.05]
+    return fig
 
-    pl.step(lmd[line.idx],spe[line.idx],'b')
-    pl.plot(lmd[bottom],spe[bottom],'*k')
-    pl.plot(lmd[idfit],fit,'r')
+def dan_errplot(fig,errs,xs=None,ys=None):
+    porder = np.array([9,1,0,4,2,6,5,3,7])
+    if xs is None:
+        xs = np.ones(11)*1.15
+    if ys is None:    
+        ys = [0.6,-4,1.0,0.2,0.2,0.1,-0.15,-0.15,-0.08,-0.08,0] 
+    perr = np.abs(errs[porder,:])
 
-    pl.show()
+    for i in range(0,9):
+        s2err = np.array([perr[i,3],perr[i,0]]).reshape(2,1)
+        s1err = np.array([perr[i,2],perr[i,1]]).reshape(2,1)
+        fig.axes[i].errorbar( xs[i],ys[i],yerr=s1err,fmt='b' )
+        fig.axes[i].errorbar( xs[i],ys[i],yerr=s2err,fmt='r' )
+    return fig
 
-def prop_plot(ax,x,y,conf):
-    regx,regy = st.kern_reg(x,y,bins=73)
+def prop_plot(ax,x,y,conf,bins=73):
+    regx,regy = st.kern_reg(x,y,bins=bins)
     ax.plot(x,y,'bo',alpha=0.1,label=conf.get("label",""))
     ax.plot(regx,regy,'r')
     ax.set_title(conf["title"])
@@ -118,178 +143,25 @@ def prop_plot(ax,x,y,conf):
     if "ylim" in conf:
         ax.set_ylim(conf["ylim"])
 
-def moments_linemap(measure,line,mesbin=None,lims=None):
-    vel = 0; bot = 1; con = 2; err = 3; ew  = 4; mn  = 5; var = 6; ske = 7; kur = 8; wvar = 9; wske = 10; wkur = 11;
-    cut = measure[err] < np.percentile(measure[err],98)
-
-    fig, axs  = pl.subplots(3,3,sharex=True)
-    fig.subplots_adjust(wspace=0.3,hspace=0.3)
-
-    mew       =  measure[ew][cut].mean()
-    prop_plot(axs[0,0],measure[con][cut],measure[ew][cut]/mew,
-        {"label" : "Average EW = {:.3f}".format(mew),
-         "title" : "Relative equivalent width,\n " + str(line),
-         "ylabel": "Relative equivalent width",
-         "xlabel": "Continuum intensity",
-         })
-#         "ylim"  : ewlim})
-
-    prop_plot(axs[0,1],measure[con][cut],measure[vel][cut],
-        {"title" : "Line centre,\n " + str(line),
-         "ylabel": "Line centre [km/s]",
-         "xlabel": "Continuum intensity",
-         })
-#         "ylim"  : vellim})
-
-    prop_plot(axs[0,2],measure[con][cut],measure[bot][cut]/measure[con][cut], 
-        {"title" : "Relative line bottom,\n " + str(line),
-         "ylabel": "Skewness",
-         "xlabel": "Continuum intensity",
-         })
-#         "ylim"  : vellim})
-
-    prop_plot(axs[1,0],measure[con][cut],measure[var][cut],
-        {"title" : "Line variance,\n " + str(line),
-         "ylabel": "Variance",
-         "xlabel": "Continuum intensity",
-         })
-#         "ylim"  : vellim})
-
-    prop_plot(axs[1,1],measure[con][cut],measure[ske][cut],
-        {"title" : "Line skewness,\n " + str(line),
-         "ylabel": "Skewness",
-         "xlabel": "Continuum intensity",
-         })
-#         "ylim"  : vellim})
-
-    prop_plot(axs[1,2],measure[con][cut],measure[kur][cut],
-        {"title" : "Line kurtosis,\n " + str(line),
-         "ylabel": "Kurtosis",
-         "xlabel": "Continuum intensity",
-         })
-#         "ylim"  : vellim})
-
-    prop_plot(axs[2,0],measure[con][cut],measure[wvar][cut],
-        {"title" : "Line variance,\n " + str(line),
-         "ylabel": "Variance",
-         "xlabel": "Continuum intensity",
-         })
-#         "ylim"  : vellim})
-
-    prop_plot(axs[2,1],measure[con][cut],measure[wske][cut],
-        {"title" : "Line skewness,\n " + str(line),
-         "ylabel": "Skewness",
-         "xlabel": "Continuum intensity",
-         })
-#         "ylim"  : vellim})
-
-    prop_plot(axs[2,2],measure[con][cut],measure[wkur][cut],
-        {"title" : "Line kurtosis,\n " + str(line),
-         "ylabel": "Kurtosis",
-         "xlabel": "Continuum intensity",
-         })
-    if mesbin is not None:
-        (vel,bot,err,ew ,mn ,var,ske,kur) = np.arange(0,8)
-        axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
-        axs[0,1].plot(mesbin[:,con],mesbin[:,vel],'ko')
-        axs[0,2].plot(mesbin[:,con],mesbin[:,bot]/mesbin[:,con],'ko')
-        axs[1,0].plot(mesbin[:,con],mesbin[:,var]/line.width,'ko')
-        axs[1,1].plot(mesbin[:,con],mesbin[:,ske]/line.width,'ko')
-        axs[1,2].plot(mesbin[:,con],mesbin[:,kur]/line.width,'ko')
-
-    pl.show()
-
-def spline_linemap(measure,line,mesbin=None,lims=None):
+def addreg(fig,measure,line,bins=73,colour="r",label=""):
     bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
-    if lims is None:
-        ewlim   = ( 0.3 , 1.8  )
-        vellim  = (-5.8 , 6.1  )
-        rellim  = ( 0.2 , 1.3  )
-        fw13lim = ( 0.0 , 1.0  )
-        fwhmlim = ( 0.0 , 1.0  )
-        fw23lim = ( 0.0 , 1.0  )
-        as13lim = (-0.03, 0.02 )
-        as12lim = (-0.02, 0.015)
-#        as23lim = (-0.02, 0.015)
-    else:
-        ewlim   = lims["ewlim"]
-        vellim  = lims["vellim"]
-        rellim  = lims["rellim"]
-        fw13lim = lims["fw13lim"]
-        fwhmlim = lims["fwhmlim"]
-        fw23lim = lims["fw23lim"]
-        as12lim = lims["as12lim"]
 
-    
-    fig, axs  = pl.subplots(3,3,sharex=True)
-    fig.subplots_adjust(wspace=0.3,hspace=0.3)
+    x = measure[:,con]
 
-    mew       =  measure[:,ew].mean()         
-    prop_plot(axs[0,0],measure[:,con],measure[:,ew]/mew,
-        {"label" : "Average EW = {:.3f}".format(mew),
-         "title" : "Relative equivalent width,\n " + str(line),
-         "ylabel": "Relative equivalent width",
-         "xlabel": "Continuum intensity",
-         "ylim"  : ewlim})
+    ys =[
+            measure[:,ew]/measure[:,ew].mean(),
+            measure[:,vel],
+            measure[:,bot],
+            measure[:,fw13]/line.width,
+            measure[:,fwhm]/line.width,
+            measure[:,fw23]/line.width,
+            (measure[:,as13]-measure[:,as13].mean())/line.width,
+            (measure[:,as12]-measure[:,as13].mean())/line.width,
+            (measure[:,as23]-measure[:,as13].mean())/line.width,
+        ]
 
-    prop_plot(axs[0,1],measure[:,con],measure[:,vel],
-        {"title" : "Line centre,\n " + str(line),
-         "ylabel": "Line centre [km/s]",
-         "xlabel": "Continuum intensity",
-         "ylim"  : vellim})
+    for i,y in enumerate(ys):
+        regx,regy = st.kern_reg(x,y,bins=bins)
+        fig.axes[i].plot(regx,regy,color=colour)
 
-    prop_plot(axs[0,2],measure[:,con],measure[:,bot]/measure[:,con],
-        {"title" : "Relative line bottom,\n " + str(line),
-         "ylabel": "Relative Line min intesity",
-         "xlabel": "Continuum intensity",
-         "ylim"  : rellim})
-
-    prop_plot(axs[1,0],measure[:,con],measure[:,fw13]/line.width,
-        {"title" : "Full width 1/3 maximum,\n " + str(line),
-         "ylabel": "Relative line width",
-         "xlabel": "Continuum intensity",
-         "ylim"  : fw13lim})
-
-    prop_plot(axs[1,1],measure[:,con],measure[:,fwhm]/line.width,
-        {"title" : "Full width half maximum,\n " + str(line),
-         "ylabel": "Relative line width",
-         "xlabel": "Continuum intensity",
-         "ylim"  : fwhmlim})
-
-    prop_plot(axs[1,2],measure[:,con],measure[:,fw23]/line.width,
-        {"title" : "Full width 2/3 maximum,\n " + str(line),
-         "ylabel": "Relative line width",
-         "xlabel": "Continuum intensity",
-         "ylim"  : fw23lim})
-
-    prop_plot(axs[2,0],measure[:,con],measure[:,as13]/line.width,
-        {"title" : "Line assymetry 1/3 maximum,\n " + str(line),
-         "ylabel": "Line assymetry",
-         "xlabel": "Continuum intensity",
-         })
-#          "ylim" : as13lim})
-        
-    prop_plot(axs[2,1],measure[:,con],measure[:,as12]/measure[:,fwhm].mean(),
-        {"title" : "Line assymetry half maximum,\n " + str(line),
-         "ylabel": "Line width [Å]",
-         "xlabel": "Continuum intensity",
-         })
-    prop_plot(axs[2,2],measure[:,con],measure[:,as23]/measure[:,as23].mean(),
-        {"title" : "Line assymetry 2/3 maximum,\n " + str(line),
-         "ylabel": "Line assymetry",
-         "xlabel": "Continuum intensity",
-         })
-
-    if mesbin is not None:
-        axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
-        axs[0,1].plot(mesbin[:,con],mesbin[:,vel],'ko')
-        axs[0,2].plot(mesbin[:,con],mesbin[:,bot]/mesbin[:,con],'ko')
-        axs[1,0].plot(mesbin[:,con],mesbin[:,fw13]/line.width,'ko')
-        axs[1,1].plot(mesbin[:,con],mesbin[:,fwhm]/line.width,'ko')
-        axs[1,2].plot(mesbin[:,con],mesbin[:,fw23]/line.width,'ko')
-     #   axs[2,0].plot(mesbin[:,con],mesbin[:,as13]/measure[:,as13].mean(),'ko')
-     #   axs[2,1].plot(mesbin[:,con],mesbin[:,as12]/measure[:,as12].mean(),'ko')
-     #   axs[2,2].plot(mesbin[:,con],mesbin[:,as23]/measure[:,as23].mean(),'ko')
-    
-
-    pl.show()
+    return fig
