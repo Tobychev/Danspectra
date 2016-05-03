@@ -453,6 +453,36 @@ class splineline(line):
         assm  = cnt  - (lmbd1 + lmbd2)/2
         return wdth,assm
 
+
+class testspline(splineline):
+    def measure_spline(self,spl,lmbd):
+        lmbd = np.linspace(lmbd[0],lmbd[-1],1e4)
+        spls = spl(lmbd)
+        bot  = spls.min()        
+        cnt  = lmbd[spls.argmin()]
+        bo12 = (1 +   bot)/2
+        bo13 = (1 + 2*bot)/3
+        bo23 = (2 +   bot)/3
+        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt)
+        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt)
+        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt)
+        cnt = 299792.458*(cnt-self.cent)/self.cent
+             #   0   1    2    3    4    5    6    7    8
+        return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
+
+    def __width_assym(self,spl,lmbd,lev,cnt:
+        ilev, = np.where(spl(lmbd) <= lev)
+        # Check that we only got one interval
+        spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
+        if spli.sum() > 0:
+            if   len(spli) == 1 :
+                ilev  = ilev[slice(spli+1)]
+
+        l1 =  lmbd[ilev[0]]; l2 = lmbd[ilev[-1]]
+        wdth  = l1 - l2
+        assm  = cnt  - (lmbd1 + lmbd2)/2
+        return wdth,assm
+
     def measure2(self,spectra,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
         nrows = spectra[:,:].shape[0]
         lmbd  = spectra.meta.lmbd[self.idx]
@@ -496,3 +526,4 @@ class splineline(line):
         as23 = 0#self.cent - (dl23[1] + dl23[0])/2
         
         return bot,cnt, wd12,as12,wd13,as13,wd23,as23
+
