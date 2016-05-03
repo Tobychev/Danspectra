@@ -470,7 +470,7 @@ class testspline(splineline):
              #   0   1    2    3    4    5    6    7    8
         return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
 
-    def __width_assym(self,spl,lmbd,lev,cnt:
+    def __width_assym(self,spl,lmbd,lev,cnt):
         ilev, = np.where(spl(lmbd) <= lev)
         # Check that we only got one interval
         spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
