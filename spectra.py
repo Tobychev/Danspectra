@@ -408,7 +408,7 @@ class splineline(line):
         splmes = np.zeros((nrows,11))
         splmes[:,10] = (spectra.meta.cont[0]*self.cent)+ (spectra.meta.cont[1])
         splmes[:, 9] = ew.reshape(-1)
-        print("Making splines and measuring")
+        print("Making splines and measuring {} line".format(self.name))
         for i,row in enumerate(spectra[:,self.idx]):
             mf           = self.makespline(row,lmbd,9)
             splmes[i,:9] = self.measure_spline(mf,lmbd,dl,smallstep,numsmallstep)
