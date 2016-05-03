@@ -1,7 +1,3 @@
-import matplotlib.pyplot as pl
-import visualize as vis
-import astropy.io.fits as fts
-import binner as bn
 import spectra as spc
 import pickle as pic
 import numpy as np
