@@ -17,6 +17,24 @@ def kde(measure,axis=None,norm=False):
         pl.plot(x,rt(x)/norm)
         pl.show()
 
+def make_linemap_lims(measure):    
+    props = [ "bot", "vel", "fwhm", "as12", "fw13", "as13", "fw23", "as23", "err", "ew", "con"]
+    proplims = {}
+    lims = {}
+    for i,name in enumerate(props):
+        proplims[name] = []
+        for line in measure:
+            # Argsort returns the index, pick third lowest and third highest value as limits
+            proplims[name].append(line[ line[:,i].argsort()[[2,-3]],i ])
+
+        most  = np.max(proplims[name]); least = np.min(proplims[name])
+        dx = (most-least)*5e-3
+        if name == "bot":
+            name = "rel"
+        lims["{}lims".format(name)] = (least-dx,most+dx)
+
+    return lims
+
 def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
     bot  = 0; vel  = 1; fwhm = 2; as12 = 3; fw13 = 4; as13 = 5; fw23 = 6; as23 = 7; err  = 8; ew   = 9; con  = 10;
     if lims is None:
@@ -87,20 +105,18 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
          "ylabel": "Line asymmetry",
          "xlabel": "Continuum intensity",
          "ylim"  : as13lim},regbins)
-#        })
         
     prop_plot(axs[2,1],measure[:,con],(measure[:,as12]-measure[:,as12].mean())/line.width,
         {"title" : "Line asymmetry half maximum,\n " + str(line),
          "ylabel": "Line width [Å]",
          "xlabel": "Continuum intensity",
          "ylim"  : as12lim},regbins)
-#         })
+
     prop_plot(axs[2,2],measure[:,con],(measure[:,as23]-measure[:,as23].mean())/line.width,
         {"title" : "Line asymmetry 2/3 maximum,\n " + str(line),
          "ylabel": "Line asymmetry",
          "xlabel": "Continuum intensity",
          "ylim"  : as23lim},regbins)
-#         })
 
     if mesbin is not None:
         axs[0,0].plot(mesbin[:,con],mesbin[:,ew]/mew,'ko')
