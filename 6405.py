@@ -1,6 +1,4 @@
 import spectra as spc
-import pickle as pic
-import numpy as np
 import errors as er
 
 #Hand placed limits from mean(axis=0)
@@ -10,11 +8,12 @@ wSiFe = [479, 519];   cSiFe = 640.7291
 wMyst = [646, 722];   cMyst = 640.5763
 wCN  = [1006,1047];   cCN   = 640.3127 
 
-s1 = spc.SpectraFactory("data/6405_aS1")
-s1.frame_row_cut([0,799])
-s1.contrast_cut(50)
-s1.set_continua("segments")
-qu1 = s1.make_spectra()
+sf_qu1 = spc.SpectraFactory("data/6405_aS1",framerows=800,framecols=1472))
+sf_qu1.frame_col_cut([0,1471])
+sf_qu1.frame_row_cut([0]+list(range(668,677))+[799])
+sf_qu1.contrast_cut(50)
+sf_qu1.set_continua("segments")
+qu1 = sf_qu1.make_spectra()
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1]
 
 qu1H2O  = spc.splineline(wH2O,  cH2O,  qu1.meta,"H2O ") # Define lines for qu1 series...
@@ -23,6 +22,52 @@ qu1SiFe = spc.splineline(wSiFe, cSiFe, qu1.meta,"SiFe ")
 qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst ")
 qu1CN   = spc.splineline(wCN,   cCN,   qu1.meta,"CN ")
 qu1lines = [qu1H2O,qu1FeI,qu1SiFe,qu1Myst,qu1CN] # ... and save in this list for qu1 
+
+
+sf_qu2 = spc.SpectraFactory("data/6405_bS1",framerows=756,framecols=1480))
+sf_qu2.frame_col_cut([0,1,1471])
+sf_qu2.frame_row_cut([0]+list(range(663,670))+[799])
+sf_qu2.contrast_cut(50)
+sf_qu2.set_continua("segments")
+qu2 = sf_qu2.make_spectra()
+qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1]
+
+qu2H2O  = spc.splineline(wH2O,  cH2O,  qu2.meta,"H2O ") # Define lines for qu2 series...
+qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI ")
+qu2SiFe = spc.splineline(wSiFe, cSiFe, qu2.meta,"SiFe ")
+qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
+qu2CN   = spc.splineline(wCN,   cCN,   qu2.meta,"CN ")
+qu2lines = [qu2H2O,qu2FeI,qu2SiFe,qu2Myst,qu2CN] # ... and save in this list for as2
+
+
+#Hand placed limits from mean(axis=0)
+wH2O  = [444, 465];   cH2O  = 640.8682
+wFeI  = [505, 571];   cFeI  = 640.8026
+wSiFe = [614, 647];   cSiFe = 640.7291
+wMyst = [797, 853];   cMyst = 640.5763
+wCN   = [1139,1178];   cCN  = 640.3127 
+
+sf_spt = spc.SpectraFactory("data/6405_aS2",framerows=774,framecols=1446)
+sf_spt.frame_col_cut([0,1445])
+sf_spt.frame_row_cut([0]+list(range(659,668))+[743])
+sf_spt.contrast_cut(85)
+sf_spt.set_continua("segments")
+spt = sf_spt.make_spectra()
+sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1]
+
+sptH2O  = spc.splineline(wH2O,  cH2O,  spt.meta,"H2O ") # Define lines for spt series...
+sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI ")
+sptSiFe = spc.splineline(wSiFe, cSiFe, spt.meta,"SiFe ")
+sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
+sptlines = [sptH2O,sptFeI,sptSiFe,sptMyst] # ... and save in this list for spt
+#OBS! H2O and CNq cause crash, removed
+
+um = 0.38978
+wl = 0.64927
+pn = 0.83791
+
+xspotlims = (640.38104838709671, 640.69435483870961)
+yspotlims = (0.86458333333333337, 1.0437500000000002)
 
 qu1lims = {}
 qu1lims["ewlim"]   = (-0.5 , 2.5 )
@@ -35,20 +80,6 @@ qu1lims["as13lim"] = (-0.7 , 0.7 )
 qu1lims["as12lim"] = (-0.8 , 0.7 )
 qu1lims["as23lim"] = (-1.1 , 0.6 )
 
-b1 = spc.SpectraFactory("data/6405_bS1")
-b1.frame_row_cut([0,799])
-b1.contrast_cut(50)
-b1.set_continua("segments")
-qu2 = b1.make_spectra()
-qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1]
-
-qu2H2O  = spc.splineline(wH2O,  cH2O,  qu2.meta,"H2O ") # Define lines for qu2 series...
-qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI ")
-qu2SiFe = spc.splineline(wSiFe, cSiFe, qu2.meta,"SiFe ")
-qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
-qu2CN   = spc.splineline(wCN,   cCN,   qu2.meta,"CN ")
-qu2lines = [qu2H2O,qu2FeI,qu2SiFe,qu2Myst,qu2CN] # ... and save in this list for as2
-
 qu2lims = {}
 qu2lims["ewlim"]   = (-0.5 , 2.5 )
 qu2lims["vellim"]  = (-10  , 10  )
@@ -60,28 +91,6 @@ qu2lims["as13lim"] = (-0.7 , 0.7 )
 qu2lims["as12lim"] = (-0.8 , 0.7 )
 qu2lims["as23lim"] = (-1.1 , 0.6 )
 
-#Hand placed limits from mean(axis=0)
-wH2O  = [444, 465];   cH2O  = 640.8682
-wFeI  = [505, 571];   cFeI  = 640.8026
-wSiFe = [614, 647];   cSiFe = 640.7291
-wMyst = [797, 853];   cMyst = 640.5763
-wCN   = [1139,1178];   cCN  = 640.3127 
-
-s2 = spc.SpectraFactory("data/6405_aS2",framerows=774,framecols=1446)
-s2.frame_row_cut([0,743])
-s2.frame_col_cut([0])
-s2.contrast_cut(85)
-s2.set_continua("segments")
-spt = s2.make_spectra()
-sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1]
-
-sptH2O  = spc.splineline(wH2O,  cH2O,  spt.meta,"H2O ") # Define lines for spt series...
-sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI ")
-sptSiFe = spc.splineline(wSiFe, cSiFe, spt.meta,"SiFe ")
-sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
-sptlines = [sptH2O,sptFeI,sptSiFe,sptMyst] # ... and save in this list for spt
-#OBS! H2O and CNq cause crash, removed
-
 sptlims = {}
 sptlims["ewlim"]   = ( 0.3 , 2.1 )
 sptlims["vellim"]  = (-8   , 8   )
@@ -92,14 +101,6 @@ sptlims["fw23lim"] = (-0.4 , 3   )
 sptlims["as13lim"] = (-1.5 , 0.74)
 sptlims["as12lim"] = (-2.0 , 0.74)
 sptlims["as23lim"] = (-2.0 , 0.84)
-
-um = 0.38978
-wl = 0.64927
-pn = 0.83791
-
-xspotlims = (640.38104838709671, 640.69435483870961)
-yspotlims = (0.86458333333333337, 1.0437500000000002)
-
 
 # Sunspot measurement
 if False:

@@ -1,35 +1,90 @@
-import matplotlib.pyplot as pl
-import numpy as np
 import spectra as spc
-import visualize as vis
 
-wC22  = [876,897];   cC22  = 505.0737
-wVI   = [1216,1244]; cVI   = 504.7302
-wNiI  = [1057,1100]; cNiI  = 504.8853
-wC2   = [1015,1032]; cC2   = 504.9425
-wCI   = [728,761];   cCI   = 505.2151
+wNiI  = [1064,1094]; cNiI  = 504.8853
+wCI   = [731,761];   cCI   = 505.2151
+wC2   = [690,701];   cC2   = 505.261
+wTiI  = [666,676];   cTiI  = 505.2869
 wMyst = [580,620];   cMyst = 505.3577
-wFeMg = [252,280];   cFeMg = 505.6846
-wFeI  = [87,117];    cFeI  = 505.8495
+wFeI  = [480,504];   cFeI  = 505.4647
+wFeI2 = [87,114];    cFeI2  = 505.8495
 
-sf53_as1 = spc.SpectraFactory("data/5053_aS1",framerows=792,framecols=1466)
-sf53_as1.frame_row_cut([0,791])
-sf53_as1.frame_col_cut([0])
-sf53_as1.contrast_cut(80)
-sf53_as1.set_continua("segments")
+sf_qu1 = spc.SpectraFactory("data/5053_aS1",framerows=792,framecols=1466)
+sf_qu1.frame_row_cut([0]+list(range(666,679))+[791])
+sf_qu1.frame_col_cut([0,1,1465])
+sf_qu1.contrast_cut(80)
+sf_qu1.set_continua("segments")
 
-qu1 = sf53_as1.make_spectra()
+qu1 = sf_qu1.make_spectra()
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
-qu1VI   = spc.splineline(wVI,   cVI,   qu1.meta,"VI "  ) # Define lines for qu1 series...
-qu1NiI  = spc.splineline(wNiI,  cNiI,  qu1.meta,"NiI " )
-qu1C2   = spc.splineline(wC2,   cC2,   qu1.meta,"C2 "  )
-qu1CI   = spc.splineline(wCI,   cCI,   qu1.meta,"CI "  )
-qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst ")
-qu1FeMg = spc.splineline(wFeMg, cFeMg, qu1.meta,"FeMg ")
-qu1FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI " )
+qu1NiI  = spc.splineline(wNiI,  cNiI,  qu1.meta,"NiI" )
+qu1CI   = spc.splineline(wCI,   cCI,   qu1.meta,"CI"  )
+qu1C2   = spc.splineline(wC2,   cC2,   qu1.meta,"C_2")
+qu1TiI  = spc.splineline(wTiI,  cTiI,  qu1.meta,"Ti I")
+qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst")
+qu1FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI" )
+qu1FeI2 = spc.splineline(wFeI2, cFeI2, qu1.meta,"FeI" )
+qu1lines = [qu1NiI,qu1CI,qu1C2,qu1TiI,qu1Myst,qu1FeI,qu1FeI2]
 
-qu1lines = [qu1VI,qu1NiI,qu1C2,qu1CI,qu1Myst,qu1FeMg,qu1FeI]
+
+wNiI  = [1065,1099]; cNiI  = 504.8853
+wCI   = [732,764];   cCI   = 505.2151
+wC2   = [693,705];   cC2   = 505.261
+wTiI  = [669,679];   cTiI  = 505.2869
+wMyst = [588,622];   cMyst = 505.3577
+wFeI  = [485,505];   cFeI  = 505.4647
+wFeI2 = [92,119];    cFeI2  = 505.8495
+
+sf_qu2 = spc.SpectraFactory("data/5053_bS1",framerows=792,framecols=1466)
+sf_qu2.frame_row_cut([0]+list(range(666,671))+[791])
+sf_qu2.frame_col_cut([0,1465])
+sf_qu2.contrast_cut(80)
+sf_qu2.set_continua("segments")
+
+qu2 = sf_qu2.make_spectra()
+qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1] # Define continua for qu2 series
+
+qu2NiI  = spc.splineline(wNiI,  cNiI,  qu1.meta,"NiI" )
+qu2CI   = spc.splineline(wCI,   cCI,   qu1.meta,"CI"  )
+qu2C2   = spc.splineline(wC2,   cC2,   qu1.meta,"C_2")
+qu2TiI  = spc.splineline(wTiI,  cTiI,  qu1.meta,"Ti I")
+qu2Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst")
+qu2FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI" )
+qu2FeI2 = spc.splineline(wFeI2, cFeI2, qu1.meta,"FeI" )
+qu2lines = [qu2NiI,qu2CI,qu2C2,qu2TiI,qu2Myst,qu2FeI,qu2FeI2]
+
+
+wNiI  = [1228,1269]; cNiI  = 504.8853
+wCI   = [901,927];   cCI   = 505.2151
+wC2   = [859,870];   cC2   = 505.261
+wTiI  = [834,844];   cTiI  = 505.2869
+wMyst = [757,786];   cMyst = 505.3577
+wFeI  = [649,674];   cFeI  = 505.4647
+wFeI2 = [258,285];   cFeI2 = 505.8495
+
+sf_spt = spc.SpectraFactory("data/5053_aS2",framerows=780,framecols=1486)
+sf_spt.frame_row_cut([0,1,779])
+sf_spt.frame_col_cut([0]+list(range(658,672))+[1485])
+sf_spt.contrast_cut(80)
+sf_spt.set_continua("segments")
+
+spt = sf_spt.make_spectra()
+sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
+
+sptNiI  = spc.splineline(wNiI,  cNiI,  spt.meta,"NiI" )
+sptCI   = spc.splineline(wCI,   cCI,   spt.meta,"CI"  )
+sptC2   = spc.splineline(wC2,   cC2,   spt.meta,"C_2")
+sptTiI  = spc.splineline(wTiI,  cTiI,  spt.meta,"Ti I")
+sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst")
+sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI" )
+sptFeI2 = spc.splineline(wFeI2, cFeI2, spt.meta,"FeI" )
+sptlines = [sptNiI,sptCI,sptC2,sptTiI,sptMyst,sptFeI,sptFeI2]
+
+um = 0.32048
+wl = 0.58196
+pn = 0.82306
+xspotlims = (505.26553248218875, 505.44646047080431)
+yspotlims = (0.63975783972631528, 1.0820081717200596)
 
 qu1lims = {}
 qu1lims["ewlim"]   = ( 0.5 ,1.5 )
@@ -42,25 +97,6 @@ qu1lims["as13lim"] = (-0.62,0.45)
 qu1lims["as12lim"] = (-0.62,0.62)
 qu1lims["as23lim"] = (-0.68,0.50)
 
-
-sf53_bs1 = spc.SpectraFactory("data/5053_bS1",framerows=792,framecols=1466)
-sf53_bs1.frame_row_cut([0,791])
-sf53_bs1.frame_col_cut([0])
-sf53_bs1.contrast_cut(80)
-sf53_bs1.set_continua("segments")
-
-qu2 = sf53_bs1.make_spectra()
-qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1] # Define continua for qu2 series
-
-qu2VI   = spc.splineline(wVI,   cVI,   qu2.meta,"VI "  ) # Define lines for qu2 series...
-qu2NiI  = spc.splineline(wNiI,  cNiI,  qu2.meta,"NiI " )
-qu2C2   = spc.splineline(wC2,   cC2,   qu2.meta,"C2 "  )
-qu2CI   = spc.splineline(wCI,   cCI,   qu2.meta,"CI "  )
-qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
-qu2FeMg = spc.splineline(wFeMg, cFeMg, qu2.meta,"FeMg ")
-qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI " )
-qu2lines = [qu2VI,qu2NiI,qu2C2,qu2CI,qu2Myst,qu2FeMg,qu2FeI]
-
 qu2lims = {}
 qu2lims["ewlim"]   = ( 0.5 ,1.5 )
 qu2lims["vellim"]  = (-4   ,3   )
@@ -72,32 +108,6 @@ qu2lims["as13lim"] = (-0.15,0.1 )
 qu2lims["as12lim"] = (-0.15,0.1 )
 qu2lims["as23lim"] = (-0.15,0.15)
 
-wVI   = [1383,1412]; cVI   = 504.7302
-wNiI  = [1229,1269]; cNiI  = 504.8853
-wC2   = [1183,1200]; cC2   = 504.9425
-wCI   = [898,927];   cCI   = 505.2151
-wMyst = [754,787];   cMyst = 505.3577
-wFeMg = [421,450];   cFeMg = 505.6846
-wFeI  = [255,285];   cFeI  = 505.8495
-
-sf53_as2 = spc.SpectraFactory("data/5053_aS2",framerows=780,framecols=1486)
-sf53_as2.frame_row_cut([0,791])
-sf53_as2.frame_col_cut([0])
-sf53_as2.contrast_cut(80)
-sf53_as2.set_continua("segments")
-
-spt = sf53_as2.make_spectra()
-sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
-
-sptVI   = spc.splineline(wVI,   cVI,   spt.meta,"VI ") # Define lines for spt series...
-sptNiI  = spc.splineline(wNiI,  cNiI,  spt.meta,"NiI ")
-sptC2   = spc.splineline(wC2,   cC2,   spt.meta,"C2 ")
-sptCI   = spc.splineline(wCI,   cCI,   spt.meta,"CI ")
-sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
-sptFeMg = spc.splineline(wFeMg, cFeMg, spt.meta,"FeMg ")
-sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI ")
-sptlines = [sptVI,sptNiI,sptC2,sptCI,sptMyst,sptFeMg,sptFeI]
-
 sptlims = {}
 sptlims["ewlim"]   = ( 0.0 , 2.5 )
 sptlims["vellim"]  = (-6   , 7   )
@@ -108,10 +118,3 @@ sptlims["fw23lim"] = ( 0.1 , 1.1 )
 sptlims["as13lim"] = (-0.2 , 0.4 )
 sptlims["as12lim"] = (-0.2 , 0.6 )
 sptlims["as23lim"] = (-0.17, 0.2 )
-
-um = 0.32048
-wl = 0.58196
-pn = 0.82306
-
-xspotlims = (505.26553248218875, 505.44646047080431)
-yspotlims = (0.63975783972631528, 1.0820081717200596)
