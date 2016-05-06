@@ -480,16 +480,20 @@ class testspline(splineline):
         return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
 
     def __width_assym(self,spl,lmbd,lev,cnt):
-        ilev, = np.where(spl(lmbd) <= lev)
+        spls  = spl(lmbd)
+        ilev, = np.where(spls <= lev)
         # Check that we only got one interval
         spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
         if spli.sum() > 0:
             if   len(spli) == 1 :
                 ilev  = ilev[slice(spli+1)]
 
-        l1 =  lmbd[ilev[0]]; l2 = lmbd[ilev[-1]]
+        x10,x11,y10,y11 = lmbd[ilev[-1]],lmbd[ilev[-1]+1],spls[ilev[-1]],spls[ilev[-1]+1]
+        x20,x21,y20,y21 = lmbd[ilev[0]] ,lmbd[ilev[0] -1],spls[ilev[0]] ,spls[ilev[0] -1]
+        l1 = x11 + (lev-y10)*(x11-x10)/(y11-y10)
+        l2 = x21 + (lev-y20)*(x21-x20)/(y21-y20)
         wdth  = l1 - l2
-        assm  = cnt  - (lmbd1 + lmbd2)/2
+        assm  = cnt  - (x20 + x10)/2
         return wdth,assm
 
     def measure2(self,spectra,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
