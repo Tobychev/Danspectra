@@ -2,13 +2,13 @@ import spectra as spc
 import errors as er
 
 #Hand placed limits from mean(axis=0)
-wH2O  = [311, 343];   cH2O  = 640.8682
-wFeI  = [378, 439];   cFeI  = 640.8026
-wSiFe = [479, 519];   cSiFe = 640.7291
-wMyst = [646, 722];   cMyst = 640.5763
-wCN  = [1006,1047];   cCN   = 640.3127 
+wFeI  = [1359,1388]; cFeI  = 640.0316 
+wMyst = [652, 721];  cMyst = 640.5763
+wSiI  = [478, 518];  cSiI  = 640.7291
+wFeI2 = [377, 438];  cFeI2 = 640.8026
+wSiI2 = [310, 342];  cSiI2 = 640.8682
 
-sf_qu1 = spc.SpectraFactory("data/6405_aS1",framerows=800,framecols=1472))
+sf_qu1 = spc.SpectraFactory("data/6405_aS1",framerows=800,framecols=1472)
 sf_qu1.frame_col_cut([0,1471])
 sf_qu1.frame_row_cut([0]+list(range(668,677))+[799])
 sf_qu1.contrast_cut(50)
@@ -16,15 +16,14 @@ sf_qu1.set_continua("segments")
 qu1 = sf_qu1.make_spectra()
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1]
 
-qu1H2O  = spc.splineline(wH2O,  cH2O,  qu1.meta,"H2O ") # Define lines for qu1 series...
-qu1FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI ")
-qu1SiFe = spc.splineline(wSiFe, cSiFe, qu1.meta,"SiFe ")
-qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst ")
-qu1CN   = spc.splineline(wCN,   cCN,   qu1.meta,"CN ")
-qu1lines = [qu1H2O,qu1FeI,qu1SiFe,qu1Myst,qu1CN] # ... and save in this list for qu1 
+qu1FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI")
+qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst")
+qu1SiI  = spc.splineline(wSiI,  cSiI,  qu1.meta,"SiI")
+qu1FeI2 = spc.splineline(wFeI2, cFeI2, qu1.meta,"FeI")
+qu1SiI2 = spc.splineline(wSiI2, cSiI2, qu1.meta,"SiI")
+qu1lines = [qu1FeI,qu1Myst,qu1SiI,qu1FeI2,qu1SiI2] # ... and save in this list for qu1 
 
-
-sf_qu2 = spc.SpectraFactory("data/6405_bS1",framerows=756,framecols=1480))
+sf_qu2 = spc.SpectraFactory("data/6405_bS1",framerows=756,framecols=1472)
 sf_qu2.frame_col_cut([0,1,1471])
 sf_qu2.frame_row_cut([0]+list(range(663,670))+[799])
 sf_qu2.contrast_cut(50)
@@ -32,20 +31,19 @@ sf_qu2.set_continua("segments")
 qu2 = sf_qu2.make_spectra()
 qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1]
 
-qu2H2O  = spc.splineline(wH2O,  cH2O,  qu2.meta,"H2O ") # Define lines for qu2 series...
-qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI ")
-qu2SiFe = spc.splineline(wSiFe, cSiFe, qu2.meta,"SiFe ")
-qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
-qu2CN   = spc.splineline(wCN,   cCN,   qu2.meta,"CN ")
-qu2lines = [qu2H2O,qu2FeI,qu2SiFe,qu2Myst,qu2CN] # ... and save in this list for as2
+qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI")
+qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst")
+qu2SiI  = spc.splineline(wSiI,  cSiI,  qu2.meta,"SiI")
+qu2FeI2 = spc.splineline(wFeI2, cFeI2, qu2.meta,"FeI")
+qu2SiI2 = spc.splineline(wSiI2, cSiI2, qu2.meta,"SiI")
+qu2lines = [qu2FeI,qu2Myst,qu2SiI,qu2FeI2,qu2SiI2] # ... and save in this list for qu2 
 
 
 #Hand placed limits from mean(axis=0)
-wH2O  = [444, 465];   cH2O  = 640.8682
-wFeI  = [505, 571];   cFeI  = 640.8026
-wSiFe = [614, 647];   cSiFe = 640.7291
-wMyst = [797, 853];   cMyst = 640.5763
-wCN   = [1139,1178];   cCN  = 640.3127 
+wMyst = [797, 850];  cMyst = 640.5763
+wSiI  = [611, 647];  cSiI  = 640.7291
+wFeI2 = [505, 571];  cFeI2 = 640.8026
+wSiI2 = [442, 470];  cSiI2 = 640.8682
 
 sf_spt = spc.SpectraFactory("data/6405_aS2",framerows=774,framecols=1446)
 sf_spt.frame_col_cut([0,1445])
@@ -55,12 +53,12 @@ sf_spt.set_continua("segments")
 spt = sf_spt.make_spectra()
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1]
 
-sptH2O  = spc.splineline(wH2O,  cH2O,  spt.meta,"H2O ") # Define lines for spt series...
-sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI ")
-sptSiFe = spc.splineline(wSiFe, cSiFe, spt.meta,"SiFe ")
-sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
-sptlines = [sptH2O,sptFeI,sptSiFe,sptMyst] # ... and save in this list for spt
-#OBS! H2O and CNq cause crash, removed
+sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI")
+sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst")
+sptSiI  = spc.splineline(wSiI,  cSiI,  spt.meta,"SiI")
+sptFeI2 = spc.splineline(wFeI2, cFeI2, spt.meta,"FeI")
+sptSiI2 = spc.splineline(wSiI2, cSiI2, spt.meta,"SiI")
+sptlines = [sptFeI,sptMyst,sptSiI,sptFeI2,sptSiI2] # ... and save in this list for spt 
 
 um = 0.38978
 wl = 0.64927

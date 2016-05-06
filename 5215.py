@@ -1,7 +1,7 @@
 import spectra as spc
 
 wFeI  = [1183,1202]; cFeI  = 520.9892
-wFeTi = [1010,1036]; cFeTi = 521.1535
+wTiII = [1010,1036]; cTiII = 521.1535
 wCoI  = [888,924];   cCoI  = 521.2691
 wMyst = [591,623];   cMyst = 521.5571
 wCuI  = [321,352];   cCuI  = 521.8209
@@ -17,12 +17,12 @@ qu1 = sf_qu1.make_spectra()
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
 qu1FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI " ) # Define lines for qu1 series...
-qu1FeTi = spc.splineline(wFeTi, cFeTi, qu1.meta,"FeTi ")
+qu1TiII = spc.splineline(wTiII, cTiII, qu1.meta,"TiII ")
 qu1CoI  = spc.splineline(wCoI,  cCoI,  qu1.meta,"CoI " )
 qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst ")
 qu1CuI  = spc.splineline(wCuI,  cCuI,  qu1.meta,"CuI " )
 qu1TiI  = spc.splineline(wTiI,  cTiI,  qu1.meta,"TiI " )
-qu1lines = [qu1FeI,qu1FeTi,qu1CoI,qu1Myst,qu1CuI,qu1TiI]
+qu1lines = [qu1FeI,qu1TiII,qu1CoI,qu1Myst,qu1CuI,qu1TiI]
 
 
 sf_qu2 = spc.SpectraFactory("data/5215_bS1",framerows=802,framecols=1476)
@@ -35,16 +35,16 @@ qu2 = sf_qu2.make_spectra()
 qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1] # Define continua for qu2 series
 
 qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI " ) # Define lines for qu2 series...
-qu2FeTi = spc.splineline(wFeTi, cFeTi, qu2.meta,"FeTi ")
+qu2TiII = spc.splineline(wTiII, cTiII, qu2.meta,"TiII ")
 qu2CoI  = spc.splineline(wCoI,  cCoI,  qu2.meta,"CoI " )
 qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
 qu2CuI  = spc.splineline(wCuI,  cCuI,  qu2.meta,"CuI " )
 qu2TiI  = spc.splineline(wTiI,  cTiI,  qu2.meta,"TiI " )
-qu2lines = [qu2FeI,qu2FeTi,qu2CoI,qu2Myst,qu2CuI,qu2TiI]
+qu2lines = [qu2FeI,qu2TiII,qu2CoI,qu2Myst,qu2CuI,qu2TiI]
 
 
 wFeI  = [1253,1272]; cFeI  = 520.9892
-wFeTi = [1077,1110]; cFeTi = 521.1535
+wTiII = [1077,1110]; cTiII = 521.1535
 wCoI  = [956,996];   cCoI  = 521.2691
 wMyst = [659,691];   cMyst = 521.5571
 wCuI  = [385,424];   cCuI  = 521.8209
@@ -60,12 +60,12 @@ spt = sf_spt.make_spectra()
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
 
 sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI " ) # Define lines for spt series...
-sptFeTi = spc.splineline(wFeTi, cFeTi, spt.meta,"FeTi ")
+sptTiII = spc.splineline(wTiII, cTiII, spt.meta,"TiII ")
 sptCoI  = spc.splineline(wCoI,  cCoI,  spt.meta,"CoI " )
 sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
 sptCuI  = spc.splineline(wCuI,  cCuI,  spt.meta,"CuI " )
 sptTiI  = spc.splineline(wTiI,  cTiI,  spt.meta,"TiI " )
-sptlines = [sptFeI,sptFeTi,sptCoI,sptMyst,sptCuI,sptTiI]
+sptlines = [sptFeI,sptTiII,sptCoI,sptMyst,sptCuI,sptTiI]
 
 
 um = 0.33427
