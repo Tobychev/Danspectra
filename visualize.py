@@ -25,14 +25,20 @@ def make_linemap_lims(measure):
         proplims[name] = []
         for line in measure:
             # Argsort returns the index, pick third lowest and third highest value as limits
-            proplims[name].append(line[ line[:,i].argsort()[[2,-3]],i ])
+            if name == "ew":
+                mew = line[:,i].mean()
+                proplims[name].append(line[ line[:,i].argsort()[[3,-2]],i ]/mew)
+            else:
+                proplims[name].append(line[ line[:,i].argsort()[[3,-2]],i ])
 
         most  = np.max(proplims[name]); least = np.min(proplims[name])
-        dx = (most-least)*5e-3
+#        print(least,most)
+        dx = (most-least)*5e-2
         if name == "bot":
             name = "rel"
-        lims["{}lims".format(name)] = (least-dx,most+dx)
-
+            
+        lims["{}lim".format(name)] = (least-dx,most+dx)
+   
     return lims
 
 def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
@@ -82,37 +88,37 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
          "xlabel": "Continuum intensity",
          "ylim"  : rellim},regbins)
 
-    prop_plot(axs[1,0],measure[:,con],measure[:,fw13]/line.width,
+    prop_plot(axs[1,0],measure[:,con],measure[:,fw13],
         {"title" : "Full width 1/3 maximum,\n " + str(line),
          "ylabel": "Relative line width",
          "xlabel": "Continuum intensity",
          "ylim"  : fw13lim},regbins)
 
-    prop_plot(axs[1,1],measure[:,con],measure[:,fwhm]/line.width,
+    prop_plot(axs[1,1],measure[:,con],measure[:,fwhm],
         {"title" : "Full width half maximum,\n " + str(line),
          "ylabel": "Relative line width",
          "xlabel": "Continuum intensity",
          "ylim"  : fwhmlim},regbins)
 
-    prop_plot(axs[1,2],measure[:,con],measure[:,fw23]/line.width,
+    prop_plot(axs[1,2],measure[:,con],measure[:,fw23],
         {"title" : "Full width 2/3 maximum,\n " + str(line),
          "ylabel": "Relative line width",
          "xlabel": "Continuum intensity",
          "ylim"  : fw23lim},regbins)
 
-    prop_plot(axs[2,0],measure[:,con],(measure[:,as13]-measure[:,as13].mean())/line.width,
+    prop_plot(axs[2,0],measure[:,con],measure[:,as13],
         {"title" : "Line asymmetry 1/3 maximum,\n " + str(line),
          "ylabel": "Line asymmetry",
          "xlabel": "Continuum intensity",
          "ylim"  : as13lim},regbins)
         
-    prop_plot(axs[2,1],measure[:,con],(measure[:,as12]-measure[:,as12].mean())/line.width,
+    prop_plot(axs[2,1],measure[:,con],measure[:,as12],
         {"title" : "Line asymmetry half maximum,\n " + str(line),
          "ylabel": "Line width [Å]",
          "xlabel": "Continuum intensity",
          "ylim"  : as12lim},regbins)
 
-    prop_plot(axs[2,2],measure[:,con],(measure[:,as23]-measure[:,as23].mean())/line.width,
+    prop_plot(axs[2,2],measure[:,con],measure[:,as23],
         {"title" : "Line asymmetry 2/3 maximum,\n " + str(line),
          "ylabel": "Line asymmetry",
          "xlabel": "Continuum intensity",

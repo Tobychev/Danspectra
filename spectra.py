@@ -192,16 +192,6 @@ class SpectraFactory(SpecMeta):
         else:
             print("Unrecognized method:", method)
 
-    def set_continua(self,method,nump=30,q=80):
-        if method in ["top 20","segments"]:
-            self.meta["cont method"] = method
-            self.meta["nump"]   = nump
-            self.meta["q"]      = q
-            self.meta["state"]  = "Continua defined"
-            self._update_meta()
-        else:
-            print("Unrecognized method:", method)
-
     def make_spectra(self,desc=""):
         lmbd = self.__load_from_fits(self.Dir+self.__lmbdname)[self.cols]
         ref  = self.__load_from_fits(self.Dir+self.__refname )[self.cols]
@@ -252,6 +242,12 @@ class SpectraFactory(SpecMeta):
             return Spectra(desc,spectra.meta.lmbd[colid],subset,meta)
         else:
             print("No selection given")
+
+    def rawstack(self):
+        acc = self.__load_from_fits(self.files[0])
+        for fil in self.files[1:]:
+            acc += self.__load_from_fits(self.files[0])
+        return acc/len(self.files)
 
 class continua(object):
     def __init__(self,refdata,lmbd,method,nump=30,q=80):
@@ -322,6 +318,14 @@ class line(object):
 #                      ).reshape((-1,1))*np.ones(spec[:,0].shape)
 #        return ((spec[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
         return st.simps(spec[:,self.idx]-1,x=spec.meta.lmbd[self.idx],even="avg")*1e3 ## Converts to miliÅngström
+
+    def recenter(self,spec):
+        x = self.spec.lmbd[self.idx]; y = spec[self.idx]
+        lmbd = np.linspace(x[0],x[-1],1000)
+        spl = si.UnivariateSpline(x[::-1],y[::-1],s=0,k=4)
+        dspl = spl.derivative()
+        candidates = dspl.roots()
+        self.cent = candidates[ np.abs(spl(candidates) - spl(lmbd).min()).argmin()]
 
 class statline(line):
     def measure(self,spectra):
@@ -412,7 +416,7 @@ class splineline(line):
         for i,row in enumerate(spectra[:,self.idx]):
             mf           = self.makespline(row,lmbd,9)
             splmes[i,:9] = self.measure_spline(mf,lmbd,dl,smallstep,numsmallstep)
-
+        splmes = self.__normalize(splmes)
         return splmes
 
     def makespline(self,spec,lmbd,kns=6):
@@ -453,6 +457,11 @@ class splineline(line):
         assm  = cnt  - (lmbd1 + lmbd2)/2
         return wdth,assm
 
+    def __normalize(self,result):
+        result[:,[2,4,6]] = result[:,[2,4,6]]/self.width
+#        result[:,[3,5,7]] = result[:,[3,5,7]]*self.width
+        return result
+        
 
 class testspline(splineline):
     def measure_spline(self,spl,lmbd):
