@@ -1,6 +1,7 @@
 import numpy as np
+import pickle as pic
 
-regnames = ["5053","5215","5654","6405","6449"]
+regnames =  ["5053","5215","5654","6405","6449"]
 
 for regname in regnames:
     region = __import__(regname)
@@ -16,6 +17,7 @@ for regname in regnames:
             print("Line {} failed to measure:".format(name))
             print(err)
     np.savez_compressed("bin/{}_qu1".format(regname),**res)
+    pic.dump(lines1,open("bin/{}_qu1.lin".format(regname),"wb"))
 
     spec2  = region.qu2
     lines2 = region.qu2lines
@@ -28,6 +30,7 @@ for regname in regnames:
             print("Line {} failed to measure:".format(name))
             print(err)
     np.savez_compressed("bin/{}_qu2".format(regname),**res)
+    pic.dump(lines2,open("bin/{}_qu2.lin".format(regname),"wb"))
 
     spec3  = region.spt
     lines3 = region.sptlines
@@ -40,5 +43,6 @@ for regname in regnames:
             print("Line {} failed to measure:".format(name))
             print(err)
     np.savez_compressed("bin/{}_spt".format(regname),**res)
+    pic.dump(lines3,open("bin/{}_spt.lin".format(regname),"wb"))
 
 
