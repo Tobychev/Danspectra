@@ -465,7 +465,7 @@ class splineline(line):
         
 
 class testspline(splineline):
-    def measure_spline(self,spl,lmbd):
+    def measure_spline(self,spl,lmbd,a,b,c):
         lmbd = np.linspace(lmbd[0],lmbd[-1],1e4)
         spls = spl(lmbd)
         bot  = spls.min()        
@@ -489,8 +489,15 @@ class testspline(splineline):
             if   len(spli) == 1 :
                 ilev  = ilev[slice(spli+1)]
 
-        x10,x11,y10,y11 = lmbd[ilev[-1]],lmbd[ilev[-1]+1],spls[ilev[-1]],spls[ilev[-1]+1]
-        x20,x21,y20,y21 = lmbd[ilev[0]] ,lmbd[ilev[0] -1],spls[ilev[0]] ,spls[ilev[0] -1]
+        if ilev[-1] <= len(lmbd) - 2:
+            x10,x11,y10,y11 = lmbd[ilev[-1]],lmbd[ilev[-1]+1],spls[ilev[-1]],spls[ilev[-1]+1]
+        else:
+            x10 = lmbd[ilev[-1]]; x11 = -x10; y10,y11 = 1,0
+        if ilev[0] >= 1:
+            x20,x21,y20,y21 = lmbd[ilev[0]] ,lmbd[ilev[0] -1],spls[ilev[0]] ,spls[ilev[0] -1]
+        else:
+            x20 = lmbd[ilev[0]]; x21 = -x20; y20,y21 = 1,0
+
         l1 = x11 + (lev-y10)*(x11-x10)/(y11-y10)
         l2 = x21 + (lev-y20)*(x21-x20)/(y21-y20)
         wdth  = l1 - l2
