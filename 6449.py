@@ -1,12 +1,20 @@
 import spectra as spc
 
-wMyst = [1211,1327]; cMyst = 644.9127
-wCa   = [1150,1198]; cCa   = 644.9820
-wBlnd = [1088,1151]; cBlnd = 645.0179
-wSiI  = [834,889];   cSiI  = 645.2315
-wH2O  = [613,637];   cH2O  = 645.4139
-wCo   = [449,534];   cCo   = 645.5001
-wH2O2 = [8,34];      cH2O2 = 645.8892
+Myst = {"El":    -1,"gf":     0,"lam":644.9127,"dep":0.102,"name":"Myst"}
+Ca   = {"El":2.5213,"gf":-0.502,"lam":644.9820,"dep":0.560,"name":"Ca I"}
+Blnd = {"El":1.7104,"gf":-1.527,"lam":645.0179,"dep":0.374,"name":"Co I Si I"}
+SiI  = {"El":5.6193,"gf":-1.433,"lam":644.2315,"dep":0.211,"name":"Si I"}
+H2O  = {"El":    -1,"gf":     0,"lam":645.4139,"dep":0.026,"name":"tel H_2O"}
+Co   = {"El":3.6321,"gf":-0.250,"lam":645.5001,"dep":0.141,"name":"Co I"}
+H2O2 = {"El":    -1,"gf":     0,"lam":645.8892,"dep":0.046,"name":"Si I"}
+
+wMyst = [1211,1327];
+wCa   = [1150,1198];
+wBlnd = [1088,1151];
+wSiI  = [834,889];  
+wH2O  = [613,637];  
+wCo   = [449,534];  
+wH2O2 = [8,34];     
 
 sf_qu1 = spc.SpectraFactory("data/6449_aS1",framerows=802,framecols=1514)
 sf_qu1.frame_row_cut([0]+list(range(668,674))+[801])
@@ -17,23 +25,22 @@ sf_qu1.set_continua("segments")
 qu1 = sf_qu1.make_spectra()
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
-qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst"   ) # Define lines for qu1 series...
-qu1Ca   = spc.splineline(wCa,   cCa,   qu1.meta,"CaI"    )
-qu1Blnd = spc.splineline(wBlnd, cBlnd, qu1.meta,"CoI+Bl" )
-qu1SiI  = spc.splineline(wSiI,  cSiI,  qu1.meta,"SiI" )
-qu1H2O  = spc.splineline(wH2O,  cH2O,  qu1.meta,"tel H2O")
-qu1Co   = spc.splineline(wCo,   cCo,   qu1.meta,"CoI"    )
-qu1H2O2 = spc.splineline(wH2O2, cH2O2, qu1.meta,"tel H2O")
+qu1Myst = spc.splineline(wMyst, Myst, qu1.meta) # Define lines for qu1 series...
+qu1Ca   = spc.splineline(wCa,   Ca,   qu1.meta)
+qu1Blnd = spc.splineline(wBlnd, Blnd, qu1.meta)
+qu1SiI  = spc.splineline(wSiI,  SiI,  qu1.meta)
+qu1H2O  = spc.splineline(wH2O,  H2O,  qu1.meta)
+qu1Co   = spc.splineline(wCo,   Co,   qu1.meta)
+qu1H2O2 = spc.splineline(wH2O2, H2O2, qu1.meta)
+qu1lines = [qu1Myst,qu1Ca,qu1Blnd,qu1SiI,qu1H2O,qu1Co,qu1H2O2]
 
-qu1lines = [qu1Myst,qu1Ca,qu1CoBl,qu1Unk2,qu1H2O,qu1Co,qu1H2O2]
-
-wMyst = [1210,1302]; cMyst = 644.9127
-wCa   = [1144,1190]; cCa   = 644.9820
-wBlnd = [1080,1144]; cBlnd = 645.0179
-wSiI  = [832,874];   cSiI  = 645.2315
-wH2O  = [608,628];   cH2O  = 645.4139
-wCo   = [492,530];   cCo   = 645.5001
-wH2O2 = [3,30];      cH2O2 = 645.8892
+wMyst = [1210,1302]
+wCa   = [1144,1190]
+wBlnd = [1080,1144]
+wSiI  = [832,874]; 
+wH2O  = [608,628]; 
+wCo   = [492,530]; 
+wH2O2 = [3,30];    
 
 sf_qu2 = spc.SpectraFactory("data/6449_bS1",framerows=802,framecols=1514)
 sf_qu2.frame_row_cut([0,1,2]+list(range(671,681))+[801])
@@ -44,15 +51,14 @@ sf_qu2.set_continua("segments")
 qu2 = sf_qu2.make_spectra()
 qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1] # Define continua for qu2 series
 
-qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst"   )   # Define lines for qu2 series...
-qu2Ca   = spc.splineline(wCa,   cCa,   qu2.meta,"CaI"    )
-qu2Blnd = spc.splineline(wBlnd, cBlnd, qu2.meta,"Blend" )
-qu2SiI  = spc.splineline(wSiI,  cSiI,  qu2.meta,"SiI" )
-qu2H2O  = spc.splineline(wH2O,  cH2O,  qu2.meta,"tel-H2O")
-qu2Co   = spc.splineline(wCo,   cCo,   qu2.meta,"CoI"    )
-qu2H2O2 = spc.splineline(wH2O2, cH2O2, qu2.meta,"tel_H2O")
-qu2lines = [qu2Myst,qu2Ca,qu2CoBl,qu2Unk2,qu2H2O,qu2Co,qu2H2O2]
-
+qu2Myst = spc.splineline(wMyst, Myst, qu2.meta)   # Define lines for qu2 series...
+qu2Ca   = spc.splineline(wCa,   Ca,   qu2.meta)
+qu2Blnd = spc.splineline(wBlnd, Blnd, qu2.meta)
+qu2SiI  = spc.splineline(wSiI,  SiI,  qu2.meta)
+qu2H2O  = spc.splineline(wH2O,  H2O,  qu2.meta)
+qu2Co   = spc.splineline(wCo,   Co,   qu2.meta)
+qu2H2O2 = spc.splineline(wH2O2, H2O2, qu2.meta)
+qu2lines = [qu2Myst,qu2Ca,qu2Blnd,qu2SiI,qu2H2O,qu2Co,qu2H2O2]
 
 ###
 # Spot section
@@ -73,14 +79,13 @@ sf_spt.set_continua("segments")
 spt = sf_spt.make_spectra()
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
 
-sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst"   ) # Define lines for spt series...
-sptCa   = spc.splineline(wCa,   cCa,   spt.meta,"CaI"    )
-sptBlnd = spc.splineline(wBlnd, cBlnd, spt.meta,"Blend" )
-sptSiI  = spc.splineline(wSiI,  cSiI,  spt.meta,"SiI" )
-sptH2O  = spc.splineline(wH2O,  cH2O,  spt.meta,"tel-H2O")
-sptCo   = spc.splineline(wCo,   cCo,   spt.meta,"CoI"    )
-sptCa2  = spc.splineline(wCa2,  cCa2,  spt.meta,"CaI."   )
-sptlines = [sptMyst,sptCa,sptCoBl,sptUnk2,sptCo]
+sptMyst = spc.splineline(wMyst, Myst, spt.meta) # Define lines for spt series...
+sptCa   = spc.splineline(wCa,   Ca,   spt.meta)
+sptBlnd = spc.splineline(wBlnd, Blnd, spt.meta)
+sptSiI  = spc.splineline(wSiI,  SiI,  spt.meta)
+sptH2O  = spc.splineline(wH2O,  H2O,  spt.meta)
+sptCo   = spc.splineline(wCo,   Co,   spt.meta)
+sptlines = [sptMyst,sptCa,sptBlnd,sptSiI,sptH2O,sptCo]
 
 um = 0.38834
 wl = 0.67615

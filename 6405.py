@@ -1,12 +1,18 @@
 import spectra as spc
 import errors as er
 
+FeI  = {"El":0.9146,"gf":-4.318,"lam":640.0316,"dep":0.533,"name":"Fe I"}
+Myst = {"El":    -1,"gf":     0,"lam":640.5763,"dep":0.058,"name":"Myst"}
+SiI  = {"El":5.8709,"gf":-1.393,"lam":640.7291,"dep":0.155,"name":"Si I"}
+FeI2 = {"El":3.6864,"gf":-1.018,"lam":640.8017,"dep":0.562,"name":"Fe I"}
+SiI2 = {"El":5.9841,"gf":-1.554,"lam":640.8670,"dep":0.098,"name":"Si I"}
+
 #Hand placed limits from mean(axis=0)
-wFeI  = [1359,1388]; cFeI  = 640.0316 
-wMyst = [652, 721];  cMyst = 640.5763
-wSiI  = [478, 518];  cSiI  = 640.7291
-wFeI2 = [377, 438];  cFeI2 = 640.8026
-wSiI2 = [310, 342];  cSiI2 = 640.8682
+wFeI  = [1359,1388]
+wMyst = [652, 721];
+wSiI  = [478, 518];
+wFeI2 = [377, 438];
+wSiI2 = [310, 342];
 
 sf_qu1 = spc.SpectraFactory("data/6405_aS1",framerows=800,framecols=1472)
 sf_qu1.frame_col_cut([0,1471])
@@ -16,11 +22,11 @@ sf_qu1.set_continua("segments")
 qu1 = sf_qu1.make_spectra()
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1]
 
-qu1FeI  = spc.splineline(wFeI,  cFeI,  qu1.meta,"FeI")
-qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst")
-qu1SiI  = spc.splineline(wSiI,  cSiI,  qu1.meta,"SiI")
-qu1FeI2 = spc.splineline(wFeI2, cFeI2, qu1.meta,"FeI")
-qu1SiI2 = spc.splineline(wSiI2, cSiI2, qu1.meta,"SiI")
+qu1FeI  = spc.splineline(wFeI,  FeI,  qu1.meta)
+qu1Myst = spc.splineline(wMyst, Myst, qu1.meta)
+qu1SiI  = spc.splineline(wSiI,  SiI,  qu1.meta)
+qu1FeI2 = spc.splineline(wFeI2, FeI2, qu1.meta)
+qu1SiI2 = spc.splineline(wSiI2, SiI2, qu1.meta)
 qu1lines = [qu1FeI,qu1Myst,qu1SiI,qu1FeI2,qu1SiI2] # ... and save in this list for qu1 
 
 sf_qu2 = spc.SpectraFactory("data/6405_bS1",framerows=756,framecols=1472)
@@ -31,19 +37,19 @@ sf_qu2.set_continua("segments")
 qu2 = sf_qu2.make_spectra()
 qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1]
 
-qu2FeI  = spc.splineline(wFeI,  cFeI,  qu2.meta,"FeI")
-qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst")
-qu2SiI  = spc.splineline(wSiI,  cSiI,  qu2.meta,"SiI")
-qu2FeI2 = spc.splineline(wFeI2, cFeI2, qu2.meta,"FeI")
-qu2SiI2 = spc.splineline(wSiI2, cSiI2, qu2.meta,"SiI")
+qu2FeI  = spc.splineline(wFeI,  FeI,  qu2.meta)
+qu2Myst = spc.splineline(wMyst, Myst, qu2.meta)
+qu2SiI  = spc.splineline(wSiI,  SiI,  qu2.meta)
+qu2FeI2 = spc.splineline(wFeI2, FeI2, qu2.meta)
+qu2SiI2 = spc.splineline(wSiI2, SiI2, qu2.meta)
 qu2lines = [qu2FeI,qu2Myst,qu2SiI,qu2FeI2,qu2SiI2] # ... and save in this list for qu2 
 
 
 #Hand placed limits from mean(axis=0)
-wMyst = [797, 850];  cMyst = 640.5763
-wSiI  = [611, 647];  cSiI  = 640.7291
-wFeI2 = [505, 571];  cFeI2 = 640.8026
-wSiI2 = [442, 470];  cSiI2 = 640.8682
+wMyst = [797, 850]
+wSiI  = [611, 647]
+wFeI2 = [505, 571]
+wSiI2 = [442, 470]
 
 sf_spt = spc.SpectraFactory("data/6405_aS2",framerows=774,framecols=1446)
 sf_spt.frame_col_cut([0,1445])
@@ -53,12 +59,11 @@ sf_spt.set_continua("segments")
 spt = sf_spt.make_spectra()
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1]
 
-sptFeI  = spc.splineline(wFeI,  cFeI,  spt.meta,"FeI")
-sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst")
-sptSiI  = spc.splineline(wSiI,  cSiI,  spt.meta,"SiI")
-sptFeI2 = spc.splineline(wFeI2, cFeI2, spt.meta,"FeI")
-sptSiI2 = spc.splineline(wSiI2, cSiI2, spt.meta,"SiI")
-sptlines = [sptFeI,sptMyst,sptSiI,sptFeI2,sptSiI2] # ... and save in this list for spt 
+sptMyst = spc.splineline(wMyst, Myst, spt.meta)
+sptSiI  = spc.splineline(wSiI,  SiI,  spt.meta)
+sptFeI2 = spc.splineline(wFeI2, FeI2, spt.meta)
+sptSiI2 = spc.splineline(wSiI2, SiI2, spt.meta)
+sptlines = [sptMyst,sptSiI,sptFeI2,sptSiI2] # ... and save in this list for spt 
 
 um = 0.38978
 wl = 0.64927

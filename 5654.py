@@ -1,12 +1,20 @@
 import spectra as spc
 
+FeI   = {"El":4.4733,"gf":-2.000,"lam":565.1468,"dep":0.121,"name":"Fe I"}
+Myst  = {"El":    -1,"gf":     0,"lam":565.4501,"dep":0.125,"name":"Myst"}
+SiI   = {"El":5.6136,"gf":-1.887,"lam":565.4919,"dep":0.362,"name":"Si I"}
+VI    = {"El":1.0636,"gf":-1.000,"lam":565.7440,"dep":0.082,"name":"V I"}
+ScII  = {"El":1.5070,"gf":-0.603,"lam":565.7896,"dep":0.491,"name":"Sc II"}
+FeI2  = {"El":4.2844,"gf":-1.736,"lam":566.1344,"dep":0.257,"name":"Fe I"}
+
+
 #Hand selected limits
-wFeI  = [1216,1248]; cFeI  = 565.1477
-wMyst = [873,937];   cMyst = 565.4501
-wSiI  = [842,867];   cSiI  = 565.4937
-wVI   = [567,595];   cVI   = 565.7456
-wScII = [512,548];   cScII = 565.7880
-wFeI2 = [131,168];   cFeI2 = 566.1354
+wFeI  = [1216,1248]
+wMyst = [873,937]; 
+wSiI  = [842,867]; 
+wVI   = [567,595]; 
+wScII = [512,548]; 
+wFeI2 = [131,168]; 
 
 sf_qu1 = spc.SpectraFactory("data/5654_aS2",framerows=756,framecols=1480)
 sf_qu1.frame_row_cut([0]+list(range(653,660))+[755])
@@ -17,12 +25,12 @@ sf_qu1.set_continua("segments")
 qu1 = sf_qu1.make_spectra() # Do this before defining lines
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
-qu1FeI  = spc.splineline(wFeI , cFeI , qu1.meta,"FeI ") # Define lines for qu1 series...
-qu1Myst = spc.splineline(wMyst, cMyst, qu1.meta,"Myst ")
-qu1SiI  = spc.splineline(wSiI , cSiI , qu1.meta,"SiI " )
-qu1VI   = spc.splineline(wVI  , cVI  , qu1.meta,"VI "  )
-qu1ScII = spc.splineline(wScII, cScII, qu1.meta,"ScII ")
-qu1FeI2 = spc.splineline(wFeI2, cFeI2, qu1.meta,"FeI "  )
+qu1FeI  = spc.splineline(wFeI , FeI , qu1.meta)# Define lines for qu1 series...
+qu1Myst = spc.splineline(wMyst, Myst, qu1.meta)
+qu1SiI  = spc.splineline(wSiI , SiI , qu1.meta)
+qu1VI   = spc.splineline(wVI  , VI  , qu1.meta)
+qu1ScII = spc.splineline(wScII, ScII, qu1.meta)
+qu1FeI2 = spc.splineline(wFeI2, FeI2, qu1.meta)
 qu1lines = [qu1FeI,qu1Myst,qu1SiI,qu1VI,qu1ScII,qu1FeI2] # ... and save in this list for qu1
 
 
@@ -35,12 +43,12 @@ sf_qu2.set_continua("segments")
 qu2 = sf_qu2.make_spectra()
 qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1] # Define continua for qu2 series
 
-qu2FeI = spc.splineline(wFeI  , cFeI , qu2.meta,"FeI  ") # Define lines for qu2 series...
-qu2Myst = spc.splineline(wMyst, cMyst, qu2.meta,"Myst ")
-qu2SiI  = spc.splineline(wSiI , cSiI , qu2.meta,"SiI " )
-qu2VI   = spc.splineline(wVI  , cVI  , qu2.meta,"VI "  )
-qu2ScII = spc.splineline(wScII, cScII, qu2.meta,"ScII ")
-qu2FeI2  = spc.splineline(wFeI2, cFeI , qu2.meta,"FeI "  )
+qu2FeI = spc.splineline(wFeI  ,  FeI , qu2.meta) # Define lines for qu2 series...
+qu2Myst = spc.splineline(wMyst,  Myst, qu2.meta)
+qu2SiI  = spc.splineline(wSiI ,  SiI , qu2.meta)
+qu2VI   = spc.splineline(wVI  ,  VI  , qu2.meta)
+qu2ScII = spc.splineline(wScII,  ScII, qu2.meta)
+qu2FeI2  = spc.splineline(wFeI2, FeI , qu2.meta)
 qu2lines = [qu2FeI,qu2Myst,qu2SiI,qu2VI,qu2ScII,qu2FeI2] # ... and save in this list for qu2
 
 
@@ -60,12 +68,12 @@ sf_spt.set_continua("segments")
 spt = sf_spt.make_spectra()
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
 
-sptFeI  = spc.splineline(wFeI , cFeI , spt.meta,"FeI  ") # Define lines for spt series...
-sptMyst = spc.splineline(wMyst, cMyst, spt.meta,"Myst ")
-sptSiI  = spc.splineline(wSiI , cSiI , spt.meta,"SiI " )
-sptVI   = spc.splineline(wVI  , cVI  , spt.meta,"VI "  )
-sptScII = spc.splineline(wScII, cScII, spt.meta,"ScII ")
-sptFeI2 = spc.splineline(wFeI2, cFeI2, spt.meta,"FeI " )
+sptFeI  = spc.splineline(wFeI , FeI , spt.meta) # Define lines for spt series...
+sptMyst = spc.splineline(wMyst, Myst, spt.meta)
+sptSiI  = spc.splineline(wSiI , SiI , spt.meta)
+sptVI   = spc.splineline(wVI  , VI  , spt.meta)
+sptScII = spc.splineline(wScII, ScII, spt.meta)
+sptFeI2 = spc.splineline(wFeI2, FeI2, spt.meta)
 sptlines = [sptFeI,sptMyst,sptSiI,sptVI,sptScII,sptFeI2] # ... and save in this list for spt
 
 um = 0.37468

@@ -299,13 +299,13 @@ class continua(object):
             return data
 
 class line(object):
-    def __init__(self,winbounds,cent,specmeta,name=""):
+    def __init__(self,winbounds,linemeta,specmeta):
         self.idx   = np.arange(winbounds[0],winbounds[1]+1)
-        self.cent  = cent
-        if name != "":
-            self.name  = "{:<7} {:6.3f}".format(name,self.cent)
-        else:
-            self.name  = "{:6.3f}".format(self.cent)
+        self.cent  = linemeta["lam"]
+        self.dept  = linemeta["dep"]
+        self.El    = linemeta["El"]
+        self.gf    = linemeta["gf"]
+        self.name  =  "{:<7} {:6.3f}".format(linemeta["name"],self.cent)
 
         self.width = specmeta.lmbd[self.idx[0]] - specmeta.lmbd[self.idx[-1]] 
         self.spec  = specmeta
@@ -326,6 +326,7 @@ class line(object):
         dspl = spl.derivative()
         candidates = dspl.roots()
         self.cent = candidates[ np.abs(spl(candidates) - spl(lmbd).min()).argmin()]
+        self.dept = spl(self.cent)
 
 class statline(line):
     def measure(self,spectra):
