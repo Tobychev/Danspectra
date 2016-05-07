@@ -66,7 +66,6 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
 
     
     fig, axs  = pl.subplots(3,3,sharex=True)
-    fig.subplots_adjust(wspace=0.3,hspace=0.3)
 
     mew       =  measure[:,ew].mean()
     prop_plot(axs[0,0],measure[:,con],measure[:,ew]/mew,
