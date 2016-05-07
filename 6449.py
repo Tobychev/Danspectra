@@ -3,7 +3,7 @@ import spectra as spc
 Myst = {"El":    -1,"gf":     0,"lam":644.9127,"dep":0.102,"name":"Myst"}
 Ca   = {"El":2.5213,"gf":-0.502,"lam":644.9820,"dep":0.560,"name":"Ca I"}
 Blnd = {"El":1.7104,"gf":-1.527,"lam":645.0179,"dep":0.374,"name":"Co I Si I"}
-SiI  = {"El":5.6193,"gf":-1.433,"lam":644.2315,"dep":0.211,"name":"Si I"}
+SiI  = {"El":5.6193,"gf":-1.433,"lam":645.2315,"dep":0.211,"name":"Si I"}
 H2O  = {"El":    -1,"gf":     0,"lam":645.4139,"dep":0.026,"name":"tel H_2O"}
 Co   = {"El":3.6321,"gf":-0.250,"lam":645.5001,"dep":0.141,"name":"Co I"}
 H2O2 = {"El":    -1,"gf":     0,"lam":645.8892,"dep":0.046,"name":"Si I"}
