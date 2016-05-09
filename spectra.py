@@ -408,6 +408,8 @@ class splineline(line):
     def measure(self,spectra,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
         nrows = spectra[:,:].shape[0]
         lmbd  = spectra.meta.lmbd[self.idx]
+        we    = np.ones(len(lmbd)); we[len(we)*2/5:len(we)*3/5] = 1.2 # Put extra effort into fitting center well
+        reler = 1.11e-4*len(self.idx)
         ew = self._equivalent_width(spectra)
 
         splmes = np.zeros((nrows,11))
@@ -415,7 +417,8 @@ class splineline(line):
         splmes[:, 9] = ew.reshape(-1)
         print("Making splines and measuring {} line".format(self.name))
         for i,row in enumerate(spectra[:,self.idx]):
-            mf           = self.makespline(row,lmbd,9)
+#            mf           = self.makespline(row,lmbd,9)
+            mf           = si.UnivariateSpline(lmbd[::-1],row[::-1],s=reler,w=we)
             splmes[i,:9] = self.measure_spline(mf,lmbd,dl,smallstep,numsmallstep)
         splmes = self.__normalize(splmes)
         return splmes
@@ -435,27 +438,35 @@ class splineline(line):
         bo12 = (1 +   bot)/2        
         bo13 = (1 + 2*bot)/3
         bo23 = (2 +   bot)/3
-        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt,smallstep,numsmallstep*10)
-        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt,smallstep,numsmallstep*10)
-        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt,smallstep,numsmallstep*10)
+        fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt)
+        fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt)
+        fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt)
         cnt = 299792.458*(cnt-self.cent)/self.cent
              #   0   1    2    3    4    5    6    7    8
         return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
 
-    def __width_assym(self,spl,lmbd,lev,cnt,smallstep,numsmallstep):
-        ilev, = np.where(spl(lmbd) <= lev)
+    def __width_assym(self,spl,lmbd,lev,cnt):
+        spls  = spl(lmbd)
+        ilev, = np.where(spls <= lev)
         # Check that we only got one interval
         spli, = np.where(np.diff(ilev) > 1)    # Either a number or empty
         if spli.sum() > 0:
             if   len(spli) == 1 :
                 ilev  = ilev[slice(spli+1)]
 
-        # Do one level of refinment at the intercepts for better accuracy
-        l1 =  lmbd[ilev[0]]; l2 = lmbd[ilev[-1]]
-        ll1 = np.linspace(l1,l1*(1+smallstep),numsmallstep); ll2 = np.linspace(l2*(1-smallstep),l2,numsmallstep)
-        lmbd1 = ll1[np.where(spl(ll1) <= lev)][0]; lmbd2 =  ll2[np.where(spl(ll2) <= lev)][-1]
-        wdth  = lmbd1 - lmbd2
-        assm  = cnt  - (lmbd1 + lmbd2)/2
+        if ilev[-1] <= len(lmbd) - 2:
+            x10,x11,y10,y11 = lmbd[ilev[-1]],lmbd[ilev[-1]+1],spls[ilev[-1]],spls[ilev[-1]+1]
+        else:
+            x10 = lmbd[ilev[-1]]; x11 = -x10; y10,y11 = 1,0
+        if ilev[0] >= 1:
+            x20,x21,y20,y21 = lmbd[ilev[0]] ,lmbd[ilev[0] -1],spls[ilev[0]] ,spls[ilev[0] -1]
+        else:
+            x20 = lmbd[ilev[0]]; x21 = -x20; y20,y21 = 1,0
+
+        l1 = x11 + (lev-y10)*(x11-x10)/(y11-y10)
+        l2 = x21 + (lev-y20)*(x21-x20)/(y21-y20)
+        wdth  = l1 - l2
+        assm  = cnt  - (x20 + x10)/2
         return wdth,assm
 
     def __normalize(self,result):
@@ -465,6 +476,14 @@ class splineline(line):
         
 
 class testspline(splineline):
+
+    def makespline(self,spec,lmbd,kns=6):
+        print(spec)
+        print(lmbd)
+        _,kno = np.histogram(lmbd,kns+2)
+        kno   = kno[1:-2]
+        return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
+
     def measure_spline(self,spl,lmbd,a,b,c):
         lmbd = np.linspace(lmbd[0],lmbd[-1],1e4)
         spls = spl(lmbd)
