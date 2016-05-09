@@ -417,7 +417,6 @@ class splineline(line):
         splmes[:, 9] = ew.reshape(-1)
         print("Making splines and measuring {} line".format(self.name))
         for i,row in enumerate(spectra[:,self.idx]):
-#            mf           = self.makespline(row,lmbd,9)
             mf           = si.UnivariateSpline(lmbd[::-1],row[::-1],s=reler,w=we)
             splmes[i,:9] = self.measure_spline(mf,lmbd,dl,smallstep,numsmallstep)
         splmes = self.__normalize(splmes)
@@ -429,8 +428,9 @@ class splineline(line):
         return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
 
     def measure_spline(self,spl,lmbd,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
-        lmbd = np.linspace(lmbd[0],lmbd[-1],int( (lmbd[0]-lmbd[-1])/dl )) 
-        #Do tow rounds to get better acc
+#        lmbd = np.linspace(lmbd[0],lmbd[-1],int( (lmbd[0]-lmbd[-1])/dl )) 
+        lmbd = np.linspace(lmbd[0],lmbd[-1],1e4) 
+        #Do two rounds to get better acc
         icnt = lmbd[spl(lmbd).argmin()]
         botl = np.linspace(icnt*(1-smallstep),icnt*(1+smallstep),int(numsmallstep))
         bot  = spl(botl).min()        
@@ -457,16 +457,17 @@ class splineline(line):
         if ilev[-1] <= len(lmbd) - 2:
             x10,x11,y10,y11 = lmbd[ilev[-1]],lmbd[ilev[-1]+1],spls[ilev[-1]],spls[ilev[-1]+1]
         else:
-            x10 = lmbd[ilev[-1]]; x11 = -x10; y10,y11 = 1,0
+            x10 = lmbd[ilev[-1]]; x11 = x10; y10,y11 = 0,1
         if ilev[0] >= 1:
             x20,x21,y20,y21 = lmbd[ilev[0]] ,lmbd[ilev[0] -1],spls[ilev[0]] ,spls[ilev[0] -1]
         else:
-            x20 = lmbd[ilev[0]]; x21 = -x20; y20,y21 = 1,0
+            x20 = lmbd[ilev[0]]; x21 = x20; y20,y21 = 0,1
 
         l1 = x11 + (lev-y10)*(x11-x10)/(y11-y10)
         l2 = x21 + (lev-y20)*(x21-x20)/(y21-y20)
-        wdth  = l1 - l2
+        wdth  = l2 - l1
         assm  = cnt  - (x20 + x10)/2
+
         return wdth,assm
 
     def __normalize(self,result):
