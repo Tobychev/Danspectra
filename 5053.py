@@ -1,4 +1,5 @@
 import spectra as spc
+import numpy as np
 
 NiI  = {"El":3.8474,"gf":-0.380,"lam":504.8847,"dep":0.580,"name":"Ni I"}
 CI   = {"El":7.6848,"gf":-1.303,"lam":505.2144,"dep":0.141,"name":"C I"}
@@ -22,7 +23,13 @@ sf_qu1.frame_col_cut([0,1,1465])
 sf_qu1.contrast_cut(80)
 sf_qu1.set_continua("segments")
 
+## Select subset
+lowNiIcut = -0.511135 # Read off from Ni I vel
+qu1sel = np.arange(0,3107) # Givin pretty pure cut
+
 qu1 = sf_qu1.make_spectra()
+qu1.modify(lambda x : x[qu1sel,:]) # Cutting
+qu1.meta.cont = (qu1.meta.cont[0][qu1sel], qu1.meta.cont[1][qu1sel]) # Updating continua
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
 qu1NiI  = spc.splineline(wNiI,  NiI,  qu1.meta)
@@ -33,6 +40,7 @@ qu1Myst = spc.splineline(wMyst, Myst, qu1.meta)
 qu1FeI  = spc.splineline(wFeI,  FeI,  qu1.meta)
 qu1FeI2 = spc.splineline(wFeI2, FeI2, qu1.meta)
 qu1lines = [qu1NiI,qu1CI,qu1C2,qu1TiI,qu1Myst,qu1FeI,qu1FeI2]
+
 
 
 wNiI  = [1065,1099]
