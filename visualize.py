@@ -155,7 +155,8 @@ def dan_errplot(fig,errs,xs=None,ys=None):
 def prop_plot(ax,x,y,conf,bins=73):
     regx,regy = st.kern_reg(x,y,bins=bins)
     ax.plot(x,y,'bo',alpha=0.1,label=conf.get("label",""))
-    ax.plot(regx,regy,'r')
+    ax.plot(regx,regy,'w',linewidth=2.1)
+    ax.plot(regx,regy,'r',linewidth=1.2)
     ax.set_title(conf["title"])
     ax.set_ylabel(conf["ylabel"])
     ax.set_xlabel(conf["xlabel"])
