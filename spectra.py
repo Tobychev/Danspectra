@@ -317,7 +317,7 @@ class line(object):
 #        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
 #                      ).reshape((-1,1))*np.ones(spec[:,0].shape)
 #        return ((spec[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
-        return st.simps(spec[:,self.idx]-1,x=spec.meta.lmbd[self.idx],even="avg")*1e3 ## Converts to miliÅngström
+        return st.simps(spec[:,self.idx]-1,x=spec.meta.lmbd[self.idx],even="avg")*1e4 ## Converts to miliÅngström
 
     def recenter(self,spec):
         x = self.spec.lmbd[self.idx]; y = spec[self.idx]
