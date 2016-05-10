@@ -20,8 +20,8 @@ def spectraplot(savename,spectra,lines,myst):
     fig.set_size_inches([12.2875, 6.575])
     fig.savefig(savename)
 
-spectraplot("../../thesis/figures/ex5053.png",r5053.as1,r5053.as1lines,r5053.as1Myst)
-spectraplot("../../thesis/figures/ex5215.png",r5215.as1,r5215.as1lines,r5215.as1Myst)
-spectraplot("../../thesis/figures/ex5654.png",r5654.as2,r5654.as2lines,r5654.as2Myst)
-spectraplot("../../thesis/figures/ex6405.png",r6405.as1,r6405.as1lines,r6405.as1Myst)
-spectraplot("../../thesis/figures/ex6449.png",r6449.as1,r6449.as1lines,r6449.as1Myst)
+spectraplot("../../thesis/figures/ex5053.png",r5053.qu1,r5053.qu1lines,r5053.qu1Myst)
+spectraplot("../../thesis/figures/ex5215.png",r5215.qu1,r5215.qu1lines,r5215.qu1Myst)
+spectraplot("../../thesis/figures/ex5654.png",r5654.qu2,r5654.qu2lines,r5654.qu2Myst)
+spectraplot("../../thesis/figures/ex6405.png",r6405.qu1,r6405.qu1lines,r6405.qu1Myst)
+spectraplot("../../thesis/figures/ex6449.png",r6449.qu1,r6449.qu1lines,r6449.qu1Myst)
