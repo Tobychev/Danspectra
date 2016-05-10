@@ -27,7 +27,6 @@ def spline_multiplot(smooths,spec,line,testrows=None):
     nrow = spec[:,:].shape[0]
     lmbd = np.linspace(spec.lmbd[line.idx][0],spec.lmbd[line.idx][-1],1e4)
     we   = np.ones(len(spec.lmbd[line.idx])); we[len(we)*2/5:len(we)*3/5] = 1.2
-    print(we)
     bins = len(line.idx)
     i = 0
     for smooth in smooths:
