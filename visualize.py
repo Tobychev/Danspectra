@@ -3,6 +3,12 @@ import scipy.stats as sta
 import stats as st
 import numpy as np
 
+def splineevalplot(spline,spec,lmbd):
+    pl.plot(lmbd,spec,'r')
+    lmbds = np.linspace(lmbd[0],lmbd[-1],1e4)
+    pl.plot(lmbds,spline(lmbds),'k')
+    pl.show()
+
 def kde(measure,axis=None,norm=False):
     rt = sta.gaussian_kde(measure)
     x  = np.linspace(measure.min(),measure.max(),121)
