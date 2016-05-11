@@ -326,7 +326,7 @@ class line(object):
         dspl = spl.derivative()
         candidates = dspl.roots()
         self.cent = candidates[ np.abs(spl(candidates) - spl(lmbd).min()).argmin()]
-        self.dept = spl(self.cent)
+        self.dept = float(spl(self.cent))
 
 class statline(line):
     def measure(self,spectra):
