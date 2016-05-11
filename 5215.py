@@ -20,14 +20,15 @@ sf_qu1.contrast_cut(70)
 sf_qu1.set_continua("segments")
 
 qu1 = sf_qu1.make_spectra()
+qu1m = qu1[:,:].mean(axis=0) 
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
-qu1FeI  = spc.splineline(wFeI,  FeI,  qu1.meta) # Define lines for qu1 series...
-qu1TiII = spc.splineline(wTiII, TiII, qu1.meta)
-qu1CoI  = spc.splineline(wCoI,  CoI,  qu1.meta)
-qu1Myst = spc.splineline(wMyst, Myst, qu1.meta)
-qu1CuI  = spc.splineline(wCuI,  CuI,  qu1.meta)
-qu1TiI  = spc.splineline(wTiI,  TiI,  qu1.meta)
+qu1FeI  = spc.splineline(wFeI,  FeI,  qu1.meta);qu1FeI.recenter(qu1m) # Define lines for qu1 series...
+qu1TiII = spc.splineline(wTiII, TiII, qu1.meta);qu1TiII.recenter(qu1m)
+qu1CoI  = spc.splineline(wCoI,  CoI,  qu1.meta);qu1CoI.recenter(qu1m)
+qu1Myst = spc.splineline(wMyst, Myst, qu1.meta);qu1Myst.recenter(qu1m)
+qu1CuI  = spc.splineline(wCuI,  CuI,  qu1.meta);qu1CuI.recenter(qu1m)
+qu1TiI  = spc.splineline(wTiI,  TiI,  qu1.meta);qu1TiI.recenter(qu1m)
 qu1lines = [qu1FeI,qu1TiII,qu1CoI,qu1Myst,qu1CuI,qu1TiI]
 
 

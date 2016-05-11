@@ -30,17 +30,18 @@ qu1sel = np.arange(0,3107) # Givin pretty pure cut
 qu1 = sf_qu1.make_spectra()
 qu1.modify(lambda x : x[qu1sel,:]) # Cutting
 qu1.meta.cont = (qu1.meta.cont[0][qu1sel], qu1.meta.cont[1][qu1sel]) # Updating continua
+
+qu1m = qu1[:,:].mean(axis=0) 
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
-qu1NiI  = spc.splineline(wNiI,  NiI,  qu1.meta)
-qu1CI   = spc.splineline(wCI,   CI,   qu1.meta)
-qu1C2   = spc.splineline(wC2,   C2,   qu1.meta)
-qu1TiI  = spc.splineline(wTiI,  TiI,  qu1.meta)
-qu1Myst = spc.splineline(wMyst, Myst, qu1.meta)
-qu1FeI  = spc.splineline(wFeI,  FeI,  qu1.meta)
-qu1FeI2 = spc.splineline(wFeI2, FeI2, qu1.meta)
+qu1NiI  = spc.splineline(wNiI,  NiI,  qu1.meta);qu1NiI.recenter(qu1m)
+qu1CI   = spc.splineline(wCI,   CI,   qu1.meta);qu1CI.recenter(qu1m)
+qu1C2   = spc.splineline(wC2,   C2,   qu1.meta);qu1C2.recenter(qu1m)
+qu1TiI  = spc.splineline(wTiI,  TiI,  qu1.meta);qu1TiI.recenter(qu1m)
+qu1Myst = spc.splineline(wMyst, Myst, qu1.meta);qu1Myst.recenter(qu1m)
+qu1FeI  = spc.splineline(wFeI,  FeI,  qu1.meta);qu1FeI.recenter(qu1m)
+qu1FeI2 = spc.splineline(wFeI2, FeI2, qu1.meta);qu1FeI2.recenter(qu1m)
 qu1lines = [qu1NiI,qu1CI,qu1C2,qu1TiI,qu1Myst,qu1FeI,qu1FeI2]
-
 
 
 wNiI  = [1065,1099]
