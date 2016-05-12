@@ -23,6 +23,16 @@ def kde(measure,axis=None,norm=False):
         pl.plot(x,rt(x)/norm)
         pl.show()
 
+def kde_multiplot(datlist,order=None):
+    cols = 3
+    rows = int(np.ceil(len(datlist)/cols))
+    fig,ax = pl.subplots(rows,cols)
+    if order is None:
+        order = range(0,len(datlist))
+    for el in list(order):       
+        fig.axes[el] = kde(datlist[el],fig.axes[el])
+    return fig
+
 def make_linemap_lims(measure):    
     props = [ "bot", "vel", "fwhm", "as12", "fw13", "as13", "fw23", "as23", "err", "ew", "con"]
     proplims = {}
@@ -143,19 +153,22 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
 
     return fig
 
-def dan_errplot(fig,errs,xs=None,ys=None):
+def add_errs_linemap(fig,errs,mew,xs=None,ys=None):
     porder = np.array([9,1,0,4,2,6,5,3,7])
     if xs is None:
-        xs = np.ones(11)*1.15
+        xs = np.ones(11)*1.17
     if ys is None:    
-        ys = [0.6,-4,1.0,0.2,0.2,0.1,-0.15,-0.15,-0.08,-0.08,0] 
+        ys = [1.2,4.5,0.93,0.85,0.87,0.9,0.0015,0.0015,0.0015,1,0] 
     perr = np.abs(errs[porder,:])
+    perr[0,:] = perr[0,:]/mew
 
     for i in range(0,9):
         s2err = np.array([perr[i,3],perr[i,0]]).reshape(2,1)
         s1err = np.array([perr[i,2],perr[i,1]]).reshape(2,1)
-        fig.axes[i].errorbar( xs[i],ys[i],yerr=s1err,fmt='b' )
-        fig.axes[i].errorbar( xs[i],ys[i],yerr=s2err,fmt='r' )
+        yl,yu = fig.axes[i].get_ylim(); 
+        dy = (yu-yl)*0.05; y = yu - s2err[1] - dy
+        fig.axes[i].errorbar( xs[i],y,yerr=s1err,fmt='b' )
+        fig.axes[i].errorbar( xs[i],y,yerr=s2err,fmt='r' )
     return fig
 
 def prop_plot(ax,x,y,conf,bins=73):
