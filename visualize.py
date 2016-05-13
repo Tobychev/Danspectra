@@ -175,7 +175,7 @@ def add_errs_linemap(fig,errs,mew,xs=None,ys=None):
 
 def prop_plot(ax,x,y,conf,bins=73):
     regx,regy = st.kern_reg(x,y,bins=bins)
-    ax.plot(x,y,'b.',alpha=0.2,label=conf.get("label",""))
+    ax.plot(x,y,'b.',alpha=0.1,label=conf.get("label",""))
     ax.plot(regx,regy,'w',linewidth=2.1)
     ax.plot(regx,regy,'r',linewidth=1.2)
     ax.set_title(conf["title"])
