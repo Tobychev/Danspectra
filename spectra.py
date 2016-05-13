@@ -316,7 +316,7 @@ class line(object):
     def _equivalent_width(self,spec):
 #        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]
 #                      ).reshape((-1,1))*np.ones(spec[:,0].shape)
-#        return ((spec[:,self.idx]-1)*dlam.T).sum(axis=1)*1e3 ## MiliÅngström
+#        return ((spec[:,self.idx]-1)*dlam.T).sum(axis=1)*1e4 ## MiliÅngström
         return st.simps(spec[:,self.idx]-1,x=spec.meta.lmbd[self.idx],even="avg")*1e4 ## Converts to miliÅngström
 
     def recenter(self,spec):
@@ -327,6 +327,17 @@ class line(object):
         candidates = dspl.roots()
         self.cent = candidates[ np.abs(spl(candidates) - spl(lmbd).min()).argmin()]
         self.dept = float(spl(self.cent))
+
+    def deconstruct(self):
+        linemeta = {}
+        linemeta["lam"]  = self.cent
+        linemeta["dep"]  = self.dept
+        linemeta["El"]   = self.El  
+        linemeta["gf"]   = self.gf  
+        linemeta["name"] = "{:<7}".format(self.name[:-7].strip())
+        win = [self.idx[0],self.idx[-1]]
+        return win,linemeta,self.spec
+        
 
 class statline(line):
     def measure(self,spectra):
