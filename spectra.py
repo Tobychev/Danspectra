@@ -439,7 +439,6 @@ class splineline(line):
         return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
 
     def measure_spline(self,spl,lmbd,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
-#        lmbd = np.linspace(lmbd[0],lmbd[-1],int( (lmbd[0]-lmbd[-1])/dl )) 
         lmbd = np.linspace(lmbd[0],lmbd[-1],1e4) 
         #Do two rounds to get better acc
         icnt = lmbd[spl(lmbd).argmin()]
