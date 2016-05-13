@@ -3,8 +3,6 @@ import scipy.interpolate as si
 import scipy.optimize as ro
 import matplotlib.cm as cm
 import numpy as np
-regnames = ["5053","5215","5654","6405","6449"]
-import pdb
 
 def bisect(lmbd,mnspec,line):
     #find highest points to the left and right of linecenter
@@ -17,7 +15,6 @@ def bisect(lmbd,mnspec,line):
     mf    = si.UnivariateSpline(lmbd[::-1],mnspec[::-1],s=0)
     bisec = np.zeros(len(ys)) 
     for i,y in enumerate(ys[1:]):
-#        print(i,mf(lmbd[left])-y,mf(lin.cent)-y,mf(lmbd[right])-y)
         try:
             lf = ro.brentq(lambda x : mf(x)-y,lmbd[left],lin.cent)
             rg = ro.brentq(lambda x : mf(x)-y,lmbd[right],lin.cent)
@@ -27,6 +24,7 @@ def bisect(lmbd,mnspec,line):
     return bisec,ys
 
 col = cm.Oranges
+regnames = ["5053","5215","5654","6405","6449"]
 
 if False:
     subs =  ['Myst    505.358','Myst    521.557','Myst    565.450','Myst    640.576','Myst    644.913',]
