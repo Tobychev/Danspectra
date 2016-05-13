@@ -50,10 +50,17 @@ for region in regnames:
         lcdata.append((dat[line][:,con],dat[line][:,vel],line,lines[line]))
 
         
+if False:
+    fig = comp_plot(sorted(ewdata,key=lambda itm: itm[3].dept),0.83,1.62)
+    fig.set_size_inches([ 10.125 ,   9.7625])
+    fig.tight_layout(h_pad=0.0, w_pad=0.0)
+    #pl.savefig("../thesis/figures/EWcompareplot.png")
+    fig.show()
 
-#fig = comp_plot(sorted(ewdata,key=lambda itm: itm[3].dept),0.83,1.62)
-fig = comp_plot(sorted(lcdata,key=lambda itm: itm[3].dept),0.83,1.62,False)
-fig.set_size_inches([ 10.125 ,   9.7625])
-fig.tight_layout(h_pad=0.0, w_pad=0.0)
-fig.show()
+if True:
+    fig = comp_plot(sorted(lcdata,key=lambda itm: itm[3].dept),0.83,3,False)
+    fig.set_size_inches([ 10.125 ,   9.7625])
+    fig.tight_layout(h_pad=0.0, w_pad=0.0)
+    pl.savefig("../thesis/figures/Depthcompareplot.png")
+    fig.show()
 
