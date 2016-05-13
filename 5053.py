@@ -9,13 +9,13 @@ Myst = {"El":    -1,"gf":     0,"lam":505.3577,"dep":0.111,"name":"Myst"}
 FeI  = {"El":3.6398,"gf":-1.921,"lam":505.4642,"dep":0.476,"name":"Fe I"}
 FeI2 = {"El":3.6417,"gf":-2.830,"lam":505.8496,"dep":0.130,"name":"Fe I"}
 
-wNiI  = [1064,1094] 
-wCI   = [731,761];  
-wC2   = [690,701];  
-wTiI  = [666,676];  
-wMyst = [580,620];  
-wFeI  = [480,504];  
-wFeI2 = [87,114];   
+wNiI  = [1064,1094]
+wCI   = [731,761]
+wC2   = [690,701]
+wTiI  = [666,676]
+wMyst = [580,620]
+wFeI  = [480,504]
+wFeI2 = [87,114]
 
 sf_qu1 = spc.SpectraFactory("data/5053_aS1",framerows=792,framecols=1466)
 sf_qu1.frame_row_cut([0]+list(range(666,679))+[791])
