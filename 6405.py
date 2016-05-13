@@ -1,5 +1,4 @@
 import spectra as spc
-import errors as er
 
 FeI  = {"El":0.9146,"gf":-4.318,"lam":640.0316,"dep":0.533,"name":"Fe I"}
 Myst = {"El":    -1,"gf":     0,"lam":640.5763,"dep":0.058,"name":"Myst"}
