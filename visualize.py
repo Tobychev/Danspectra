@@ -86,55 +86,55 @@ def spline_linemap(measure,line,mesbin=None,lims=None,errs=None,regbins=73):
     mew       =  measure[:,ew].mean()
     prop_plot(axs[0,0],measure[:,con],measure[:,ew]/mew,
         {"label" : "Average EW = {:.3f}".format(mew),
-         "title" : "Relative equivalent width,\n " + str(line),
+         "title" : "Relative equivalent width",
          "ylabel": "Relative equivalent width",
          "xlabel": "Continuum intensity",
          "ylim"  : ewlim},regbins)
 
     prop_plot(axs[0,1],measure[:,con],measure[:,vel],
-        {"title" : "Line centre,\n " + str(line),
+        {"title" : "Line centre",
          "ylabel": "Line centre [km/s]",
          "xlabel": "Continuum intensity",
          "ylim"  : vellim},regbins)
 
     prop_plot(axs[0,2],measure[:,con],measure[:,bot],
-        {"title" : "Relative line bottom,\n " + str(line),
+        {"title" : "Relative line bottom",
          "ylabel": "Relative Line min intesity",
          "xlabel": "Continuum intensity",
          "ylim"  : rellim},regbins)
 
     prop_plot(axs[1,0],measure[:,con],measure[:,fw13],
-        {"title" : "Full width 1/3 maximum,\n " + str(line),
+        {"title" : "Full width 1/3 maximum",
          "ylabel": "Relative line width",
          "xlabel": "Continuum intensity",
          "ylim"  : fw13lim},regbins)
 
     prop_plot(axs[1,1],measure[:,con],measure[:,fwhm],
-        {"title" : "Full width half maximum,\n " + str(line),
+        {"title" : "Full width half maximum",
          "ylabel": "Relative line width",
          "xlabel": "Continuum intensity",
          "ylim"  : fwhmlim},regbins)
 
     prop_plot(axs[1,2],measure[:,con],measure[:,fw23],
-        {"title" : "Full width 2/3 maximum,\n " + str(line),
+        {"title" : "Full width 2/3 maximum",
          "ylabel": "Relative line width",
          "xlabel": "Continuum intensity",
          "ylim"  : fw23lim},regbins)
 
     prop_plot(axs[2,0],measure[:,con],measure[:,as13],
-        {"title" : "Line asymmetry 1/3 maximum,\n " + str(line),
+        {"title" : "Line asymmetry 1/3 maximum",
          "ylabel": "Line asymmetry",
          "xlabel": "Continuum intensity",
          "ylim"  : as13lim},regbins)
         
     prop_plot(axs[2,1],measure[:,con],measure[:,as12],
-        {"title" : "Line asymmetry half maximum,\n " + str(line),
+        {"title" : "Line asymmetry half maximum",
          "ylabel": "Line width [Å]",
          "xlabel": "Continuum intensity",
          "ylim"  : as12lim},regbins)
 
     prop_plot(axs[2,2],measure[:,con],measure[:,as23],
-        {"title" : "Line asymmetry 2/3 maximum,\n " + str(line),
+        {"title" : "Line asymmetry 2/3 maximum",
          "ylabel": "Line asymmetry",
          "xlabel": "Continuum intensity",
          "ylim"  : as23lim},regbins)
@@ -167,13 +167,15 @@ def add_errs_linemap(fig,errs,mew,xs=None,ys=None):
         s1err = np.array([perr[i,2],perr[i,1]]).reshape(2,1)
         yl,yu = fig.axes[i].get_ylim(); 
         dy = (yu-yl)*0.05; y = yu - s2err[1] - dy
-        fig.axes[i].errorbar( xs[i],y,yerr=s1err,fmt='b' )
-        fig.axes[i].errorbar( xs[i],y,yerr=s2err,fmt='r' )
+        if i == 0:
+            y = yl + s2err[0] + dy
+        fig.axes[i].errorbar( xs[i],y,yerr=s1err,fmt='b',linewidth=1.5 )
+        fig.axes[i].errorbar( xs[i],y,yerr=s2err,fmt='r',alpha=0.3 )
     return fig
 
 def prop_plot(ax,x,y,conf,bins=73):
     regx,regy = st.kern_reg(x,y,bins=bins)
-    ax.plot(x,y,'bo',alpha=0.1,label=conf.get("label",""))
+    ax.plot(x,y,'b.',alpha=0.2,label=conf.get("label",""))
     ax.plot(regx,regy,'w',linewidth=2.1)
     ax.plot(regx,regy,'r',linewidth=1.2)
     ax.set_title(conf["title"])
