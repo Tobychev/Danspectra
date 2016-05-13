@@ -28,7 +28,7 @@ def bisect(lmbd,mnspec,line):
 
 col = cm.Oranges
 
-if True:
+if False:
     subs =  ['Myst    505.358','Myst    521.557','Myst    565.450','Myst    640.576','Myst    644.913',]
     j = 0
     for i,regname in enumerate(regnames):
@@ -44,10 +44,10 @@ if True:
     pl.xlabel("Distance from line center [nm]")
     pl.xlim(-0.00158, 0.00288)
     pl.ylim( 0.81045, 0.98785)
-    #pl.show(block=False)
+    pl.show(block=False)
     pl.savefig("../thesis/figures/MystBisectors.png")
 
-if False:
+if True:
 
     alla = ['Ni I    504.885','C I     505.214','C_2     505.262','Ti I    505.287','Fe I    505.464','Fe I    505.850','Fe I    520.988','Ti II   521.153','Co I    521.269','Cu I    521.820','Fe I    521.970','Fe I    565.147','Si I    565.492','V I     565.744','Sc II   565.790','Fe I    566.134','Fe I    640.032','Si I    640.729','Fe I    640.802','Si I    640.867','Ca I    644.982','Co I Si I 645.018','Si I    645.231','tel H_2O 645.414','Co I    645.500','tel H_2O 645.889']
 
@@ -64,7 +64,7 @@ if False:
     pl.legend(loc="best")
     pl.ylabel("Relative intensity")
     pl.xlabel("Distance from line center [nm]")
-#    pl.xlim(-0.00158, 0.00288)
-#    pl.ylim( 0.81045, 0.98785)
+    pl.xlim(-0.0015, 0.0015)
+    pl.ylim(0.57461, 1.02461)
     pl.show(block=False)
     pl.savefig("../thesis/figures/OtherBisectors.png")
