@@ -339,82 +339,6 @@ class line(object):
         return win,linemeta,self.spec
         
 
-class statline(line):
-    def measure(self,spectra):
-        guess = spectra.meta.ref[self.idx].argmin()
-        width = len(self.idx)*0.16 # Min fraction of points to be used in fit
-
-        if width%2 == 0:
-            width +=1
-        dwn = int((width - 1)/2); up = dwn+1
-
-        bottom  = self.idx[guess + np.arange(-dwn,up)]   
-        test    = self.idx[guess + np.arange(-(dwn+1),(up+1))]
-
-        ew = self._equivalent_width(spectra)
-        vel,bot,err    = self.__linfit(spectra,bottom,test)
-        mn,var,ske,kur = self.__moments(spectra)
-        wvar,wske,wkur = self.__ew_moments(spectra,vel,bot,ew)        
-        
-        if spectra.meta.cont is not None:
-            con = spectra.meta.cont[0].reshape(-1,1)*self.cent + spectra.meta.cont[1].reshape(-1,1)
-        else:
-            con = None
-
-        return vel,bot,con,err,ew,mn,var,ske,kur,wvar,wske,wkur
-
-    def __linfit(self,spec,bottom,test):
-        cv = 299792.458
-        fit   = pol.polyfit(spec.meta.lmbd[bottom],spec[:,bottom].T,2)
-        a,b,c = fit[2,:],fit[1,:],fit[0,:]
-        lmin  = -b/(2*a)
-        bot   = pol.polyval(lmin,fit,tensor=False)
-        pred  = pol.polyval(spec.meta.lmbd[test],fit)
-        vel   = cv*(lmin-self.cent)/self.cent
-        # Error of fit with extra error term to penalize fits 
-        # that gets wildly off center, with extra weight so it *hurts*
-        err   = np.sqrt( np.mean( (spec[:,test]-pred)**2,axis=1) 
-                                         + 2*(lmin-self.cent)**2 )
-        return vel,bot,err
-
-    def __moments(self,spec):
-        x    = spec.meta.lmbd[self.idx]
-        dpdf = (1-spec[:,self.idx]/spec[:,self.idx].max(axis=1).reshape(-1,1))
-        dpdf = dpdf/dpdf.sum(axis=1).reshape(-1,1)
-        mu   = np.sum(dpdf*x,axis=1).reshape(-1,1) # Reshaping enables broadcasting
-        mu2  = np.sum(dpdf*(x-mu)**2,axis=1)
-        mu3  = np.sum(dpdf*(x-mu)**3,axis=1)
-        mu4  = np.sum(dpdf*(x-mu)**4,axis=1)
-        mu   = mu.reshape(-1) # Undoing reshape to allow assignment
-
-        skew = mu3/mu2**(3/2) 
-        kurt = (mu4/mu2**2 - 3)
-        return mu,mu2,skew,kurt
-
-    def __ew_moments(self,spec,vel,bot,ew):
-        lmbd = spec.meta.lmbd[self.idx].reshape(-1,1)
-        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]).reshape((-1,1))*np.ones(spec[:,:].shape[0])
-        ew   = ew*1e-3 # Cancels scaling
-
-        # Variance by ratio between center and outer mass
-        lsel = (lmbd > vel-ew/2) & (lmbd < vel+ew/2); 
-        In   = ((spec[:,self.idx]-1)*dlam.T*lsel.T).sum(axis=1)
-        var  =  In/ew
-
-        # Skewness by ratio between left and right mass
-        lsel = (lmbd < vel)
-        lft  = ((spec[:,self.idx]-1)*dlam.T*lsel.T).sum(axis=1); rght = ((spec[:,self.idx]-1)*dlam.T*np.logical_not(lsel.T)).sum(axis=1);
-        cut, = np.where(rght == 0); lft[cut] = 0; rght[cut] = 1
-        ske  = lft/rght-1
-
-        # Kurtosis 
-        lsel = spec[:,self.idx] > (1 +   bot.reshape(-1,1))/2
-        up   = ((spec[:,self.idx]-1)*dlam.T*lsel).sum(axis=1); dwn  = ((spec[:,self.idx]-1)*dlam.T*np.logical_not(lsel)).sum(axis=1);
-        cut, = np.where(dwn == 0); dwn[cut] = 1; up[cut] = 0
-        kur  = up/dwn
-
-        return var, ske, kur
-
 class splineline(line):
     def measure(self,spectra,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
         nrows = spectra[:,:].shape[0]
@@ -482,33 +406,84 @@ class splineline(line):
 
     def __normalize(self,result):
         result[:,[2,4,6]] = result[:,[2,4,6]]/self.width
-#        result[:,[3,5,7]] = result[:,[3,5,7]]*self.width
         return result
         
 
 class testspline(splineline):
 
-    def makespline(self,spec,lmbd,kns=6):
-        print(spec)
-        print(lmbd)
-        _,kno = np.histogram(lmbd,kns+2)
-        kno   = kno[1:-2]
-        return si.LSQUnivariateSpline(lmbd[::-1],spec[::-1],kno)
+    def measure(self,spectra,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
+        nrows = spectra[:,:].shape[0]
+        lmbd  = spectra.meta.lmbd[self.idx]
+        we    = np.ones(len(lmbd)); we[len(we)*2/5:len(we)*3/5] = 1.2 # Put extra effort into fitting center well
+        reler = 1.11e-4*len(self.idx)
+        ew = self._equivalent_width(spectra)
 
-    def measure_spline(self,spl,lmbd,a,b,c):
-        lmbd = np.linspace(lmbd[0],lmbd[-1],1e4)
-        spls = spl(lmbd)
-        bot  = spls.min()        
-        cnt  = lmbd[spls.argmin()]
+        splmes = np.zeros((nrows,17))
+        print("Making splines and measuring {} line".format(self.name))
+        for i,row in enumerate(spectra[:,self.idx]):
+            mf           = si.UnivariateSpline(lmbd[::-1],row[::-1],s=reler,w=we)
+            splmes[i,:9] = self.measure_spline(mf,lmbd)
+        splmes[:, 9] = ew.reshape(-1)
+        splmes[:,10] = (spectra.meta.cont[0]*self.cent)+ (spectra.meta.cont[1])
+        splmes[:,11],splmes[:,12],splmes[:,13] = self.__moments(spectra)
+        splmes[:,14],splmes[:,15],splmes[:,16] = self.__ew_moments(spectra,splmes[:,1],splmes[:,0],splmes[:,9])    
+        splmes[:,1] = 299792.458*(splmes[:,1]-self.cent)/self.cent
+        splmes = self.__normalize(splmes)
+        return splmes
+
+    def measure_spline(self,spl,lmbd):
+        lmbd = np.linspace(lmbd[0],lmbd[-1],1e4) 
+        #Do two rounds to get better acc
+        icnt = lmbd[spl(lmbd).argmin()]
+        botl = np.linspace(icnt*(1-1e-6),icnt*(1+1e-6),2e2)
+        bot  = spl(botl).min()
+        cnt  = botl[spl(botl).argmin()]
         bo12 = (1 +   bot)/2
         bo13 = (1 + 2*bot)/3
         bo23 = (2 +   bot)/3
         fwhm,as12 = self.__width_assym(spl,lmbd,bo12,cnt)
         fw13,as13 = self.__width_assym(spl,lmbd,bo13,cnt)
         fw23,as23 = self.__width_assym(spl,lmbd,bo23,cnt)
-        cnt = 299792.458*(cnt-self.cent)/self.cent
              #   0   1    2    3    4    5    6    7    8
         return bot,cnt,fwhm,as12,fw13,as13,fw23,as23,spl.get_residual()
+
+    def __moments(self,spec):
+        x    = spec.meta.lmbd[self.idx]
+        dpdf = (1-spec[:,self.idx]/spec[:,self.idx].max(axis=1).reshape(-1,1))
+        dpdf = dpdf/dpdf.sum(axis=1).reshape(-1,1)
+        mu   = np.sum(dpdf*x,axis=1).reshape(-1,1) # Reshaping enables broadcasting
+        mu2  = np.sum(dpdf*(x-mu)**2,axis=1)
+        mu3  = np.sum(dpdf*(x-mu)**3,axis=1)
+        mu4  = np.sum(dpdf*(x-mu)**4,axis=1)
+        mu   = mu.reshape(-1) # Undoing reshape to allow assignment
+
+        skew = mu3/mu2**(3/2) 
+        kurt = (mu4/mu2**2 - 3)
+        return mu,skew,kurt
+
+    def __ew_moments(self,spec,vel,bot,ew):
+        lmbd = spec.meta.lmbd[self.idx].reshape(-1,1)
+        dlam = np.diff(spec.meta.lmbd[slice(self.idx[0]-1,self.idx[-1]+1)]).reshape((-1,1))*np.ones(spec[:,:].shape[0])
+        ew   = ew*1e-3 # Cancels scaling
+
+        # Variance by ratio between center and outer mass
+        lsel = (lmbd > vel-ew/2) & (lmbd < vel+ew/2); 
+        In   = ((spec[:,self.idx]-1)*dlam.T*lsel.T).sum(axis=1)
+        var  =  In/ew
+
+        # Skewness by ratio between left and right mass
+        lsel = (lmbd < vel)
+        lft  = ((spec[:,self.idx]-1)*dlam.T*lsel.T).sum(axis=1); rght = ((spec[:,self.idx]-1)*dlam.T*np.logical_not(lsel.T)).sum(axis=1);
+        cut, = np.where(rght == 0); lft[cut] = 0; rght[cut] = 1
+        ske  = lft/rght-1
+
+        # Kurtosis 
+        lsel = spec[:,self.idx] > (1 +   bot.reshape(-1,1))/2
+        up   = ((spec[:,self.idx]-1)*dlam.T*lsel).sum(axis=1); dwn  = ((spec[:,self.idx]-1)*dlam.T*np.logical_not(lsel)).sum(axis=1);
+        cut, = np.where(dwn == 0); dwn[cut] = 1; up[cut] = 0
+        kur  = up/dwn
+
+        return var, ske, kur
 
     def __width_assym(self,spl,lmbd,lev,cnt):
         spls  = spl(lmbd)
@@ -522,59 +497,19 @@ class testspline(splineline):
         if ilev[-1] <= len(lmbd) - 2:
             x10,x11,y10,y11 = lmbd[ilev[-1]],lmbd[ilev[-1]+1],spls[ilev[-1]],spls[ilev[-1]+1]
         else:
-            x10 = lmbd[ilev[-1]]; x11 = -x10; y10,y11 = 1,0
+            x10 = lmbd[ilev[-1]]; x11 = x10; y10,y11 = 0,1
         if ilev[0] >= 1:
             x20,x21,y20,y21 = lmbd[ilev[0]] ,lmbd[ilev[0] -1],spls[ilev[0]] ,spls[ilev[0] -1]
         else:
-            x20 = lmbd[ilev[0]]; x21 = -x20; y20,y21 = 1,0
+            x20 = lmbd[ilev[0]]; x21 = x20; y20,y21 = 0,1
 
         l1 = x11 + (lev-y10)*(x11-x10)/(y11-y10)
         l2 = x21 + (lev-y20)*(x21-x20)/(y21-y20)
-        wdth  = l1 - l2
+        wdth  = l2 - l1
         assm  = cnt  - (x20 + x10)/2
+
         return wdth,assm
 
-    def measure2(self,spectra,dl=2e-5,smallstep=1e-7,numsmallstep=1e3):
-        nrows = spectra[:,:].shape[0]
-        lmbd  = spectra.meta.lmbd[self.idx]
-        x = lmbd[::-1]
-        ew = self._equivalent_width(spectra)
-
-        splmes = np.zeros((nrows,11))
-        splmes[:,10] = (spectra.meta.cont[0]*self.cent)+ (spectra.meta.cont[1])
-        splmes[:, 9] = ew.reshape(-1)
-        for i,row in enumerate(spectra[:,self.idx]):
-            y   = row[::-1]
-            tck = si.splrep(x,y,s=8e3)
-            splmes[i,:8] = self.tck_mod_mes(x,tck,dl=1e-7)
-            splmes[i,8] = np.sum( (y - si.splev(x,tck))**2 )
-        return splmes
-
-
-    def tck_mod_mes(self,x,tck,dl=1e-7):
-        smallstep = 1e-7
-        numsmallstep = 1e3
-        lmbd = np.linspace(x[0],x[-1],int( (x[-1]-x[0])/dl ))
-        #Do two rounds to get better acc
-        icnt = lmbd[si.splev(lmbd,tck).argmin()]
-        botl = np.linspace(icnt*(1-smallstep),icnt*(1+smallstep),int(numsmallstep))
-        bot  = si.splev(botl,tck).min()
-        cnt  = botl[si.splev(botl,tck).argmin()]
-        bo12 = (1 +   bot)/2
-        bo13 = (1 + 2*bot)/3
-        bo23 = (2 +   bot)/3
-        tck13 = (tck[0],tck[1]-bo13,tck[2])
-        tck12 = (tck[0],tck[1]-bo12,tck[2])
-        tck23 = (tck[0],tck[1]-bo23,tck[2])
-        dl13  = si.sproot(tck13)
-        dl12  = si.sproot(tck12)
-        dl23  = si.sproot(tck23)
-        wd13 = dl13[1] - dl13[0]
-        wd12 = dl12[1] - dl12[0]
-        wd23 = 0# dl23[1] - dl23[0]
-        as13 = self.cent - (dl13[1] + dl13[0])/2
-        as12 = self.cent - (dl12[1] + dl12[0])/2
-        as23 = 0#self.cent - (dl23[1] + dl23[0])/2
-        
-        return bot,cnt, wd12,as12,wd13,as13,wd23,as23
-
+    def __normalize(self,result):
+        result[:,[2,4,6]] = result[:,[2,4,6]]/self.width
+        return result
