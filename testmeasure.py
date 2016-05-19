@@ -5,31 +5,76 @@ import pickle as pic
 import numpy as np
 import traceback
 
-wMyst = [1211,1327]; cMyst = 644.9127
-wCa   = [1150,1198]; cCa   = 644.9820
-wBlnd = [1088,1151]; cBlnd = 645.0179
-wSiI  = [834,889];   cSiI  = 645.2315
-wH2O  = [613,637];   cH2O  = 645.4139
-wCo   = [449,534];   cCo   = 645.5001
-wH2O2 = [8,34];      cH2O2 = 645.8892
+def comp_plot(datlist,xpos,ypos,normalize=True):
+    cols = 4
+    rows = int(np.ceil(len(datlist)/cols))
+    fig,ax = pl.subplots(rows,cols,sharex=True,sharey=True)
 
-sf_qu1 = spc.SpectraFactory("data/6449_aS1",framerows=802,framecols=1514)
-sf_qu1.frame_row_cut([0]+list(range(668,674))+[801])
-sf_qu1.frame_col_cut([0,1513])
-sf_qu1.contrast_cut(50)
+    for i,(x,y,name,_) in enumerate(datlist):
+        if normalize:
+            norm = y.mean()
+            fig.axes[i].text(xpos,ypos,"{} {:5.1f}".format(name[:-5],norm))
+        else:
+            norm = 1
+            fig.axes[i].text(xpos,ypos,"{}".format(name))
+
+        regx,regy = st.kern_reg(x,y,bins=73)
+        fig.axes[i].plot(x,y/norm,'bo',alpha=0.1)
+        fig.axes[i].plot(regx,regy/norm,'w',linewidth=2.1)
+        fig.axes[i].plot(regx,regy/norm,'r',linewidth=1.2)
+
+    fig.axes[i].set_xlim(0.8,1.27)
+    xtic,ytic = fig.axes[i].get_xticks(),fig.axes[i].get_yticks()
+    fig.axes[i].xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:3.1f}"))
+    fig.axes[i].set_xticks(xtic[1:-1])
+    fig.axes[i].set_yticks(ytic[1:-1])
+
+    return fig
+
+bot,vel,fwhm,as12,fw13,as13,fw23,as23,err,ew,con,smu,sskew,skurt,evar,eske,ekur = range(0,17)
+
+
+
+NiI  = {"El":3.8474,"gf":-0.380,"lam":504.8847,"dep":0.580,"name":"Ni I"}
+CI   = {"El":7.6848,"gf":-1.303,"lam":505.2144,"dep":0.141,"name":"C I"}
+C2   = {"El":0.4891,"gf": 0.158,"lam":505.2620,"dep":0.020,"name":"C_2 "}
+TiI  = {"El":2.1747,"gf":-0.270,"lam":505.2868,"dep":0.277,"name":"Ti I"}
+Myst = {"El":    -1,"gf":     0,"lam":505.3577,"dep":0.111,"name":"Myst"}
+FeI  = {"El":3.6398,"gf":-1.921,"lam":505.4642,"dep":0.476,"name":"Fe I"}
+FeI2 = {"El":3.6417,"gf":-2.830,"lam":505.8496,"dep":0.130,"name":"Fe I"}
+
+wNiI  = [1064,1094]
+wCI   = [731,761]
+wC2   = [690,701]
+wTiI  = [666,676]
+wMyst = [580,620]
+wFeI  = [480,504]
+wFeI2 = [87,114]
+
+sf_qu1 = spc.SpectraFactory("data/5053_aS1",framerows=792,framecols=1466)
+sf_qu1.frame_row_cut([0]+list(range(666,679))+[791])
+sf_qu1.frame_col_cut([0,1,1465])
+sf_qu1.contrast_cut(80)
 sf_qu1.set_continua("segments")
+lowNiIcut = -0.511135 # Read off from Ni I vel
+qu1sel = np.arange(0,3107) # Givin pretty pure cut
 
 qu1 = sf_qu1.make_spectra()
+qu1.modify(lambda x : x[qu1sel,:]) # Cutting
+qu1.meta.cont = (qu1.meta.cont[0][qu1sel], qu1.meta.cont[1][qu1sel]) # Updating continua
+
+qu1m = qu1[:,:].mean(axis=0) 
 qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua for qu1 series
 
-qu1Myst = spc.testspline(wMyst, cMyst, qu1.meta,"Myst"   ) # Define lines for qu1 series...
-qu1Ca   = spc.testspline(wCa,   cCa,   qu1.meta,"CaI"    )
-qu1Blnd = spc.testspline(wBlnd, cBlnd, qu1.meta,"Blend" )
-qu1SiI  = spc.testspline(wSiI,  cSiI,  qu1.meta,"SiI" )
-qu1H2O  = spc.testspline(wH2O,  cH2O,  qu1.meta,"tel H2O")
-qu1Co   = spc.testspline(wCo,   cCo,   qu1.meta,"CoI"    )
-qu1H2O2 = spc.testspline(wH2O2, cH2O2, qu1.meta,"tel H2O")
-qu1lines = [qu1Myst,qu1Ca,qu1Blnd,qu1SiI,qu1H2O,qu1Co,qu1H2O2]
+
+qu1NiI  = spc.testspline(wNiI,  NiI,  qu1.meta);qu1NiI.recenter(qu1m)
+qu1CI   = spc.testspline(wCI,   CI,   qu1.meta);qu1CI.recenter(qu1m)
+qu1C2   = spc.testspline(wC2,   C2,   qu1.meta);qu1C2.recenter(qu1m)
+qu1TiI  = spc.testspline(wTiI,  TiI,  qu1.meta);qu1TiI.recenter(qu1m)
+qu1Myst = spc.testspline(wMyst, Myst, qu1.meta);qu1Myst.recenter(qu1m)
+qu1FeI  = spc.testspline(wFeI,  FeI,  qu1.meta);qu1FeI.recenter(qu1m)
+qu1FeI2 = spc.testspline(wFeI2, FeI2, qu1.meta);qu1FeI2.recenter(qu1m)
+qu1lines = [qu1NiI,qu1CI,qu1C2,qu1TiI,qu1Myst,qu1FeI,qu1FeI2]
 
 regname = "6449"
 res = {} 
@@ -41,18 +86,4 @@ for i,line in enumerate(qu1lines):
         print("Line {} failed to measure:".format(name))
         print(err)
         traceback.print_exc()
-np.savez_compressed("bin/test_{}_qu1".format(regname),**res)
-pic.dump(qu1lines,open("bin/test_{}_qu1.lin".format(regname),"wb"))
 
-dat = np.load("bin/test_6449_qu1.npz")
-lines = pic.load(open("bin/test_6449_qu1.lin","rb"))
-lims = vis.make_linemap_lims([dat[key] for key in dat.keys()])
-
-pl.close("all")
-
-for i,line in enumerate(lines):
-    name ="{}_{}".format(line.name.split()[0],int(line.cent*10))
-    fig = vis.spline_linemap(dat[name],lines[i],lims=lims)
-    fig.set_size_inches([ 14.2625,   10.])
-#   fig.savefig("../thesis/figures/{}_{}_{}.png".format(regname,typname,name))
-    pl.show(block=False)
