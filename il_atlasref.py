@@ -1,6 +1,6 @@
 import matplotlib.pyplot as pl
 import matplotlib.ticker as tck
-import matplotlib.cm as cm
+import matplotlib.cm as cmm
 import numpy as np
 import os
 
@@ -11,10 +11,10 @@ def atlasplot(atlas,regname):
     lm = atlas["lm{}".format(reg[regname])]
     region = __import__(regname)
     
-    colr = cm.Oranges
+    colr = cmm.Oranges
     fig,ax = pl.subplots(1)
     ax.plot(1e7/qs[::-1,0],qs[::-1,1],color=colr(0.75),label="Quiet sun")
-    ax.plot(lm[:,0],lm[:,1],color=colr(0.6), label="Limb")
+    ax.plot(lm[:,0]/10,lm[:,1],color=colr(0.55), label="Limb")
     ax.plot(1e7/sp[::-1,0],sp[::-1,1],color=colr(0.15),label="Spot")
 
     ax.set_xlabel("Wavelenght [nm]")
