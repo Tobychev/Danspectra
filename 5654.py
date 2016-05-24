@@ -14,7 +14,7 @@ wMyst = [873,937];
 wSiI  = [842,867]; 
 wVI   = [567,595]; 
 wScII = [512,548]; 
-wFeI2 = [131,168]; 
+wFeI2 = [136,165]; 
 
 sf_qu1 = spc.SpectraFactory("data/5654_aS2",framerows=756,framecols=1480)
 sf_qu1.frame_row_cut([0]+list(range(653,660))+[755])
@@ -42,14 +42,15 @@ sf_qu2.contrast_cut(20)
 sf_qu2.set_continua("segments")
 
 qu2 = sf_qu2.make_spectra()
+qu2m = qu2[:,:].mean(axis=0) 
 qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1] # Define continua for qu2 series
 
-qu2FeI = spc.splineline(wFeI  ,  FeI , qu2.meta) # Define lines for qu2 series...
-qu2Myst = spc.splineline(wMyst,  Myst, qu2.meta)
-qu2SiI  = spc.splineline(wSiI ,  SiI , qu2.meta)
-qu2VI   = spc.splineline(wVI  ,  VI  , qu2.meta)
-qu2ScII = spc.splineline(wScII,  ScII, qu2.meta)
-qu2FeI2  = spc.splineline(wFeI2, FeI , qu2.meta)
+qu2FeI = spc.splineline(wFeI  ,  FeI , qu2.meta);qu2FeI.recenter(qu2m)# # Define lines for qu2 series...
+qu2Myst = spc.splineline(wMyst,  Myst, qu2.meta);qu2Myst.recenter(qu2m)
+qu2SiI  = spc.splineline(wSiI ,  SiI , qu2.meta);qu2SiI.recenter(qu2m)
+qu2VI   = spc.splineline(wVI  ,  VI  , qu2.meta);qu2VI.recenter(qu2m)
+qu2ScII = spc.splineline(wScII,  ScII, qu2.meta);qu2ScII.recenter(qu2m)
+qu2FeI2  = spc.splineline(wFeI2, FeI2, qu2.meta);qu2FeI2.recenter(qu2m)
 qu2lines = [qu2FeI,qu2Myst,qu2SiI,qu2VI,qu2ScII,qu2FeI2] # ... and save in this list for qu2
 
 

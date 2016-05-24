@@ -11,7 +11,7 @@ wFeI  = [1359,1388]
 wMyst = [652, 721];
 wSiI  = [478, 518];
 wFeI2 = [377, 438];
-wSiI2 = [310, 342];
+wSiI2 = [310, 340];
 
 sf_qu1 = spc.SpectraFactory("data/6405_aS1",framerows=800,framecols=1472)
 sf_qu1.frame_col_cut([0,1471])
