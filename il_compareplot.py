@@ -21,7 +21,7 @@ def comp_plot(datlist,xpos,ypos,normalize=True):
             fig.axes[i].text(xpos,ypos,"{}".format(name))
 
         regx,regy = st.kern_reg(x,y,bins=73)
-        fig.axes[i].plot(x,y/norm,'bo',alpha=0.1)
+        fig.axes[i].plot(x,y/norm,'b.',alpha=0.1)
         fig.axes[i].plot(regx,regy/norm,'w',linewidth=2.1)
         fig.axes[i].plot(regx,regy/norm,'r',linewidth=1.2)
 
@@ -52,14 +52,14 @@ for region in regnames:
         
 if False:
     fig = comp_plot(sorted(ewdata,key=lambda itm: itm[3].dept),0.83,1.62)
-    fig.set_size_inches([ 10.125 ,   9.7625])
+    fig.set_size_inches([ 8.8, 10.125])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
-    #pl.savefig("../thesis/figures/EWcompareplot.png")
+    pl.savefig("../thesis/figures/EWcompareplot.png")
     fig.show()
 
 if True:
     fig = comp_plot(sorted(lcdata,key=lambda itm: itm[3].dept),0.83,3,False)
-    fig.set_size_inches([ 10.125 ,   9.7625])
+    fig.set_size_inches([  8.8, 10.125 ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
     pl.savefig("../thesis/figures/Depthcompareplot.png")
     fig.show()
