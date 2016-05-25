@@ -20,7 +20,7 @@ def bisect(lmbd,mnspec,line):
             rg = ro.brentq(lambda x : mf(x)-y,lmbd[right],lin.cent)
         except:
             lf = rg = lin.cent
-        bisec[i+1] = (lf+rg)/2 - lin.cent
+        bisec[i+1] = 299792.458*( (lf+rg)/2 - lin.cent ) / lin.cent
     return bisec,ys
 
 col = cm.Oranges
@@ -39,9 +39,9 @@ if False:
                 j+=1
     pl.legend(loc="best")
     pl.ylabel("Relative intensity")
-    pl.xlabel("Distance from line center [nm]")
-    pl.xlim(-0.00158, 0.00288)
-    pl.ylim( 0.81045, 0.98785)
+    pl.xlabel("Distance from line center [km/s]")
+    pl.xlim(-0.88750004187643439, 1.6009210836348338)
+    pl.ylim(0.80158726997818763, 0.98994711697517279)
     pl.show(block=False)
     pl.savefig("../thesis/figures/MystBisectors.png")
 
@@ -61,8 +61,8 @@ if True:
                 j+=1
     pl.legend(loc="best")
     pl.ylabel("Relative intensity")
-    pl.xlabel("Distance from line center [nm]")
-    pl.xlim(-0.0015, 0.0015)
-    pl.ylim(0.57461, 1.02461)
+    pl.xlabel("Distance from line center [km/s]")
+    pl.xlim(-0.85708312598300707, 0.86817404863583336)
+    pl.ylim(0.57010223250114422, 1.0201022325011442)
     pl.show(block=False)
     pl.savefig("../thesis/figures/OtherBisectors.png")
