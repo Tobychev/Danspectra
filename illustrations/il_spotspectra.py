@@ -24,14 +24,14 @@ def spotspec(regname):
     ax.plot(spt.lmbd,spt[pn,:].mean(axis=0),color=colr(0.6), label="Penumbra")
     ax.plot(spt.lmbd,spt[qs,:].mean(axis=0),color=colr(0.75),label="Quiet sun")
 
-    ax.set_xlabel("Wavelenght [nm]")
+    ax.set_xlabel("Wavelength [nm]")
     ax.set_ylabel("Relative intensity")
     ax.set_xlim(region.xspotlims); 
     ax.set_ylim(region.yspotlims); 
     ax.xaxis.set_major_formatter(tck.StrMethodFormatter("{x:6.2f}"))
     pl.legend(loc="lower left")
-#    fig.savefig("../thesis/figures/spot{}.png".format(regname))
-    fig.show()
+    fig.savefig("../thesis/figures/spot{}.png".format(regname))
+#    fig.show()
 
 spotspec("5053")
 spotspec("5215")
