@@ -17,7 +17,7 @@ def atlasplot(atlas,regname):
             "6405":(0.86458333333333337, 1.0437500000000002),
             "6449":(0.67393994279930325, 1.0507659350912264)}
     qs = atlas["qs{}".format(reg[regname])]
-    sp = atlas["sp{}".format(reg[regname])]
+#    sp = atlas["sp{}".format(reg[regname])]
     lm = atlas["lm{}".format(reg[regname])]
 #    region = __import__(regname)
     
@@ -25,7 +25,7 @@ def atlasplot(atlas,regname):
     fig,ax = pl.subplots(1)
     ax.plot(1e7/qs[::-1,0],qs[::-1,1],color=colr(0.95),label="Quiet sun")
     ax.plot(lm[:,0]/10,lm[:,1],color=colr(0.70), label="Limb")
-    ax.plot(1e7/sp[::-1,0],sp[::-1,1],color=colr(0.20),label="Spot")
+#    ax.plot(1e7/sp[::-1,0],sp[::-1,1],color=colr(0.20),label="Spot")
 
     ax.set_xlabel("Wavelenght [nm]")
     ax.set_ylabel("Relative intensity")
@@ -52,9 +52,9 @@ limblines = {"5053":[19750,193091,195955,1.394],"5215":[19150,224647,227693,1.43
 
 atlas = {}
 
-for spot in spotatlas:
-    atlas[spot[:-5]] = np.loadtxt(datadir+spot)
-    print(spot)
+#for spot in spotatlas:
+#    atlas[spot[:-5]] = np.loadtxt(datadir+spot)
+#    print(spot)
 
 for quiet in quietatlas:
     tmp = np.loadtxt(datadir+quiet)
