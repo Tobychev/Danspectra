@@ -67,15 +67,17 @@ sf_spt.frame_row_cut([0]+list(range(653,662))+[755])
 sf_spt.frame_col_cut([0,1479])
 sf_spt.contrast_cut(50)
 sf_spt.set_continua("segments")
+
 spt = sf_spt.make_spectra()
+sptm = qu1m # spt[:,:].mean(axis=0) 
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
 
-sptFeI  = spc.splineline(wFeI , FeI , spt.meta) # Define lines for spt series...
-sptMyst = spc.splineline(wMyst, Myst, spt.meta)
-sptSiI  = spc.splineline(wSiI , SiI , spt.meta)
-sptVI   = spc.splineline(wVI  , VI  , spt.meta)
-sptScII = spc.splineline(wScII, ScII, spt.meta)
-sptFeI2 = spc.splineline(wFeI2, FeI2, spt.meta)
+sptFeI  = spc.splineline(wFeI , FeI , spt.meta);sptFeI.recenter(sptm)# Define lines for spt series... 
+sptMyst = spc.splineline(wMyst, Myst, spt.meta);sptMyst.recenter(sptm)
+sptSiI  = spc.splineline(wSiI , SiI , spt.meta);sptSiI.recenter(sptm)
+sptVI   = spc.splineline(wVI  , VI  , spt.meta);sptVI.recenter(sptm)
+sptScII = spc.splineline(wScII, ScII, spt.meta);sptScII.recenter(sptm)
+sptFeI2 = spc.splineline(wFeI2, FeI2, spt.meta);sptFeI2.recenter(sptm)
 sptlines = [sptFeI,sptMyst,sptSiI,sptVI,sptScII,sptFeI2] # ... and save in this list for spt
 
 um = 0.37468

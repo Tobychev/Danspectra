@@ -82,19 +82,20 @@ wFeI2 = [258,285];   cFeI2 = 505.8495
 sf_spt = spc.SpectraFactory("data/5053_aS2",framerows=780,framecols=1486)
 sf_spt.frame_row_cut([0,1,779])
 sf_spt.frame_col_cut([0]+list(range(658,672))+[1485])
-sf_spt.contrast_cut(80)
+sf_spt.contrast_cut(50)
 sf_spt.set_continua("segments")
 
 spt = sf_spt.make_spectra()
+sptm = qu1m #spt[:,:].mean(axis=0) 
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
 
-sptNiI  = spc.splineline(wNiI,  NiI,  spt.meta)
-sptCI   = spc.splineline(wCI,   CI,   spt.meta)
-sptC2   = spc.splineline(wC2,   C2,   spt.meta)
-sptTiI  = spc.splineline(wTiI,  TiI,  spt.meta)
-sptMyst = spc.splineline(wMyst, Myst, spt.meta)
-sptFeI  = spc.splineline(wFeI,  FeI,  spt.meta)
-sptFeI2 = spc.splineline(wFeI2, FeI2, spt.meta)
+sptNiI  = spc.splineline(wNiI,  NiI,  spt.meta);sptNiI.recenter(sptm)
+sptCI   = spc.splineline(wCI,   CI,   spt.meta);sptCI.recenter(sptm)
+sptC2   = spc.splineline(wC2,   C2,   spt.meta);sptC2.recenter(sptm)
+sptTiI  = spc.splineline(wTiI,  TiI,  spt.meta);sptTiI.recenter(sptm)
+sptMyst = spc.splineline(wMyst, Myst, spt.meta);sptMyst.recenter(sptm)
+sptFeI  = spc.splineline(wFeI,  FeI,  spt.meta);sptFeI.recenter(sptm)
+sptFeI2 = spc.splineline(wFeI2, FeI2, spt.meta);sptFeI2.recenter(sptm)
 sptlines = [sptNiI,sptCI,sptC2,sptTiI,sptMyst,sptFeI,sptFeI2]
 
 um = 0.32048

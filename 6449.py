@@ -50,15 +50,16 @@ sf_qu2.contrast_cut(50)
 sf_qu2.set_continua("segments")
 
 qu2 = sf_qu2.make_spectra()
+qu2m = qu2[:,:].mean(axis=0) 
 qu2con = qu2.meta.cont[0]*qu2.lmbd.mean() + qu2.meta.cont[1] # Define continua for qu2 series
 
-qu2Myst = spc.splineline(wMyst, Myst, qu2.meta)   # Define lines for qu2 series...
-qu2Ca   = spc.splineline(wCa,   Ca,   qu2.meta)
-qu2Blnd = spc.splineline(wBlnd, Blnd, qu2.meta)
-qu2SiI  = spc.splineline(wSiI,  SiI,  qu2.meta)
-qu2H2O  = spc.splineline(wH2O,  H2O,  qu2.meta)
-qu2Co   = spc.splineline(wCo,   Co,   qu2.meta)
-qu2H2O2 = spc.splineline(wH2O2, H2O2, qu2.meta)
+qu2Myst = spc.splineline(wMyst, Myst, qu2.meta);qu2Myst.recenter(qu2m)   # Define lines for qu2 series...
+qu2Ca   = spc.splineline(wCa,   Ca,   qu2.meta);qu2Ca.recenter(qu2m)
+qu2Blnd = spc.splineline(wBlnd, Blnd, qu2.meta);qu2Blnd.recenter(qu2m)
+qu2SiI  = spc.splineline(wSiI,  SiI,  qu2.meta);qu2SiI.recenter(qu2m)
+qu2H2O  = spc.splineline(wH2O,  H2O,  qu2.meta);qu2H2O.recenter(qu2m)
+qu2Co   = spc.splineline(wCo,   Co,   qu2.meta);qu2Co.recenter(qu2m)
+qu2H2O2 = spc.splineline(wH2O2, H2O2, qu2.meta);qu2H2O2.recenter(qu2m)
 qu2lines = [qu2Myst,qu2Ca,qu2Blnd,qu2SiI,qu2H2O,qu2Co,qu2H2O2]
 
 ###
@@ -78,14 +79,15 @@ sf_spt.contrast_cut(50)
 sf_spt.set_continua("segments")
 
 spt = sf_spt.make_spectra()
+sptm = qu1m# spt[:,:].mean(axis=0) 
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1] # Define continua for spt series
 
-sptMyst = spc.splineline(wMyst, Myst, spt.meta) # Define lines for spt series...
-sptCa   = spc.splineline(wCa,   Ca,   spt.meta)
-sptBlnd = spc.splineline(wBlnd, Blnd, spt.meta)
-sptSiI  = spc.splineline(wSiI,  SiI,  spt.meta)
-sptH2O  = spc.splineline(wH2O,  H2O,  spt.meta)
-sptCo   = spc.splineline(wCo,   Co,   spt.meta)
+sptMyst = spc.splineline(wMyst, Myst, spt.meta);sptMyst.recenter(sptm) # Define lines for spt series... 
+sptCa   = spc.splineline(wCa,   Ca,   spt.meta);sptCa.recenter(sptm)
+sptBlnd = spc.splineline(wBlnd, Blnd, spt.meta);sptBlnd.recenter(sptm)
+sptSiI  = spc.splineline(wSiI,  SiI,  spt.meta);sptSiI.recenter(sptm)
+sptH2O  = spc.splineline(wH2O,  H2O,  spt.meta);sptH2O.recenter(sptm)
+sptCo   = spc.splineline(wCo,   Co,   spt.meta);sptCo.recenter(sptm)
 sptlines = [sptMyst,sptCa,sptBlnd,sptSiI,sptH2O,sptCo]
 
 um = 0.38834

@@ -57,13 +57,15 @@ sf_spt.frame_col_cut([0,1445])
 sf_spt.frame_row_cut([0]+list(range(659,668))+[743])
 sf_spt.contrast_cut(85)
 sf_spt.set_continua("segments")
+
 spt = sf_spt.make_spectra()
+sptm = spt[:,:].mean(axis=0) 
 sptcon = spt.meta.cont[0]*spt.lmbd.mean() + spt.meta.cont[1]
 
-sptMyst = spc.splineline(wMyst, Myst, spt.meta)
-sptSiI  = spc.splineline(wSiI,  SiI,  spt.meta)
-sptFeI2 = spc.splineline(wFeI2, FeI2, spt.meta)
-sptSiI2 = spc.splineline(wSiI2, SiI2, spt.meta)
+sptMyst = spc.splineline(wMyst, Myst, spt.meta);sptMyst.recenter(sptm)
+sptSiI  = spc.splineline(wSiI,  SiI,  spt.meta);sptSiI.recenter(sptm)
+sptFeI2 = spc.splineline(wFeI2, FeI2, spt.meta);sptFeI2.recenter(sptm)
+sptSiI2 = spc.splineline(wSiI2, SiI2, spt.meta);sptSiI2.recenter(sptm)
 sptlines = [sptMyst,sptSiI,sptFeI2,sptSiI2] # ... and save in this list for spt 
 
 um = 0.38978
