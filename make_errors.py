@@ -2,6 +2,7 @@ import numpy as np
 import spectra as spc
 import scipy.interpolate as si 
 import matplotlib.pyplot as pl
+import matplotlib.cm as cm
 import numpy.polynomial.chebyshev as ch
 
 def errlims(measure):
@@ -56,6 +57,26 @@ for regname in regnames:
         k += leng+1
 bmean = bak.mean(axis=0)
 bspec = spc.Spectra("Background+lines",blmbd,bak,bmet)
+
+if True:
+    rnds = np.random.randint(789,size=3)
+    col  = cm.YlGnBu([0.9, 0.4,  0.3])
+    for i,rnd in enumerate(rnds):
+        pl.plot(bak[rnd,:],color = col[i],alpha=0.8)
+
+    pl.xlim(349.79627678567999, 748.14957715358037)
+    pl.ylim(0.5779066796740211, 1.1268191169272317)
+    pl.ylabel("Relative intensity")
+    pl.tick_params(
+    axis='x',          # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    bottom='off',      # ticks along the bottom edge are off
+    top='off',         # ticks along the top edge are off
+    labelbottom='off') # labels along the bottom edge are off
+    pl.savefig("../thesis/figures/errestimate.png")
+    pl.show()
+    
+    raise SystemExit
 
 res = []
 for line in newlines:
