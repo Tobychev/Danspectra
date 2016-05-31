@@ -18,7 +18,7 @@ for region in regnames:
         print("Plotting region {}".format(region))
         for i,line in enumerate(lines):
             name ="{}_{}".format(line.name.split()[0],int(line.cent*10))
-            print("Plotting line {}".format(name))        
+            print("Plotting line {}".format(name))
             try:
                 fig = vis.spline_linemap(dat[name],lines[i],lims=lims)
                 fig = vis.add_errs_linemap(fig,errs[line.name[:-2]],dat[name][:,9].mean())

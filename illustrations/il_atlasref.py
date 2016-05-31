@@ -23,11 +23,11 @@ def atlasplot(atlas,regname):
     
     colr = cmm.RdYlGn
     fig,ax = pl.subplots(1)
-    ax.plot(1e7/qs[::-1,0],qs[::-1,1],color=colr(0.95),label="Quiet sun")
+    ax.plot(1e7/qs[::-1,0],qs[::-1,1],color=colr(0.95),label="Disk center")
     ax.plot(lm[:,0]/10,lm[:,1],color=colr(0.70), label="Limb")
 #    ax.plot(1e7/sp[::-1,0],sp[::-1,1],color=colr(0.20),label="Spot")
 
-    ax.set_xlabel("Wavelenght [nm]")
+    ax.set_xlabel("Wavelength [nm]")
     ax.set_ylabel("Relative intensity")
     ax.set_xlim(xlim[regname]); 
     ax.set_ylim(ylim[regname]); 

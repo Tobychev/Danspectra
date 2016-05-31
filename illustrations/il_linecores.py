@@ -3,7 +3,7 @@ import matplotlib.pyplot as pl
 import matplotlib.cm as cm
 import numpy as np
 
-regnames = ["5053","5215","5654","6405","6449"]
+regnames =  ["5053","5215","5654","6405","6449"]
 for regname in regnames:
     fg,ax     = pl.subplots(1)
     ax.xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:3.3f}"))
@@ -30,12 +30,11 @@ for regname in regnames:
         num = 3
     xtic = ax.get_xticks()
     ax.set_xticks(xtic[1:-1])
-    ax.set_xlabel("Wavelenght [nm]")
+    ax.set_xlabel("Wavelength [nm]")
     ax.set_ylabel("Relative intensity")
     
     rg = __import__(regname)
-    lmbd,cont = rg.qu1.lmbd,rg.qu1.meta.cont
-    cont      = cont[0]*lmbd.mean()+cont[1]
+    lmbd,cont = rg.qu1.lmbd,rg.qu1con
     cn, ed    = np.histogram(cont,num)
     scaling   = np.linspace(0.30,0.87,num)[::-1]
     for i in range(0,num):
