@@ -400,6 +400,8 @@ class splineline(line):
         l1 = x11 + (lev-y10)*(x11-x10)/(y11-y10)
         l2 = x21 + (lev-y20)*(x21-x20)/(y21-y20)
         wdth  = l2 - l1
+        if wdth < 0:
+            print(l2,l1,x11,x10,x21,x20)
         assm  = cnt  - (x20 + x10)/2
 
         return wdth,assm

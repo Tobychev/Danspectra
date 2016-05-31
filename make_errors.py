@@ -58,7 +58,7 @@ for regname in regnames:
 bmean = bak.mean(axis=0)
 bspec = spc.Spectra("Background+lines",blmbd,bak,bmet)
 
-if True:
+if False:
     rnds = np.random.randint(789,size=3)
     col  = cm.YlGnBu([0.9, 0.4,  0.3])
     for i,rnd in enumerate(rnds):

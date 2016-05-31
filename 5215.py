@@ -1,6 +1,7 @@
 import spectra as spc
 FeI   = {"El":3.2368,"gf":-3.260,"lam":520.9884,"dep":0.121,"name":"Fe I"}
 TiII  = {"El":2.5903,"gf":-1.410,"lam":521.1530,"dep":0.362,"name":"Ti II"}
+Blnd  = {"El":-1    ,"gf":0     ,"lam":5212.219,"dep":0.142,"name":"Blend"}
 CoI   = {"El":3.5145,"gf":-0.110,"lam":521.2687,"dep":0.257,"name":"Co I"}
 Myst  = {"El":    -1,"gf":     0,"lam":521.5571,"dep":0.181,"name":"Myst"}
 CuI   = {"El":3.8167,"gf": 0.364,"lam":521.8198,"dep":0.529,"name":"Cu I"}
@@ -8,6 +9,7 @@ TiI   = {"El":0.0211,"gf":-2.220,"lam":521.9702,"dep":0.381,"name":"Fe I"}
 
 wFeI  = [1184,1202]
 wTiII = [1010,1036]
+wBlnd = [941,964];
 wCoI  = [888,921]; 
 wMyst = [591,623]; 
 wCuI  = [321,352]; 
@@ -25,11 +27,12 @@ qu1con = qu1.meta.cont[0]*qu1.lmbd.mean() + qu1.meta.cont[1] # Define continua f
 
 qu1FeI  = spc.splineline(wFeI,  FeI,  qu1.meta);qu1FeI.recenter(qu1m) # Define lines for qu1 series...
 qu1TiII = spc.splineline(wTiII, TiII, qu1.meta);qu1TiII.recenter(qu1m)
+qu1Blnd  = spc.splineline(wBlnd,Blnd, qu1.meta);qu1Blnd.recenter(qu1m)
 qu1CoI  = spc.splineline(wCoI,  CoI,  qu1.meta);qu1CoI.recenter(qu1m)
 qu1Myst = spc.splineline(wMyst, Myst, qu1.meta);qu1Myst.recenter(qu1m)
 qu1CuI  = spc.splineline(wCuI,  CuI,  qu1.meta);qu1CuI.recenter(qu1m)
 qu1TiI  = spc.splineline(wTiI,  TiI,  qu1.meta);qu1TiI.recenter(qu1m)
-qu1lines = [qu1FeI,qu1TiII,qu1CoI,qu1Myst,qu1CuI,qu1TiI]
+qu1lines = [qu1FeI,qu1TiII,qu1CoI,qu1Blnd,qu1Myst,qu1CuI,qu1TiI]
 
 
 sf_qu2 = spc.SpectraFactory("data/5215_bS1",framerows=802,framecols=1476)

@@ -15,31 +15,39 @@ def comp_plot(datlist,xpos,ypos,normalize=True):
     for i,(x,y,name,_) in enumerate(datlist):
         if normalize:
             norm = y.mean()
-            fig.axes[i].text(xpos,ypos,"{} {:5.1f}".format(name[:-5],norm))
+            fig.axes[i].text(xpos,ypos,"{} {:5.1f}".format(name,norm))
         else:
             norm = 1
             fig.axes[i].text(xpos,ypos,"{}".format(name))
 
         regx,regy = st.kern_reg(x,y,bins=73)
-        fig.axes[i].plot(x,y/norm,'b.',alpha=0.1)
+        fig.axes[i].plot(x,y/norm,'b.',alpha=0.05)
         fig.axes[i].plot(regx,regy/norm,'w',linewidth=2.1)
         fig.axes[i].plot(regx,regy/norm,'r',linewidth=1.2)
 
     fig.axes[i].set_xlim(0.8,1.27)
     xtic,ytic = fig.axes[i].get_xticks(),fig.axes[i].get_yticks()
     fig.axes[i].xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:3.1f}"))
-    fig.axes[i].set_xticks(xtic[1:-1])
-    fig.axes[i].set_yticks(ytic[1:-1])
+#    fig.axes[i].set_xticks(xtic[1:-1])
+#    fig.axes[i].set_yticks(ytic[1:-1])
 
     return fig
 
 regnames = ["5053","5215","5654","6405","6449"]
 
+errs = np.load("bin/errlimfile.npz")
 ewdata = []
 lcdata = []
+lddata = []
+asdata = []
+fwdata = []
 for region in regnames:
-    dat = np.load("bin/{}_qu1.npz".format(region))
-    lines = pic.load(open("bin/{}_qu1.lin".format(region),"rb"))
+    if region == "6449":
+        typ = "qu2"
+    else:
+        typ = "qu1"
+    dat = np.load("bin/{}_{}.npz".format(region,typ))
+    lines = pic.load(open("bin/{}_{}.lin".format(region,typ),"rb"))
     def dictgen(i):
         yield lines[i].name.split()[0]+"_"+str(int(lines[i].cent*10))
         yield lines[i]
@@ -48,19 +56,47 @@ for region in regnames:
     for line in dat.keys():
         ewdata.append((dat[line][:,con],dat[line][:,ew],line,lines[line]))
         lcdata.append((dat[line][:,con],dat[line][:,vel],line,lines[line]))
+        lddata.append((dat[line][:,con],dat[line][:,bot],line,lines[line]))
+        fwdata.append((dat[line][:,con],dat[line][:,fw13],line,lines[line]))
+        asdata.append((dat[line][:,con],dat[line][:,as13],line,lines[line]))
 
         
 if False:
-    fig = comp_plot(sorted(ewdata,key=lambda itm: itm[3].dept),0.83,1.62)
+    fig = comp_plot(sorted(ewdata,key=lambda itm: 1-itm[3].dept,),0.83,1.06)
     fig.set_size_inches([ 8.8, 10.125])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
-    pl.savefig("../thesis/figures/EWcompareplot.png")
+    fig.axes[-1].set_ylim(0.85248256275956014, 1.1380523623353493)
+#    pl.savefig("../thesis/figures/EWcompareplot.png")
     fig.show()
 
-if True:
-    fig = comp_plot(sorted(lcdata,key=lambda itm: itm[3].dept),0.83,3,False)
+if False:
+    fig = comp_plot(sorted(lcdata,key=lambda itm: 1-itm[3].dept),0.83,2.6,normalize=False)
     fig.set_size_inches([  8.8, 10.125 ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
+    fig.axes[-1].set_ylim(-1.8771761049602738, 4.2387981400066064)
+    pl.savefig("../thesis/figures/Centcompareplot.png")
+    fig.show()
+
+if False:
+    fig = comp_plot(sorted(lddata,key=lambda itm: 1-itm[3].dept),0.83,.975,normalize=True)
+    fig.set_size_inches([  8.8, 10.125 ])
+    fig.tight_layout(h_pad=0.0, w_pad=0.0)
+    fig.axes[-1].set_ylim(0.97007367457031757, 1.0252222422251558)
     pl.savefig("../thesis/figures/Depthcompareplot.png")
     fig.show()
 
+if True:
+    fig = comp_plot(sorted(asdata,key=lambda itm: 1-itm[3].dept),0.83,0.0007,normalize=False)
+    fig.set_size_inches([  8.8, 10.125 ])
+    fig.tight_layout(h_pad=0.0, w_pad=0.0)
+    fig.axes[-1].set_ylim(-0.0025418394542102273, 0.0018153436601899033)
+    pl.savefig("../thesis/figures/Asymmcompareplot.png")
+    fig.show()
+
+if False:
+    fig = comp_plot(sorted(fwdata,key=lambda itm: 1-itm[3].dept),0.83,1.13,normalize=True)
+    fig.set_size_inches([  8.8, 10.125 ])
+    fig.tight_layout(h_pad=0.0, w_pad=0.0)
+    fig.axes[-1].set_ylim(0.78702842776826376, 1.2734822961034631)
+#    pl.savefig("../thesis/figures/Widthcompareplot.png")
+    fig.show()
