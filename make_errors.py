@@ -9,6 +9,11 @@ def errlims(measure):
     return np.array([ np.percentile(measure,2.274), np.percentile(measure,15.87),
                       np.percentile(measure,84.13), np.percentile(measure,97.725)])-measure.mean()
 
+def shortname(line):
+    return "{}_{}".format(line.name.split()[0],int(line.cent*10))
+
+
+
 # For spline measurement
 s_bot,s_cnt,s_fwhm,s_as12,s_fw13,s_as13,s_fw23,s_as23,s_err,s_ew,s_cont = np.arange(0,11)
 
@@ -83,7 +88,7 @@ for line in newlines:
     line.recenter(bmean)
     res.append(line.measure(bspec))
 
-dump  = {line.name: res[i] for i,line in enumerate(newlines)}
+dump  = {shortname(line): res[i] for i,line in enumerate(newlines)}
 np.savez_compressed("bin/errorfile",**dump)
 
 errs = {}
