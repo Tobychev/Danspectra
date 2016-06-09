@@ -10,9 +10,8 @@ def errlims(measure):
                       np.percentile(measure,84.13), np.percentile(measure,97.725)])-measure.mean()
 
 def shortname(line):
-    return "{}_{}".format(line.name.split()[0],int(line.cent*10))
-
-
+    angstrom  = float(line.name.split()[-1])*10
+    return "{}_{}".format(line.name.split()[0],int(angstrom))
 
 # For spline measurement
 s_bot,s_cnt,s_fwhm,s_as12,s_fw13,s_as13,s_fw23,s_as23,s_err,s_ew,s_cont = np.arange(0,11)
@@ -94,7 +93,7 @@ np.savez_compressed("bin/errorfile",**dump)
 errs = {}
 for key in dump.keys():
     rowerr = [np.abs(errlims(row)) for row in dump[key].T]
-    errs[key[:-2]] = rowerr
+    errs[key] = rowerr
 
 np.savez_compressed("bin/errlimfile",**errs)
 
