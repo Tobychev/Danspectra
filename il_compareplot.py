@@ -77,7 +77,7 @@ if False:
     fig.set_size_inches([ 8.8, 10.125])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
     fig.axes[-1].set_ylim(0.85248256275956014, 1.1380523623353493)
-#    pl.savefig("../thesis/figures/EWcompareplot.png")
+    pl.savefig("../thesis/figures/EWcompareplot.png")
     fig.show()
 
 if False:
@@ -85,7 +85,7 @@ if False:
     fig.set_size_inches([  8.8, 10.125 ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
     fig.axes[-1].set_ylim(-1.8771761049602738, 4.2387981400066064)
-#    pl.savefig("../thesis/figures/Centcompareplot.png")
+    pl.savefig("../thesis/figures/Centcompareplot.png")
     fig.show()
 
 if False:
@@ -93,7 +93,7 @@ if False:
     fig.set_size_inches([  8.8, 10.125 ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
     fig.axes[-1].set_ylim(0.97007367457031757, 1.0252222422251558)
-#    pl.savefig("../thesis/figures/Depthcompareplot.png")
+    pl.savefig("../thesis/figures/Depthcompareplot.png")
     fig.show()
 
 if False:
@@ -102,7 +102,7 @@ if False:
     fig.set_size_inches([  8.8, 10.125 ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
     fig.axes[-1].set_ylim(-0.0025418394542102273, 0.0018153436601899033)
-#    pl.savefig("../thesis/figures/Asymmcompareplot.png")
+    pl.savefig("../thesis/figures/Asymmcompareplot.png")
     fig.show()
 
 if True:
@@ -110,5 +110,5 @@ if True:
     fig.set_size_inches([  8.8, 10.125 ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
     fig.axes[-1].set_ylim(0.78702842776826376, 1.2734822961034631)
-#    pl.savefig("../thesis/figures/Widthcompareplot.png")
+    pl.savefig("../thesis/figures/Widthcompareplot.png")
     fig.show()
