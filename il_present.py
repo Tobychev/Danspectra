@@ -1,4 +1,5 @@
 import numpy as np
+import spectra as spc
 import pickle as pic
 import matplotlib.pyplot as pl
 import matplotlib.ticker as ticker
