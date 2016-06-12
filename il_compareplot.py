@@ -72,7 +72,7 @@ for region in regnames:
         asdata.append((dat[line][:,con],dat[line][:,as13],line,lines[line],errs[line][as13,:]))
 
         
-if False:
+if True:
     fig = comp_plot(sorted(ewdata,key=lambda itm: 1-itm[3].dept,),0.83,1.06,epos=(1.23,1.))
     fig.set_size_inches([ 8.8, 10.125])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
@@ -80,7 +80,7 @@ if False:
     pl.savefig("../thesis/figures/EWcompareplot.png")
     fig.show()
 
-if False:
+if True:
     fig = comp_plot(sorted(lcdata,key=lambda itm: 1-itm[3].dept),0.83,2.6,normalize=False,epos=(1.23,.0))
     fig.set_size_inches([  8.8, 10.125 ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
@@ -88,7 +88,7 @@ if False:
     pl.savefig("../thesis/figures/Centcompareplot.png")
     fig.show()
 
-if False:
+if True:
     fig = comp_plot(sorted(lddata,key=lambda itm: 1-itm[3].dept),0.83,.975,normalize=True,epos=(1.23,1.))
     fig.set_size_inches([  8.8, 10.125 ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
@@ -96,7 +96,7 @@ if False:
     pl.savefig("../thesis/figures/Depthcompareplot.png")
     fig.show()
 
-if False:
+if True:
 
     fig = comp_plot(sorted(asdata,key=lambda itm: 1-itm[3].dept),0.83,0.0007,normalize=False,epos=(1.23,.0))
     fig.set_size_inches([  8.8, 10.125 ])

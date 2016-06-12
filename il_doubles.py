@@ -100,11 +100,11 @@ if False:
     fig.show()
 
 if True:
-    data = [ewdata[22],ewdata[26]]
-    fig  = dat_plot(sorted(data,key=lambda itm: 1-itm[3].dept,),0.84,1.19,epos=(1.23,1.1))
+    data = [ewdata[22],ewdata[23]]
+    fig  = dat_plot(sorted(data,key=lambda itm: 1-itm[3].dept,),0.78,1.19,epos=(1.23,1.1))
     fig.set_size_inches([15.925,   6. ])
     fig.tight_layout(h_pad=0.0, w_pad=0.0)
-    fig.axes[-1].set_xlim(0.79907330635612739, 1.2690733063561275)
-    fig.axes[-1].set_ylim(0.665093813383692, 1.3141211342188408)
-    pl.savefig("../thesis/presentation/MystSidouble.png")
+    fig.axes[-1].set_xlim(0.72470734048321559, 1.3103121103168045)
+    fig.axes[-1].set_ylim(0.56787633065083232, 1.3950303046517241)
+    pl.savefig("../thesis/presentation/MystDiffdouble.png")
     fig.show()
